@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DB Viewer — {{ db }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f1f5f9; color: #0f172a; line-height: 1.5;
+    }
+    header {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #fff; padding: 20px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+    }
+    header h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    header .logo {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, #0d9488, #14b8a6);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    header .meta { font-size: 12px; color: #94a3b8; text-align: right; }
+    header .meta b { color: #5eead4; }
+    .container { max-width: 1100px; margin: 26px auto; padding: 0 20px; }
+
+    .stats { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+    .stat {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 16px 20px; flex: 1; min-width: 160px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .stat .num { font-size: 26px; font-weight: 800; color: #0d9488; }
+    .stat .lbl { font-size: 12.5px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    h2 { font-size: 15px; font-weight: 700; color: #334155; margin: 22px 0 12px; display: flex; align-items: center; gap: 8px; }
+    h2 .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.2); animation: blink 2s infinite; }
+    @keyframes blink { 0%,100% { opacity: 1 } 50% { opacity: .4 } }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+    .card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 13px;
+      padding: 16px 18px; display: flex; align-items: center; justify-content: space-between;
+      text-decoration: none; color: inherit; transition: all .18s cubic-bezier(.16,1,.3,1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .card:hover { transform: translateY(-3px); border-color: #5eead4; box-shadow: 0 10px 24px -8px rgba(13,148,136,0.35); }
+    .card .tname { font-weight: 700; font-size: 14px; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+    .card .tname .ico { color: #0d9488; }
+    .card .badge {
+      background: #ccfbf1; color: #0f766e; font-weight: 800; font-size: 12.5px;
+      padding: 3px 11px; border-radius: 999px; min-width: 38px; text-align: center;
+    }
+    .views-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .view-chip { background: #fff; border: 1px solid #e2e8f0; border-radius: 999px; padding: 6px 14px; font-size: 12.5px; color: #475569; }
+    .foot { text-align: center; color: #94a3b8; font-size: 12px; margin: 30px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><span class="logo">🗄️</span> DB Viewer</h1>
+    <div class="meta">
+      Database: <b>{{ db }}</b><br>
+      Server: {{ server }}
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="stats">
+      <div class="stat"><div class="num">{{ tables|length }}</div><div class="lbl">Bảng</div></div>
+      <div class="stat"><div class="num">{{ views|length }}</div><div class="lbl">View</div></div>
+      <div class="stat"><div class="num" id="total-rows">{{ total }}</div><div class="lbl">Tổng số dòng</div></div>
+    </div>
+
+    <h2><span class="live-dot"></span> Bảng dữ liệu <span style="font-weight:400;color:#94a3b8;font-size:12px">(số dòng tự cập nhật mỗi 3 giây)</span></h2>
+    <div class="grid">
+      {% for t in tables %}
+      <a class="card" href="{{ url_for('table_detail', name=t.name) }}">
+        <span class="tname"><span class="ico">▦</span> {{ t.name }}</span>
+        <span class="badge" data-table="{{ t.name }}">{{ t.count }}</span>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if views %}
+    <h2>👁️ Views</h2>
+    <div class="views-list">
+      {% for v in views %}<span class="view-chip">{{ v }}</span>{% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="foot">DB Viewer • {{ db }} • Nhấn vào bảng để xem dữ liệu</div>
+  </div>
+
+  <script>
+    async function refresh() {
+      try {
+        const r = await fetch('/api/counts');
+        const j = await r.json();
+        if (!j.ok) return;
+        let total = 0;
+        for (const [k, v] of Object.entries(j.data)) {
+          total += v;
+          const el = document.querySelector(`.badge[data-table="${k}"]`);
+          if (el && el.textContent != v) {
+            el.textContent = v;
+            el.style.background = '#fde68a';
+            el.style.color = '#b45309';
+            setTimeout(() => { el.style.background = '#ccfbf1'; el.style.color = '#0f766e'; }, 900);
+          }
+        }
+        const t = document.getElementById('total-rows');
+        if (t) t.textContent = total;
+      } catch (e) {}
+    }
+    setInterval(refresh, 3000);
+  </script>
+</body>
+</html>

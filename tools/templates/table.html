@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ name }} — DB Viewer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; }
+    header {
+      background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff;
+      padding: 18px 28px; display: flex; align-items: center; justify-content: space-between;
+    }
+    header h1 { font-size: 18px; display: flex; align-items: center; gap: 10px; }
+    header .logo { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg,#0d9488,#14b8a6); display: flex; align-items: center; justify-content: center; }
+    .back { color: #5eead4; text-decoration: none; font-size: 13px; font-weight: 600; }
+    .back:hover { text-decoration: underline; }
+    .container { max-width: 1400px; margin: 22px auto; padding: 0 20px; }
+    .head-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 12px; }
+    .head-info .title { font-size: 20px; font-weight: 800; }
+    .head-info .title .cnt { color: #0d9488; }
+    .pager { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .pager a, .pager span {
+      padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff;
+      color: #475569; text-decoration: none; font-weight: 600;
+    }
+    .pager a:hover { border-color: #5eead4; color: #0d9488; }
+    .pager .cur { background: #0d9488; color: #fff; border-color: #0d9488; }
+    .table-wrap { background: #fff; border: 1px solid #e2e8f0; border-radius: 13px; overflow: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    thead th {
+      background: #f8fafc; color: #475569; font-weight: 700; text-align: left;
+      padding: 11px 14px; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0;
+      white-space: nowrap; font-size: 12.5px; text-transform: uppercase; letter-spacing: .3px;
+    }
+    tbody td { padding: 9px 14px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; color: #334155; }
+    tbody tr:hover td { background: #f0fdfa; }
+    tbody tr:nth-child(even) td { background: #fcfdfe; }
+    tbody tr:nth-child(even):hover td { background: #f0fdfa; }
+    td.null { color: #cbd5e1; font-style: italic; }
+    .foot { text-align: center; color: #94a3b8; font-size: 12px; margin: 26px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><span class="logo">▦</span> {{ name }}</h1>
+    <a class="back" href="{{ url_for('index') }}">← Về danh sách bảng</a>
+  </header>
+
+  <div class="container">
+    <div class="head-info">
+      <div class="title">{{ name }} <span class="cnt">— {{ total }} dòng</span></div>
+      <div class="pager">
+        {% if page > 1 %}
+          <a href="{{ url_for('table_detail', name=name, page=page-1, size=page_size) }}">← Trước</a>
+        {% endif %}
+        <span class="cur">{{ page }} / {{ total_pages }}</span>
+        {% if page < total_pages %}
+          <a href="{{ url_for('table_detail', name=name, page=page+1, size=page_size) }}">Sau →</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>{% for c in columns %}<th>{{ c }}</th>{% endfor %}</tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            {% for cell in row %}
+              {% if cell is none %}<td class="null">NULL</td>{% else %}<td>{{ cell }}</td>{% endif %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+          {% if not rows %}
+          <tr><td colspan="{{ columns|length }}" style="text-align:center;color:#94a3b8;padding:30px">Bảng trống</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="foot">DB Viewer • bảng {{ name }} • trang {{ page }}/{{ total_pages }}</div>
+  </div>
+</body>
+</html>

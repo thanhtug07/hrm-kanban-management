@@ -1,59 +1,59 @@
-# 🗄️ DB Live Monitor
+# 🗄️ DB Viewer — Xem CSDL kiểu phpMyAdmin
 
-Công cụ theo dõi CSDL `QUANLYNHANSU` **theo thời gian thực** — tự động chạy lại query và
-refresh màn hình mỗi vài giây, giúp bạn thấy dữ liệu thay đổi ngay khi thao tác trên app.
+Giao diện web xem toàn bộ CSDL `QUANLYNHANSU` trong trình duyệt — giống **phpMyAdmin / XAMPP**.
+Click từng bảng để xem dữ liệu, số dòng **tự cập nhật realtime** mỗi 3 giây.
 
-## Cách dùng
+## Yêu cầu
+- **Python 3** (đã có sẵn trên máy) + thư viện `pyodbc`, `flask`
+- **ODBC Driver 17 for SQL Server** (đã có sẵn)
+- SQL Server / LocalDB đang chạy, DB `QUANLYNHANSU` đã tạo
+
+Cài thư viện (1 lần):
+
+```bash
+pip install pyodbc flask
+```
+
+## Cách chạy
 
 **Cách 1 — Nhấp đúp (dễ nhất):**
 
-Mở thư mục `tools/`, nhấp đúp file:
+Mở thư mục `tools/`, nhấp đúp:
 
 ```
-DB_LIVE_MONITOR.bat
+db_viewer.bat
 ```
 
-**Cách 2 — Chạy trong PowerShell:**
+Trình duyệt tự mở **http://localhost:8000**.
 
-```powershell
+**Cách 2 — Chạy trong terminal:**
+
+```bash
 cd tools
-.\DB_LIVE_MONITOR.ps1
+python db_viewer.py
 ```
 
-## Tùy chọn
+## Tính năng
+- **Trang chủ**: liệt kê toàn bộ 11 bảng + số dòng, kèm 6 view. Số dòng **tự nhảy** khi có thay đổi.
+- **Chi tiết bảng**: click vào bảng → xem dữ liệu dạng bảng, phân trang (50 dòng/trang).
+- **Realtime**: mở sẵn viewer, thao tác trên app → số dòng cập nhật sau vài giây.
 
-| Tham số | Mặc định | Mô tả |
-|---|---|---|
-| `-Interval <giây>` | `3` | Chu kỳ refresh (giây) |
-| `-Server "<tên>"` | `(localdb)\MSSQLLocalDB` | SQL Server instance |
-| `-Database "<tên>"` | `QUANLYNHANSU` | Tên database |
-| `-Tables "A","B"` | toàn bộ bảng | Chỉ xem vài bảng cụ thể |
-| `-Once` | — | Chạy 1 lần rồi thoát (không lặp) |
+## Tùy chỉnh kết nối
 
-Ví dụ:
+Đặt biến môi trường nếu SQL Server của bạn khác:
 
-```powershell
-# Xem nhanh chỉ bảng tài khoản và nhân viên, refresh 2 giây/lần
-.\DB_LIVE_MONITOR.ps1 -Interval 2 -Tables "TaiKhoan","NhanVien"
-
-# Chạy 1 lần để chụp ảnh nhanh
-.\DB_LIVE_MONITOR.ps1 -Once
+```bat
+set DB_SERVER=(localdb)\MSSQLLocalDB
+set DB_NAME=QUANLYNHANSU
+set DB_DRIVER=ODBC Driver 17 for SQL Server
+set DB_VIEWER_PORT=8000
+python db_viewer.py
 ```
 
-## Màn hình hiển thị gì
-
-1. **Tổng quan** — số dòng mỗi bảng (thay đổi ngay khi thêm/xóa).
-2. **Chi tiết từng bảng** — toàn bộ bảng nghiệp vụ: `TaiKhoan`, `NhanVien`, `PhongBan`,
-   `ChucVu`, `ChamCong`, `NghiPhep`, `BangLuong`, `ChiPhiPhatSinh`, `CongViec`, `BinhLuan`, `HopDong`.
-
-Nhấn **Ctrl+C** để dừng.
-
-## Mẹo: xem realtime song song với app
-
-1. Mở cửa sổ **DB Live Monitor** bên trái (để nguyên chạy).
-2. Mở trình duyệt app (`http://localhost:5173`) bên phải.
+## Cách xem realtime song song với app
+1. Chạy `db_viewer.bat` → mở **http://localhost:8000** (để tab này bên cạnh).
+2. Chạy backend + frontend app → **http://localhost:5173**.
 3. Thao tác trên app (tạo nhân viên, chấm công, tạo task...).
-4. Nhìn sang cửa sổ monitor — số dòng sẽ nhảy ngay trong vài giây.
+4. Quay lại tab viewer — số dòng + dữ liệu đã nhảy.
 
-> 💡 Nếu console hiển thị tiếng Việt bị lỗi font, đảm bảo terminal dùng UTF-8
-> (file `.bat` đã tự set `chcp 65001`). Với Windows Terminal / PowerShell 7 hiển thị đẹp nhất.
+> 💡 Muốn xem chi tiết thì click vào bảng tương ứng (ví dụ `TaiKhoan`, `NhanVien`) và bấm F5 để làm mới.
