@@ -198,6 +198,17 @@
     END
     GO
 
+    -- Đảm bảo các CHECK constraint cho ChiPhiPhatSinh tồn tại (cho DB cũ đã tạo thiếu ràng buộc)
+    IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_ChiPhiPhatSinh_Loai')
+        ALTER TABLE dbo.ChiPhiPhatSinh ADD CONSTRAINT CK_ChiPhiPhatSinh_Loai CHECK (Loai IN (N'Thưởng', N'Phạt', N'Ứng lương', N'Công tác phí'));
+    IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_ChiPhiPhatSinh_SoTien')
+        ALTER TABLE dbo.ChiPhiPhatSinh ADD CONSTRAINT CK_ChiPhiPhatSinh_SoTien CHECK (SoTien >= 0);
+    IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_ChiPhiPhatSinh_Thang')
+        ALTER TABLE dbo.ChiPhiPhatSinh ADD CONSTRAINT CK_ChiPhiPhatSinh_Thang CHECK (Thang BETWEEN 1 AND 12);
+    IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_ChiPhiPhatSinh_Nam')
+        ALTER TABLE dbo.ChiPhiPhatSinh ADD CONSTRAINT CK_ChiPhiPhatSinh_Nam CHECK (Nam >= 2000);
+    GO
+
     -- 1.8. BẢNG CÔNG VIỆC - KANBAN 4 CỘT (CongViec)
     IF OBJECT_ID(N'dbo.CongViec', N'U') IS NULL
     BEGIN
