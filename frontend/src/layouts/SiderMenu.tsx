@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+﻿import React, { useMemo } from 'react';
 import { Layout, Menu, Avatar, Tooltip } from 'antd';
 import {
   DashboardOutlined,
@@ -97,7 +97,7 @@ export const SiderMenu: React.FC = () => {
     const menu = (
       <Menu
         mode="inline"
-        theme="dark"
+        theme="light"
         selectedKeys={[selectedKey]}
         items={menuItems}
         onClick={({ key }) => navigate(key)}
@@ -142,7 +142,7 @@ export const SiderMenu: React.FC = () => {
       collapsible
       collapsed={sidebarCollapsed}
       width={256}
-      theme="dark"
+      theme="light"
       className={`hrm-sider${sidebarCollapsed ? ' hrm-sider-collapsed' : ''}`}
     >
       {/* Brand */}
@@ -175,7 +175,7 @@ export const SiderMenu: React.FC = () => {
             {userCard}
             <div className="hrm-status-row">
               <span className="hrm-status-text">
-                <DatabaseOutlined style={{ color: '#38bdf8' }} />
+                <DatabaseOutlined style={{ color: '#0d9488' }} />
                 QUANLYNHANSU
               </span>
               <span className="hrm-status-text">

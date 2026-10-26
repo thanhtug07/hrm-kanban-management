@@ -21,11 +21,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       locale={viVN}
       theme={{
         token: {
-          colorPrimary: '#4F46E5', // Indigo SaaS
+          colorPrimary: '#0D9488', // Teal SaaS
           colorSuccess: '#10B981', // Emerald
           colorWarning: '#F59E0B', // Amber
           colorError: '#EF4444',   // Muted Rose Red
-          colorInfo: '#3B82F6',    // Sky Blue
+          colorInfo: '#14B8A6',    // Teal
           colorBgLayout: '#F8FAFC',
           colorBgContainer: '#FFFFFF',
           colorText: '#1E293B',
