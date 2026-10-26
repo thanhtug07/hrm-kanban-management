@@ -142,6 +142,8 @@ export const SiderMenu: React.FC = () => {
       collapsible
       collapsed={sidebarCollapsed}
       width={256}
+      breakpoint="lg"
+      collapsedWidth={0}
       theme="light"
       className={`hrm-sider${sidebarCollapsed ? ' hrm-sider-collapsed' : ''}`}
     >

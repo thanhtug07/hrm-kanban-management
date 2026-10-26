@@ -112,3 +112,71 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+/* ===== Responsive mobile ===== */
+@media (max-width: 991px) {
+  /* Ẩn breadcrumb trên mobile, thu gọn header */
+  .ant-layout-header .ant-breadcrumb {
+    display: none !important;
+  }
+  /* Ẩn role tag để header gọn */
+  .ant-layout-header .ant-tag {
+    display: none !important;
+  }
+  .ant-layout-header {
+    padding: 0 12px !important;
+  }
+  /* Content margin nhỏ hơn */
+  .ant-layout-content {
+    margin: 12px 12px 0 !important;
+  }
+  .ant-layout-footer {
+    padding: 14px 12px 18px !important;
+  }
+}
+
+@media (max-width: 575px) {
+  /* Header: ẩn tên user, chỉ để avatar */
+  .ant-layout-header .ant-typography.ant-typography-ellipsis {
+    max-width: 90px !important;
+  }
+}
+/* Chống tràn ngang toàn cục trên mobile */
+@media (max-width: 991px) {
+  .ant-layout-content {
+    overflow-x: hidden;
+  }
+  .ant-layout-content .ant-space {
+    flex-wrap: wrap !important;
+  }
+  body {
+    overflow-x: hidden;
+  }
+}
+/* Bảng luôn cuộn ngang trong khung, không đẩy layout */
+.ant-table-wrapper {
+  max-width: 100%;
+}
+.ant-table-wrapper .ant-table-content,
+.ant-table-wrapper .ant-table-body {
+  overflow-x: auto !important;
+}
+@media (max-width: 991px) {
+  .ant-table-wrapper,
+  .ant-table-wrapper .ant-table {
+    max-width: 100vw;
+  }
+  .ant-card {
+    max-width: 100%;
+    overflow: hidden;
+  }
+}
+@media (max-width: 991px) {
+  .ant-layout-header {
+    overflow: hidden !important;
+    max-width: 100vw !important;
+  }
+  /* Ẩn tên user trên mobile, chỉ hiện avatar */
+  .ant-layout-header .ant-space .ant-typography.ant-typography-ellipsis {
+    display: none !important;
+  }
+}

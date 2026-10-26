@@ -1,29 +1,31 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button, Typography, Space, Select, message } from 'antd';
-import {
-  FileTextOutlined,
-  CalendarOutlined,
-  DownloadOutlined,
-  CheckCircleOutlined,
-} from '@ant-design/icons';
+import { DownloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { useAuthStore } from '@/stores/authStore';
+import { DashboardDto } from '@/types/dashboard';
 
 const { Title, Text } = Typography;
+
+export type DashboardPeriod = 'week' | 'month' | 'quarter';
 
 interface DashboardHeaderProps {
   taskQuaHan: number;
   donNghiPhepChoDuyet: number;
+  data: DashboardDto | null;
+  period: DashboardPeriod;
+  onPeriodChange: (period: DashboardPeriod) => void;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   taskQuaHan,
   donNghiPhepChoDuyet,
+  data,
+  period,
+  onPeriodChange,
 }) => {
   const { user } = useAuthStore();
-  const [period, setPeriod] = useState<'week' | 'month' | 'quarter'>('month');
-  const [exporting, setExporting] = useState(false);
 
   // Tính lời chào theo buổi
   const currentHour = new Date().getHours();
@@ -44,11 +46,26 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const capitalizedDate = todayStr.charAt(0).toUpperCase() + todayStr.slice(1);
 
   const handleExportReport = () => {
-    setExporting(true);
-    setTimeout(() => {
-      setExporting(false);
-      message.success('Đã xuất báo cáo tổng quan HRM (PDF/Excel) thành công!');
-    }, 1000);
+    const rows: [string, number][] = [
+      ['Tổng nhân sự', data?.tongNhanVien || 0],
+      ['Đang làm', data?.nhanVienDangLam || 0],
+      ['Nghỉ việc', data?.nhanVienNghiViec || 0],
+      ['Task quá hạn', data?.taskQuaHan || 0],
+      ['Đơn chờ duyệt', data?.donNghiPhepChoDuyet || 0],
+    ];
+    const csv =
+      '\uFEFF' +
+      ['Chỉ số,Số lượng', ...rows.map(([k, v]) => `${k},${v}`)].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bao-cao-hrm-${dayjs().format('YYYYMMDD')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    message.success('Đã tải báo cáo CSV');
   };
 
   return (
@@ -101,7 +118,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       <Space size={10} wrap>
         <Select
           value={period}
-          onChange={setPeriod}
+          onChange={onPeriodChange}
           style={{ width: 130 }}
           options={[
             { value: 'week', label: 'Tuần này' },
@@ -115,7 +132,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           type="primary"
           icon={<DownloadOutlined />}
           shape="round"
-          loading={exporting}
           onClick={handleExportReport}
           style={{
             backgroundColor: '#0F766E', // Teal Enterprise Accent

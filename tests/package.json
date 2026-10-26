@@ -1,0 +1,18 @@
+{
+  "name": "hrm-tests",
+  "version": "1.0.0",
+  "description": "Bộ kiểm thử tự động cho dự án HRM Portal (E2E + API fuzz + smoke)",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node run-all.js",
+    "test:smoke": "node suites/smoke.test.js",
+    "test:e2e": "node suites/e2e.test.js",
+    "test:rbac": "node suites/rbac.test.js",
+    "test:api": "node suites/api-fuzz.test.js",
+    "test:ui": "node suites/ui-layout.test.js"
+  },
+  "dependencies": {
+    "playwright-core": "^1.40.0"
+  }
+}

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Card, Table, Typography, Button, Tag, Space } from 'antd';
 import { ArrowRightOutlined, AlertOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -130,7 +130,7 @@ export const UrgentTasksTable: React.FC<UrgentTasksTableProps> = ({ tasks, loadi
           type="link"
           size="small"
           onClick={() => navigate('/kanban')}
-          style={{ padding: 0, fontWeight: 500, fontSize: 12.5, color: '#4F46E5' }}
+          style={{ padding: 0, fontWeight: 500, fontSize: 12.5, color: '#0F766E' }}
         >
           Xem trên Kanban <ArrowRightOutlined style={{ fontSize: 10 }} />
         </Button>
@@ -188,7 +188,7 @@ export const UrgentTasksTable: React.FC<UrgentTasksTableProps> = ({ tasks, loadi
         loading={loading}
         pagination={{ pageSize: 5, showSizeChanger: false }}
         size="middle"
-        style={{ borderRadius: 10, overflow: 'hidden' }}
+        scroll={{ x: 820 }}
       />
     </Card>
   );

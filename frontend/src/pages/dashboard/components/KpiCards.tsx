@@ -5,8 +5,6 @@ import {
   CheckCircleOutlined,
   FireOutlined,
   CalendarOutlined,
-  ArrowUpOutlined,
-  ArrowDownOutlined,
   ArrowRightOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -73,8 +71,8 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ data, loading }) => {
                 width: 44,
                 height: 44,
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
-                color: '#4F46E5',
+                background: 'linear-gradient(135deg, #ECFDF5 0%, #CCFBF1 100%)',
+                color: '#0F766E',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -92,7 +90,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ data, loading }) => {
               alignItems: 'center',
               gap: 6,
               fontSize: 12.5,
-              color: '#16A34A',
+              color: '#0F766E',
               fontWeight: 500,
             }}
           >
@@ -102,14 +100,14 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ data, loading }) => {
                 alignItems: 'center',
                 padding: '2px 6px',
                 borderRadius: 6,
-                backgroundColor: '#DCFCE7',
+                backgroundColor: '#ECFDF5',
                 fontSize: 11.5,
                 fontWeight: 700,
               }}
             >
-              <ArrowUpOutlined style={{ marginRight: 3 }} /> +12%
+              {activeEmployees} đang làm
             </span>
-            <span style={{ color: '#64748B' }}>so với tháng trước</span>
+            <span style={{ color: '#64748B' }}>/ {data?.nhanVienNghiViec || 0} đã nghỉ</span>
           </div>
         </Card>
       </Col>

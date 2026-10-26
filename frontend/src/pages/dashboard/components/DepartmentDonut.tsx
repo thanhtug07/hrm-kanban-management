@@ -5,7 +5,7 @@ import { NhanSuTheoPhongBanItem } from '@/types/dashboard';
 
 const { Text } = Typography;
 
-const DONUT_COLORS = ['#4F46E5', '#06B6D4', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'];
+const DONUT_COLORS = ['#0F766E', '#06B6D4', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'];
 
 interface DepartmentDonutProps {
   data: NhanSuTheoPhongBanItem[];
@@ -41,6 +41,7 @@ export const DepartmentDonut: React.FC<DepartmentDonutProps> = ({
   return (
     <Card
       style={{
+        height: '100%',
         borderRadius: 16,
         background: '#FFFFFF',
         border: '1px solid #F1F5F9',

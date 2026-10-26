@@ -5,7 +5,7 @@ import { congViecApi } from '@/api/congViecApi';
 import { DashboardDto } from '@/types/dashboard';
 import { TaskItemDto } from '@/types/congViec';
 
-import DashboardHeader from './components/DashboardHeader';
+import DashboardHeader, { DashboardPeriod } from './components/DashboardHeader';
 import KpiCards from './components/KpiCards';
 import TaskTrendChart from './components/TaskTrendChart';
 import DepartmentDonut from './components/DepartmentDonut';
@@ -17,6 +17,7 @@ export const AdminDashboard: React.FC = () => {
   const [data, setData] = useState<DashboardDto | null>(null);
   const [tasks, setTasks] = useState<TaskItemDto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [period, setPeriod] = useState<DashboardPeriod>('month');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,13 +60,16 @@ export const AdminDashboard: React.FC = () => {
       <DashboardHeader
         taskQuaHan={data?.taskQuaHan || 0}
         donNghiPhepChoDuyet={data?.donNghiPhepChoDuyet || 0}
+        data={data}
+        period={period}
+        onPeriodChange={setPeriod}
       />
 
       {/* 2. Khối KPI Cards (Top Metrics - Hàng 1) */}
       <KpiCards data={data} loading={loading} />
 
-      {/* 3. Bố Cục Bento Grid (Hàng 2 & 3: Cột Trái 60% & Cột Phải 40%) */}      {/* 3. Xu Hướng Công Việc (toàn chiều rộng) */}
-      <TaskTrendChart />
+      {/* 3. Xu Hướng Công Việc (toàn chiều rộng, lọc theo kỳ đã chọn) */}
+      <TaskTrendChart period={period} />
 
       {/* 4. Hàng cân bằng: Phân bổ phòng ban + Top nhân sự */}
       <div
@@ -73,16 +77,20 @@ export const AdminDashboard: React.FC = () => {
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1.35fr) minmax(0, 1fr)',
           gap: 20,
-          alignItems: 'start',
+          alignItems: 'stretch',
           marginBottom: 20,
         }}
         className="dash-balanced-row"
       >
-        <DepartmentDonut
-          data={data?.nhanSuTheoPhongBan || []}
-          totalEmployees={totalEmployees}
-        />
-        <TopEmployees data={data?.topNhanVienNhieuTask || []} />
+        <div style={{ height: '100%' }}>
+          <DepartmentDonut
+            data={data?.nhanSuTheoPhongBan || []}
+            totalEmployees={totalEmployees}
+          />
+        </div>
+        <div style={{ height: '100%' }}>
+          <TopEmployees data={data?.topNhanVienNhieuTask || []} />
+        </div>
       </div>
 
       {/* 5. Hoạt động gần đây (toàn chiều rộng) */}

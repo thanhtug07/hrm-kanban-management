@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Typography, Avatar, Tag, Empty } from 'antd';
-import { CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
+import { Card, Typography, Avatar, Tag, Empty, Tooltip } from 'antd';
+import { CheckCircleOutlined, SyncOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { getInitials, getAvatarStyle } from '@/utils/avatar';
 import { TaskItemDto, TaskStatus } from '@/types/congViec';
 
@@ -17,11 +17,40 @@ const STATUS_META: Record<TaskStatus, { label: string; color: string; bg: string
   Done: { label: 'Hoàn thành', color: '#059669', bg: '#ECFDF5' },
 };
 
+// Thời gian tuyệt đối: dd/MM/yyyy HH:mm
+function formatDateTime(iso?: string): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '—';
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+// Thời gian tương đối: "vừa xong", "5 phút trước", "2 giờ trước", "hôm qua"...
+function formatRelative(iso?: string): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const diffMs = Date.now() - d.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'vừa xong';
+  if (mins < 60) return `${mins} phút trước`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} giờ trước`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'hôm qua';
+  if (days < 30) return `${days} ngày trước`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} tháng trước`;
+  return `${Math.floor(months / 12)} năm trước`;
+}
+
 function formatDeadline(deadline?: string): string {
-  if (!deadline) return 'Không có hạn';
+  if (!deadline) return '—';
   const d = new Date(deadline);
-  if (isNaN(d.getTime())) return 'Không có hạn';
-  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  if (isNaN(d.getTime())) return '—';
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
 }
 
 export const ActivityFeed: React.FC<ActivityFeedProps> = ({ tasks }) => {
@@ -32,7 +61,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ tasks }) => {
       if (tb !== ta) return tb - ta;
       return b.maTask - a.maTask;
     })
-    .slice(0, 8);
+    .slice(0, 10);
 
   return (
     <Card
@@ -83,65 +112,72 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ tasks }) => {
       {recent.length === 0 ? (
         <Empty description="Chưa có hoạt động nào" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {recent.map((task, index) => {
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 440, overflowY: 'auto' }}>
+          {recent.map((task) => {
             const actor = task.tenNV_PhuTrach || task.tenNV_Giao || 'Hệ Thống';
             const avatar = getAvatarStyle(actor);
             const status = STATUS_META[task.trangThai] || STATUS_META.Todo;
             const isDone = task.trangThai === 'Done';
+            const updatedAt = task.ngayCapNhat || task.ngayTao;
+
             return (
               <div
                 key={task.maTask}
                 style={{
                   display: 'flex',
-                  alignItems: 'flex-start',
+                  alignItems: 'stretch',
                   gap: 12,
-                  paddingBottom: 12,
-                  borderBottom: index !== recent.length - 1 ? '1px solid #F1F5F9' : 'none',
+                  padding: '12px 14px',
+                  borderRadius: 12,
+                  background: '#FFFFFF',
+                  border: '1px solid #F1F5F9',
+                  transition: 'box-shadow 0.15s ease, border-color 0.15s ease',
                 }}
+                className="activity-item"
               >
+                {/* Avatar + nội dung (trái) */}
                 <Avatar
-                  size={34}
+                  size={40}
                   style={{
                     backgroundColor: avatar.bg,
                     color: avatar.text,
                     border: `1px solid ${avatar.border}`,
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 700,
                     flexShrink: 0,
+                    alignSelf: 'flex-start',
                   }}
                 >
                   {getInitials(actor)}
                 </Avatar>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, color: '#334155', lineHeight: 1.4 }}>
+                  {/* Dòng 1: actor + hành động */}
+                  <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.4 }}>
                     <strong style={{ color: '#0F172A' }}>{actor}</strong>{' '}
-                    {isDone ? 'đã hoàn thành' : 'vừa cập nhật'}
+                    <span style={{ color: '#64748B' }}>
+                      {isDone ? 'đã hoàn thành' : 'vừa cập nhật'}
+                    </span>
                   </div>
+
+                  {/* Dòng 2: tiêu đề task — TO, RÕ */}
                   <div
                     style={{
-                      fontSize: 12,
-                      fontWeight: 500,
+                      fontSize: 14,
+                      fontWeight: 650,
                       color: '#0F766E',
-                      marginTop: 2,
-                      whiteSpace: 'nowrap',
+                      marginTop: 3,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
-                    title={task.tieuDe}
+                    title={`Task #${task.maTask}: ${task.tieuDe}`}
                   >
-                    Task #{task.maTask}: {task.tieuDe}
+                    #{task.maTask} · {task.tieuDe}
                   </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      marginTop: 6,
-                      flexWrap: 'wrap',
-                    }}
-                  >
+
+                  {/* Dòng 3: tag trạng thái + deadline */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 7, flexWrap: 'wrap' }}>
                     <Tag
                       icon={isDone ? <CheckCircleOutlined /> : <SyncOutlined />}
                       style={{
@@ -158,15 +194,48 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ tasks }) => {
                     </Tag>
                     <span
                       style={{
-                        fontSize: 11,
+                        fontSize: 11.5,
                         color: task.laQuaHan ? '#DC2626' : '#94A3B8',
-                        fontWeight: task.laQuaHan ? 600 : 400,
+                        fontWeight: task.laQuaHan ? 600 : 500,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
                       }}
                     >
+                      <ClockCircleOutlined style={{ fontSize: 10 }} />
                       {task.laQuaHan ? 'Quá hạn: ' : 'Hạn: '}
                       {formatDeadline(task.deadline)}
                     </span>
                   </div>
+                </div>
+
+                {/* Thời gian (phải) — chi tiết */}
+                <div
+                  style={{
+                    flexShrink: 0,
+                    textAlign: 'right',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                    gap: 2,
+                    minWidth: 118,
+                  }}
+                >
+                  <Tooltip title="Thời điểm cập nhật gần nhất">
+                    <span
+                      style={{
+                        fontSize: 11.5,
+                        fontWeight: 700,
+                        color: '#0F766E',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {formatDateTime(updatedAt)}
+                    </span>
+                  </Tooltip>
+                  <span style={{ fontSize: 11, color: '#94A3B8', whiteSpace: 'nowrap' }}>
+                    {formatRelative(updatedAt)}
+                  </span>
                 </div>
               </div>
             );

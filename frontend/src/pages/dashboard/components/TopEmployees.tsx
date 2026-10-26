@@ -64,6 +64,7 @@ export const TopEmployees: React.FC<TopEmployeesProps> = ({ data }) => {
   return (
     <Card
       style={{
+        height: '100%',
         borderRadius: 16,
         background: '#FFFFFF',
         border: '1px solid #F1F5F9',
@@ -156,13 +157,13 @@ export const TopEmployees: React.FC<TopEmployeesProps> = ({ data }) => {
 
               {/* Progress & Task Count */}
               <div style={{ width: 130, textAlign: 'right' }}>
-                <div style={{ fontWeight: 700, fontSize: 13, color: '#4F46E5', marginBottom: 2 }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: '#0F766E', marginBottom: 2 }}>
                   {emp.soTask} tasks
                 </div>
                 <Progress
                   percent={percentage}
                   showInfo={false}
-                  strokeColor={index === 0 ? '#7C3AED' : '#4F46E5'}
+                  strokeColor={index === 0 ? '#0F766E' : '#14B8A6'}
                   size="small"
                   style={{ margin: 0 }}
                 />
