@@ -59,7 +59,8 @@
 
 ```text
 hrm-kanban-management/
-├── QUANLYNHANSU.sql        # ⭐ Script CSDL: 11 bảng, 6 views, 3 SP, 3 trigger + data mẫu
+├── QUANLYNHANSU.sql        # ⭐ Script CSDL: 11 bảng, 6 views, 3 SP, 3 trigger (cấu trúc)
+├── SEED_DATA.sql           # 🌱 Dữ liệu mẫu: 35 nhân viên, tài khoản, hợp đồng, chấm công...
 ├── backend/                # ASP.NET Core 8 Web API
 │   ├── HRM.Core/           # Domain: Entities, DTOs, Interfaces, Constants
 │   ├── HRM.Infrastructure/ # EF Core: AppDbContext, Configurations, PasswordHasher
@@ -116,11 +117,16 @@ Tài khoản demo: **admin / Admin@123**
 
 ### Bước 1 — Tạo Cơ sở dữ liệu
 
-1. Mở **SSMS**, kết nối tới `(localdb)\MSSQLLocalDB` (hoặc SQL Server instance của bạn).
-2. Mở file `QUANLYNHANSU.sql`.
-3. Nhấn **Execute (F5)** — script sẽ tự tạo database `QUANLYNHANSU`, toàn bộ bảng, view, stored procedure, trigger và nạp dữ liệu mẫu.
+**Yêu cầu:** SQL Server (bản đầy đủ/Express/Developer — KHÔNG dùng XAMPP/MySQL).
+Kiểm tra server đang chạy: service `MSSQLSERVER` hoặc `MSSQL$SQLExpress`.
 
-> 💡 Script có thể chạy lại nhiều lần — dùng `IF NOT EXISTS` nên không gây lỗi trùng.
+1. Mở **SSMS** hoặc **Azure Data Studio**, kết nối tới SQL Server của bạn (`localhost`, `.` hoặc `.\SQLEXPRESS`).
+2. **File → Open File** chọn `QUANLYNHANSU.sql` → nhấn **F5** (Run All) để tạo cấu trúc 11 bảng + view + SP + trigger.
+3. Tiếp tục **Open File** chọn `SEED_DATA.sql` → **F5** để nạp dữ liệu mẫu (35 nhân viên, tài khoản, hợp đồng...).
+
+> Chạy 2 file **theo thứ tự**: `QUANLYNHANSU.sql` (cấu trúc) → `SEED_DATA.sql` (dữ liệu).
+> Cả hai dùng `IF NOT EXISTS`/`MERGE` nên chạy lại nhiều lần không lỗi.
+> **Lưu ý:** Script viết cho **SQL Server** (T-SQL), KHÔNG chạy được trên MySQL/XAMPP.
 
 ### Bước 2 — Chạy Backend
 
@@ -136,7 +142,7 @@ Swagger UI: **http://localhost:5100/swagger**
 > ⚙️ **Cấu hình kết nối:** Sửa chuỗi kết nối trong `backend/HRM.API/appsettings.json` nếu SQL Server của bạn khác mặc định:
 > ```json
 > "ConnectionStrings": {
->   "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=QUANLYNHANSU;Trusted_Connection=True;TrustServerCertificate=True"
+>   "DefaultConnection": "Server=localhost;Database=QUANLYNHANSU;Trusted_Connection=True;TrustServerCertificate=True"
 > }
 > ```
 >
