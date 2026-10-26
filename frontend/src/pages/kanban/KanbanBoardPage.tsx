@@ -418,9 +418,9 @@ export const KanbanBoardPage: React.FC = () => {
             tasks={boardData.todo}
             totalTasks={boardData.totalTasks}
             onTaskClick={handleOpenDetail}
-            onEditTask={handleOpenEdit}
-            onDeleteTask={handleDeleteTask}
-            onQuickAdd={handleQuickAdd}
+            onEditTask={isHrOrAdmin ? handleOpenEdit : undefined}
+            onDeleteTask={isHrOrAdmin ? handleDeleteTask : undefined}
+            onQuickAdd={isHrOrAdmin ? handleQuickAdd : undefined}
           />
           <KanbanColumn
             status="InProgress"
@@ -428,9 +428,9 @@ export const KanbanBoardPage: React.FC = () => {
             tasks={boardData.inProgress}
             totalTasks={boardData.totalTasks}
             onTaskClick={handleOpenDetail}
-            onEditTask={handleOpenEdit}
-            onDeleteTask={handleDeleteTask}
-            onQuickAdd={handleQuickAdd}
+            onEditTask={isHrOrAdmin ? handleOpenEdit : undefined}
+            onDeleteTask={isHrOrAdmin ? handleDeleteTask : undefined}
+            onQuickAdd={isHrOrAdmin ? handleQuickAdd : undefined}
           />
           <KanbanColumn
             status="Review"
@@ -438,9 +438,9 @@ export const KanbanBoardPage: React.FC = () => {
             tasks={boardData.review}
             totalTasks={boardData.totalTasks}
             onTaskClick={handleOpenDetail}
-            onEditTask={handleOpenEdit}
-            onDeleteTask={handleDeleteTask}
-            onQuickAdd={handleQuickAdd}
+            onEditTask={isHrOrAdmin ? handleOpenEdit : undefined}
+            onDeleteTask={isHrOrAdmin ? handleDeleteTask : undefined}
+            onQuickAdd={isHrOrAdmin ? handleQuickAdd : undefined}
           />
           <KanbanColumn
             status="Done"
@@ -448,9 +448,9 @@ export const KanbanBoardPage: React.FC = () => {
             tasks={boardData.done}
             totalTasks={boardData.totalTasks}
             onTaskClick={handleOpenDetail}
-            onEditTask={handleOpenEdit}
-            onDeleteTask={handleDeleteTask}
-            onQuickAdd={handleQuickAdd}
+            onEditTask={isHrOrAdmin ? handleOpenEdit : undefined}
+            onDeleteTask={isHrOrAdmin ? handleDeleteTask : undefined}
+            onQuickAdd={isHrOrAdmin ? handleQuickAdd : undefined}
           />
         </div>
       </DragDropContext>
@@ -462,6 +462,7 @@ export const KanbanBoardPage: React.FC = () => {
         onClose={() => setDrawerOpen(false)}
         onEdit={handleOpenEdit}
         onDeleted={() => fetchBoard(true)}
+        onChanged={(updated) => { if (updated) setSelectedTask(updated); fetchBoard(true); }}
       />
 
       {/* Create / Edit Modal */}

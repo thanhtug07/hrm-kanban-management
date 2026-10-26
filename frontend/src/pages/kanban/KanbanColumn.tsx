@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Typography, Input, Button } from 'antd';
 import { PlusOutlined, InboxOutlined } from '@ant-design/icons';
 import { Droppable } from '@hello-pangea/dnd';
@@ -170,6 +170,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         </div>
 
         {/* Right Header Controls */}
+        {onQuickAdd && (
         <button
           type="button"
           onClick={() => setIsAdding(true)}
@@ -196,7 +197,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
           }}
         >
           <PlusOutlined style={{ fontSize: 13 }} />
-        </button>
+        </button>)}
       </div>
 
       {/* Droppable Card List Area - Tự nhiên không cuộn lồng nhau (no inner scrollbars) */}
@@ -256,6 +257,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
       </Droppable>
 
       {/* Bottom Button: + Add task */}
+      {onQuickAdd && (
       <div style={{ marginTop: 8, paddingTop: 4 }}>
         {isAdding ? (
           <div
@@ -345,6 +347,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
           </button>
         )}
       </div>
+      )}
     </div>
   );
 };
