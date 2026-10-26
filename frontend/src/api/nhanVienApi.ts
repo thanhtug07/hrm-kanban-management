@@ -1,4 +1,4 @@
-import axiosClient from './axiosClient';
+﻿import axiosClient from './axiosClient';
 import { ApiResponse, PagedResult } from '@/types/common';
 import {
   NhanVienDto,
@@ -29,6 +29,6 @@ export const nhanVienApi = {
   },
 
   search: async (query: string): Promise<ApiResponse<NhanVienDto[]>> => {
-    return axiosClient.get('/api/nhanvien/search', { params: { query } });
+    return axiosClient.get('/api/nhanvien/search', { params: { keyword: query } });
   },
 };

@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.NghiPhep;
@@ -112,10 +112,15 @@ public class NghiPhepService : INghiPhepService
         if (don.TrangThai != "Chờ duyệt")
             return ApiResponse<NghiPhepDto>.Fail("Chỉ có thể duyệt đơn nghỉ phép đang ở trạng thái Chờ duyệt.");
 
-        var maNVHienTai = user.FindFirstValue("MaNV") ?? "NV000";
+        var maNVHienTai = user.FindFirstValue("MaNV");
+        if (string.IsNullOrWhiteSpace(maNVHienTai))
+        {
+            return ApiResponse<NghiPhepDto>.Fail("Tài khoản chưa liên kết nhân viên, không thể duyệt đơn.");
+        }
+        maNVHienTai = maNVHienTai.Trim();
 
         // Quy tắc: Không được tự duyệt đơn của chính mình
-        if (don.MaNV.Trim() == maNVHienTai.Trim())
+        if (don.MaNV.Trim() == maNVHienTai)
         {
             return ApiResponse<NghiPhepDto>.Fail("Bạn không có quyền tự phê duyệt đơn nghỉ phép của chính mình.");
         }

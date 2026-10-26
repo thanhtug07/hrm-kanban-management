@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.Constants;
@@ -62,7 +62,7 @@ public class NhanVienService : INhanVienService
         };
 
         var page = filter.Page > 0 ? filter.Page : 1;
-        var pageSize = filter.PageSize > 0 ? filter.PageSize : 20;
+        var pageSize = Math.Clamp(filter.PageSize > 0 ? filter.PageSize : 20, 1, 100);
 
         var items = await query
             .Skip((page - 1) * pageSize)
@@ -116,30 +116,26 @@ public class NhanVienService : INhanVienService
         };
 
         // Chạy Stored Procedure sinh mã và chèn an toàn chống race condition
+        var p = new List<SqlParameter>
+        {
+            new("@HoTen", SqlDbType.NVarChar, 100) { Value = dto.HoTen.Trim() },
+            new("@GioiTinh", SqlDbType.NVarChar, 5) { Value = dto.GioiTinh },
+            new("@NgaySinh", SqlDbType.Date) { Value = dto.NgaySinh.ToDateTime(TimeOnly.MinValue) },
+            new("@CCCD", SqlDbType.Char, 12) { Value = dto.CCCD.Trim() },
+            new("@SDT", SqlDbType.VarChar, 15) { Value = (object?)dto.SDT?.Trim() ?? DBNull.Value },
+            new("@Email", SqlDbType.VarChar, 100) { Value = (object?)dto.Email?.Trim() ?? DBNull.Value },
+            new("@DiaChi", SqlDbType.NVarChar, 255) { Value = (object?)dto.DiaChi?.Trim() ?? DBNull.Value },
+            new("@MaPB", SqlDbType.Char, 5) { Value = dto.MaPB },
+            new("@MaCV", SqlDbType.Char, 5) { Value = dto.MaCV },
+            new("@NgayVaoLam", SqlDbType.Date) { Value = dto.NgayVaoLam.ToDateTime(TimeOnly.MinValue) },
+            maNVParam
+        };
+
         await _context.Database.ExecuteSqlRawAsync(
-            @"EXEC dbo.SP_ThemNhanVien 
-                @HoTen = {0}, 
-                @GioiTinh = {1}, 
-                @NgaySinh = {2}, 
-                @CCCD = {3}, 
-                @SDT = {4}, 
-                @Email = {5}, 
-                @DiaChi = {6}, 
-                @MaPB = {7}, 
-                @MaCV = {8}, 
-                @NgayVaoLam = {9}, 
-                @MaNVmoi = {10} OUTPUT",
-            dto.HoTen.Trim(),
-            dto.GioiTinh,
-            dto.NgaySinh.ToDateTime(TimeOnly.MinValue),
-            dto.CCCD.Trim(),
-            (object?)dto.SDT?.Trim() ?? DBNull.Value,
-            (object?)dto.Email?.Trim() ?? DBNull.Value,
-            (object?)dto.DiaChi?.Trim() ?? DBNull.Value,
-            dto.MaPB,
-            dto.MaCV,
-            dto.NgayVaoLam.ToDateTime(TimeOnly.MinValue),
-            maNVParam);
+            "EXEC dbo.SP_ThemNhanVien @HoTen=@HoTen, @GioiTinh=@GioiTinh, @NgaySinh=@NgaySinh, " +
+            "@CCCD=@CCCD, @SDT=@SDT, @Email=@Email, @DiaChi=@DiaChi, @MaPB=@MaPB, @MaCV=@MaCV, " +
+            "@NgayVaoLam=@NgayVaoLam, @MaNVmoi=@MaNVmoi OUTPUT",
+            p);
 
         var maNVMoi = (maNVParam.Value?.ToString() ?? string.Empty).Trim();
 

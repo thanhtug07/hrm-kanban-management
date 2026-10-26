@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.Kanban;
@@ -23,7 +23,7 @@ public class CongViecService : ICongViecService
         _logger = logger;
     }
 
-    public async Task<ApiResponse<KanbanBoardDto>> GetBoardAsync(string? maNV, ClaimsPrincipal user)
+    public async Task<ApiResponse<KanbanBoardDto>> GetBoardAsync(string? maNV, string? doUuTien, string? search, ClaimsPrincipal user)
     {
         var role = user.FindFirstValue(ClaimTypes.Role);
         var userMaNV = user.FindFirstValue("MaNV");
@@ -38,6 +38,18 @@ public class CongViecService : ICongViecService
         else if (!string.IsNullOrWhiteSpace(maNV))
         {
             query = query.Where(x => x.MaNV_PhuTrach == maNV.Trim());
+        }
+
+        if (!string.IsNullOrWhiteSpace(doUuTien))
+        {
+            var uuTien = doUuTien.Trim();
+            query = query.Where(x => x.DoUuTien == uuTien);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var kw = search.Trim().ToLower();
+            query = query.Where(x => x.TieuDe.ToLower().Contains(kw) || (x.MoTa != null && x.MoTa.ToLower().Contains(kw)));
         }
 
         var items = await query.OrderBy(x => x.ViTri).ToListAsync();

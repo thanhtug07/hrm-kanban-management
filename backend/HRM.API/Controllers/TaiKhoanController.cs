@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.DTOs.TaiKhoan;
 using HRM.Core.Entities;
@@ -18,6 +18,7 @@ public class TaiKhoanController : ControllerBase
     private readonly AppDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ILogger<TaiKhoanController> _logger;
+    private static readonly string[] ValidRoles = { "Admin", "HR", "NhanVien" };
 
     public TaiKhoanController(
         AppDbContext context,
@@ -114,11 +115,17 @@ public class TaiKhoanController : ControllerBase
         var plainPassword = string.IsNullOrWhiteSpace(dto.MatKhau) ? "Hrm@123456" : dto.MatKhau.Trim();
         var hash = _passwordHasher.HashPassword(plainPassword);
 
+        var vaiTroMoi = string.IsNullOrWhiteSpace(dto.VaiTro) ? "NhanVien" : dto.VaiTro.Trim();
+        if (!ValidRoles.Contains(vaiTroMoi))
+        {
+            return BadRequest(ApiResponse<TaiKhoanDto>.Fail("Vai trò không hợp lệ (chỉ nhận Admin, HR, NhanVien)."));
+        }
+
         var account = new TaiKhoan
         {
             TenDangNhap = username,
             MatKhauHash = hash,
-            VaiTro = !string.IsNullOrWhiteSpace(dto.VaiTro) ? dto.VaiTro : "NhanVien",
+            VaiTro = vaiTroMoi,
             MaNV = validMaNV, // Nullable nếu không liên kết nhân viên công ty
             TrangThai = true,
             NgayTao = DateTime.Now
@@ -195,12 +202,17 @@ public class TaiKhoanController : ControllerBase
         // 3. Đổi vai trò nếu có
         if (!string.IsNullOrWhiteSpace(dto.VaiTro))
         {
+            var vaiTroMoi = dto.VaiTro.Trim();
+            if (!ValidRoles.Contains(vaiTroMoi))
+            {
+                return BadRequest(ApiResponse<TaiKhoanDto>.Fail("Vai trò không hợp lệ (chỉ nhận Admin, HR, NhanVien)."));
+            }
             // Chỉ Admin được gán vai trò Admin (chống leo thang đặc quyền)
-            if (dto.VaiTro.Equals("Admin", StringComparison.OrdinalIgnoreCase) && !User.IsInRole("Admin"))
+            if (vaiTroMoi == "Admin" && !User.IsInRole("Admin"))
             {
                 return Forbid();
             }
-            account.VaiTro = dto.VaiTro;
+            account.VaiTro = vaiTroMoi;
         }
 
         // 4. Đổi nhân viên liên kết nếu có

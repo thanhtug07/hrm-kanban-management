@@ -5,6 +5,7 @@ import { ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import 'dayjs/locale/vi';
 
 import router from '@/router';
@@ -13,6 +14,7 @@ import '@/styles/sider-premium.css';
 
 // Kích hoạt relativeTime và locale tiếng Việt cho dayjs toàn cục
 dayjs.extend(relativeTime);
+dayjs.extend(customParseFormat);
 dayjs.locale('vi');
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

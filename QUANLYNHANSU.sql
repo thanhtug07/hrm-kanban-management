@@ -456,7 +456,8 @@
         @DiaChi NVARCHAR(255) = NULL,
         @MaPB CHAR(5),
         @MaCV CHAR(5),
-        @NgayVaoLam DATE = NULL
+        @NgayVaoLam DATE = NULL,
+        @MaNVmoi CHAR(5) = NULL OUTPUT
     AS
     BEGIN
         SET NOCOUNT ON;
@@ -484,6 +485,7 @@
             INSERT INTO dbo.NhanVien (MaNV, HoTen, GioiTinh, NgaySinh, CCCD, SDT, Email, DiaChi, MaPB, MaCV, NgayVaoLam, TrangThai)
             VALUES (@NewMaNV, @HoTen, @GioiTinh, @NgaySinh, @CCCD, @SDT, @Email, @DiaChi, @MaPB, @MaCV, @NgayVaoLam, N'Đang làm');
 
+            SET @MaNVmoi = @NewMaNV;
             COMMIT TRANSACTION;
             SELECT * FROM dbo.VW_DanhSachNhanVien WHERE MaNV = @NewMaNV;
         END TRY
@@ -582,7 +584,8 @@
             WHERE nv.TrangThai = N'Đang làm';
 
             COMMIT TRANSACTION;
-            SELECT * FROM dbo.VW_BangLuongChiTiet WHERE Thang = @Thang AND Nam = @Nam;
+            SELECT COUNT(*) AS SoNhanVienTinhLuong, @Thang AS Thang, @Nam AS Nam
+            FROM dbo.BangLuong WHERE Thang = @Thang AND Nam = @Nam;
         END TRY
         BEGIN CATCH
             ROLLBACK TRANSACTION;

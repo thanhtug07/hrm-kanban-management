@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   Table,
@@ -22,6 +22,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { NhanVienDto, NhanVienFilterDto } from '@/types/nhanVien';
 import { nhanVienApi } from '@/api/nhanVienApi';
+import { useAuthStore } from '@/stores/authStore';
 import { formatDate } from '@/utils/format';
 import { getInitials, getAvatarStyle } from '@/utils/avatar';
 import NhanVienFormModal, { PHONG_BAN_OPTIONS, TRANG_THAI_OPTIONS } from './NhanVienFormModal';
@@ -29,6 +30,8 @@ import NhanVienFormModal, { PHONG_BAN_OPTIONS, TRANG_THAI_OPTIONS } from './Nhan
 const { Title, Text } = Typography;
 
 export const NhanVienListPage: React.FC = () => {
+  const { user } = useAuthStore();
+  const isAdmin = user?.vaiTro === 'Admin';
   const [data, setData] = useState<NhanVienDto[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -205,15 +208,17 @@ export const NhanVienListPage: React.FC = () => {
               setModalOpen(true);
             }}
           />
-          <Popconfirm
-            title={`Bạn có chắc muốn xóa nhân viên ${record.hoTen} (${record.maNV})?`}
-            onConfirm={() => handleDelete(record.maNV)}
-            okText="Xóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
-            <Button type="text" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
+          {isAdmin && (
+            <Popconfirm
+              title={`Bạn có chắc muốn xóa nhân viên ${record.hoTen} (${record.maNV})?`}
+              onConfirm={() => handleDelete(record.maNV)}
+              okText="Xóa"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true }}
+            >
+              <Button type="text" danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          )}
         </Space>
       ),
     },

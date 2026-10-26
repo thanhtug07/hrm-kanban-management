@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.DTOs.Kanban;
 
@@ -6,7 +6,7 @@ namespace HRM.Core.Interfaces;
 
 public interface ICongViecService
 {
-    Task<ApiResponse<KanbanBoardDto>> GetBoardAsync(string? maNV, ClaimsPrincipal user);
+    Task<ApiResponse<KanbanBoardDto>> GetBoardAsync(string? maNV, string? doUuTien, string? search, ClaimsPrincipal user);
     Task<ApiResponse<TaskItemDto>> GetByIdAsync(int id, ClaimsPrincipal user);
     Task<ApiResponse<TaskItemDto>> CreateTaskAsync(CreateTaskDto dto, ClaimsPrincipal user);
     Task<ApiResponse<TaskItemDto>> UpdateTaskAsync(int id, UpdateTaskDto dto, ClaimsPrincipal user);

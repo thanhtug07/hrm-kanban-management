@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Card,
   Tabs,
@@ -540,7 +540,8 @@ export const BangLuongPage: React.FC = () => {
                 Thêm chi phí phát sinh
               </Button>
 
-              {/* Nút Tính Lương (SP) */}
+              {/* Nút Tính Lương (SP) — chỉ Admin */}
+              {isAdmin && (
               <Button
                 type="primary"
                 icon={<CalculatorOutlined />}
@@ -555,6 +556,7 @@ export const BangLuongPage: React.FC = () => {
               >
                 Tính Lương (SP)
               </Button>
+              )}
             </>
           )}
         </Space>

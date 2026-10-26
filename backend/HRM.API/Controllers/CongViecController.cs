@@ -1,4 +1,4 @@
-using HRM.Core.Common;
+﻿using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.Kanban;
 using HRM.Core.Interfaces;
@@ -24,9 +24,9 @@ public class CongViecController : ControllerBase
     /// </summary>
     [HttpGet("board")]
     [ProducesResponseType(typeof(ApiResponse<KanbanBoardDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetBoard([FromQuery] string? maNV)
+    public async Task<IActionResult> GetBoard([FromQuery] string? maNV, [FromQuery] string? doUuTien, [FromQuery] string? search)
     {
-        var result = await _congViecService.GetBoardAsync(maNV, User);
+        var result = await _congViecService.GetBoardAsync(maNV, doUuTien, search, User);
         return Ok(result);
     }
 
