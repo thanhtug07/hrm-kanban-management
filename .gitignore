@@ -1,0 +1,48 @@
+# ===== .NET / C# =====
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userprefs
+.vs/
+*.dll
+*.pdb
+*.cache
+
+# ===== Logs =====
+*.log
+logs/
+Logs/
+hrm_log-*.txt
+
+# ===== Node / Frontend =====
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== Build info =====
+*.tsbuildinfo
+
+# ===== IDE / Editor =====
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# ===== Secrets / môi trường =====
+appsettings.Production.json
+.env
+.env.local
+.env.production.local
+secrets.json
+
+# ===== Tạm =====
+*.tmp
+tmp/
