@@ -3,6 +3,7 @@
     -- DATABASE: QUANLYNHANSU (FILE DUY NHẤT CHẠY TRỌN VẸN 100%)
     -- Hướng dẫn: Mở file này trong SSMS và nhấn Execute (F5) là xong toàn bộ!
     -- ============================================================================
+    GO
 
     USE master;
     GO

@@ -94,6 +94,8 @@ export const KanbanBoardPage: React.FC = () => {
   }, [fetchBoard]);
 
   useEffect(() => {
+    // Chỉ Admin/HR mới có quyền xem danh sách nhân viên (endpoint /api/nhanvien)
+    if (!isHrOrAdmin) return;
     const loadEmps = async () => {
       try {
         const res: any = await nhanVienApi.getList({ pageSize: 100 });
@@ -105,7 +107,7 @@ export const KanbanBoardPage: React.FC = () => {
       }
     };
     loadEmps();
-  }, []);
+  }, [isHrOrAdmin]);
 
   const handleDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result;
