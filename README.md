@@ -1,4 +1,4 @@
-# 🏢 HRM Portal — Hệ thống Quản lý Nhân sự & Kanban
+﻿# 🏢 HRM Portal — Hệ thống Quản lý Nhân sự & Kanban
 
 > **Hệ thống quản trị nhân sự (HRM) kết hợp bảng công việc Kanban** — Bài tập lớn môn Cơ sở Dữ liệu.
 > Xây dựng theo kiến trúc tách tầng (Clean Architecture) với **ASP.NET Core 8 Web API + SQL Server** ở backend và **React 19 + TypeScript** ở frontend.
@@ -74,14 +74,39 @@ hrm-kanban-management/
 │       ├── stores/         # Zustand stores
 │       ├── styles/         # Global CSS + design tokens
 │       └── types/          # TypeScript types
+├── tools/                  # DB Viewer (xem CSDL kiểu phpMyAdmin) + hướng dẫn
 ├── docs/                   # API contract, swagger.json, test report
+├── run.bat / run.ps1       # ⭐ Chạy 1 lệnh: auto backend + frontend
 ├── README.md
 └── TIEN_DO_CHI_TIET.md     # Nhật ký tiến độ chi tiết
 ```
 
 ---
 
-## 🚀 Hướng dẫn cài đặt & chạy
+## 🚀 Chạy nhanh (1 lệnh duy nhất)
+
+Sau khi đã chuẩn bị môi trường (xem mục dưới), chỉ cần chạy:
+
+```bat
+run.bat
+```
+
+Script tự động: kiểm tra công cụ → tạo DB nếu thiếu → cài npm packages (nếu thiếu) →
+build backend → mở **cả backend và frontend** trong 2 cửa sổ riêng → tự mở trình duyệt.
+
+> Hoặc dùng PowerShell: `.\run.ps1`
+
+| Dịch vụ | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:5100 |
+| Swagger | http://localhost:5100/swagger |
+
+Tài khoản demo: **admin / Admin@123**
+
+---
+
+## 🛠️ Hướng dẫn cài đặt chi tiết (thủ công)
 
 ### Yêu cầu hệ thống
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
