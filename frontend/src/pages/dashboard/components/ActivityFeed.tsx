@@ -1,77 +1,39 @@
 import React from 'react';
-import { Card, Typography, Avatar, Tag } from 'antd';
-import {
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  CommentOutlined,
-  FileDoneOutlined,
-  SyncOutlined,
-} from '@ant-design/icons';
+import { Card, Typography, Avatar, Tag, Empty } from 'antd';
+import { CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { getInitials, getAvatarStyle } from '@/utils/avatar';
+import { TaskItemDto, TaskStatus } from '@/types/congViec';
 
 const { Text } = Typography;
 
-interface ActivityItem {
-  id: number;
-  actor: string;
-  action: string;
-  target: string;
-  time: string;
-  type: 'task' | 'leave' | 'comment' | 'payroll';
+interface ActivityFeedProps {
+  tasks: TaskItemDto[];
 }
 
-const MOCK_ACTIVITIES: ActivityItem[] = [
-  {
-    id: 1,
-    actor: 'Bùi Thanh Thảo',
-    action: 'vừa cập nhật tiến độ công việc',
-    target: 'Task #8: Xây dựng giao diện Kanban kéo thả',
-    time: '5 phút trước',
-    type: 'task',
-  },
-  {
-    id: 2,
-    actor: 'Vũ Đình Trọng',
-    action: 'đã chuyển trạng thái sang In Progress',
-    target: 'Task #6: Thiết kế CSDL SQL Server',
-    time: '25 phút trước',
-    type: 'task',
-  },
-  {
-    id: 3,
-    actor: 'Ngô Văn Kiên',
-    action: 'đã gửi đơn xin nghỉ phép năm',
-    target: 'Đơn nghỉ 2 ngày (02/11 - 03/11)',
-    time: '1 giờ trước',
-    type: 'leave',
-  },
-  {
-    id: 4,
-    actor: 'Lý Hải Yến',
-    action: 'đã hoàn thành công việc',
-    target: 'Task #4: Lập báo cáo tài chính dự trù quý 4',
-    time: '3 giờ trước',
-    type: 'task',
-  },
-  {
-    id: 5,
-    actor: 'Dương Thúy Hằng',
-    action: 'vừa thêm bình luận mới vào',
-    target: 'Task #7: Phát triển API Xác thực JWT',
-    time: '5 giờ trước',
-    type: 'comment',
-  },
-  {
-    id: 6,
-    actor: 'Hệ Thống HRM',
-    action: 'đã tự động tổng hợp bảng lương tháng',
-    target: 'Kỳ lương tháng 10/2026 cho 22 nhân viên',
-    time: 'Hôm qua',
-    type: 'payroll',
-  },
-];
+const STATUS_META: Record<TaskStatus, { label: string; color: string; bg: string }> = {
+  Todo: { label: 'Cần làm', color: '#475569', bg: '#F1F5F9' },
+  InProgress: { label: 'Đang làm', color: '#0F766E', bg: '#ECFDF5' },
+  Review: { label: 'Chờ duyệt', color: '#B45309', bg: '#FFFBEB' },
+  Done: { label: 'Hoàn thành', color: '#059669', bg: '#ECFDF5' },
+};
 
-export const ActivityFeed: React.FC = () => {
+function formatDeadline(deadline?: string): string {
+  if (!deadline) return 'Không có hạn';
+  const d = new Date(deadline);
+  if (isNaN(d.getTime())) return 'Không có hạn';
+  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+export const ActivityFeed: React.FC<ActivityFeedProps> = ({ tasks }) => {
+  const recent = [...tasks]
+    .sort((a, b) => {
+      const ta = new Date(a.ngayCapNhat || a.ngayTao || 0).getTime();
+      const tb = new Date(b.ngayCapNhat || b.ngayTao || 0).getTime();
+      if (tb !== ta) return tb - ta;
+      return b.maTask - a.maTask;
+    })
+    .slice(0, 8);
+
   return (
     <Card
       style={{
@@ -96,7 +58,7 @@ export const ActivityFeed: React.FC = () => {
             Hoạt Động Gần Đây (Activity Feed)
           </div>
           <Text type="secondary" style={{ fontSize: 12.5 }}>
-            Dòng sự kiện cập nhật thời gian thực trên hệ thống
+            Các công việc được cập nhật mới nhất trên hệ thống
           </Text>
         </div>
 
@@ -118,59 +80,99 @@ export const ActivityFeed: React.FC = () => {
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {MOCK_ACTIVITIES.map((act) => {
-          const avatar = getAvatarStyle(act.actor);
-          return (
-            <div
-              key={act.id}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 12,
-                paddingBottom: 12,
-                borderBottom: act.id !== MOCK_ACTIVITIES.length ? '1px solid #F1F5F9' : 'none',
-              }}
-            >
-              <Avatar
-                size={34}
+      {recent.length === 0 ? (
+        <Empty description="Chưa có hoạt động nào" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {recent.map((task, index) => {
+            const actor = task.tenNV_PhuTrach || task.tenNV_Giao || 'Hệ Thống';
+            const avatar = getAvatarStyle(actor);
+            const status = STATUS_META[task.trangThai] || STATUS_META.Todo;
+            const isDone = task.trangThai === 'Done';
+            return (
+              <div
+                key={task.maTask}
                 style={{
-                  backgroundColor: avatar.bg,
-                  color: avatar.text,
-                  border: `1px solid ${avatar.border}`,
-                  fontSize: 12,
-                  fontWeight: 700,
-                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 12,
+                  paddingBottom: 12,
+                  borderBottom: index !== recent.length - 1 ? '1px solid #F1F5F9' : 'none',
                 }}
               >
-                {getInitials(act.actor)}
-              </Avatar>
-
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12.5, color: '#334155', lineHeight: 1.4 }}>
-                  <strong style={{ color: '#0F172A' }}>{act.actor}</strong> {act.action}
-                </div>
-                <div
+                <Avatar
+                  size={34}
                   style={{
+                    backgroundColor: avatar.bg,
+                    color: avatar.text,
+                    border: `1px solid ${avatar.border}`,
                     fontSize: 12,
-                    fontWeight: 500,
-                    color: '#4F46E5',
-                    marginTop: 2,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
+                    fontWeight: 700,
+                    flexShrink: 0,
                   }}
                 >
-                  {act.target}
-                </div>
-                <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
-                  {act.time}
+                  {getInitials(actor)}
+                </Avatar>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12.5, color: '#334155', lineHeight: 1.4 }}>
+                    <strong style={{ color: '#0F172A' }}>{actor}</strong>{' '}
+                    {isDone ? 'đã hoàn thành' : 'vừa cập nhật'}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: '#0F766E',
+                      marginTop: 2,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                    title={task.tieuDe}
+                  >
+                    Task #{task.maTask}: {task.tieuDe}
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      marginTop: 6,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <Tag
+                      icon={isDone ? <CheckCircleOutlined /> : <SyncOutlined />}
+                      style={{
+                        margin: 0,
+                        fontSize: 11,
+                        borderRadius: 8,
+                        border: 'none',
+                        color: status.color,
+                        backgroundColor: status.bg,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {status.label}
+                    </Tag>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: task.laQuaHan ? '#DC2626' : '#94A3B8',
+                        fontWeight: task.laQuaHan ? 600 : 400,
+                      }}
+                    >
+                      {task.laQuaHan ? 'Quá hạn: ' : 'Hạn: '}
+                      {formatDeadline(task.deadline)}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </Card>
   );
 };

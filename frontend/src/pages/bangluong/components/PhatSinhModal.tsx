@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Modal, Form, Select, InputNumber, Input, message, Row, Col, Typography, Divider } from 'antd';
 import { DollarOutlined, UserOutlined, TagOutlined, FileTextOutlined } from '@ant-design/icons';
 import { Dayjs } from 'dayjs';
@@ -85,7 +85,7 @@ export const PhatSinhModal: React.FC<PhatSinhModalProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#4F46E5',
+              color: '#0F766E',
             }}
           >
             <DollarOutlined style={{ fontSize: 16 }} />
@@ -109,7 +109,7 @@ export const PhatSinhModal: React.FC<PhatSinhModalProps> = ({
       width={520}
       okButtonProps={{
         style: {
-          backgroundColor: '#4F46E5',
+          backgroundColor: '#0F766E',
           borderRadius: 8,
           height: 38,
           fontWeight: 600,

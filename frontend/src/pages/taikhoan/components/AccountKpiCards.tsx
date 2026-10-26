@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Row, Col, Card } from 'antd';
 import {
   TeamOutlined,
@@ -21,10 +21,10 @@ export const AccountKpiCards: React.FC<AccountKpiCardsProps> = ({ accounts, load
   const adminHrPct = total > 0 ? Math.round((adminHrCount / total) * 100) : 0;
 
   const cardStyle: React.CSSProperties = {
-    borderRadius: 14,
+    borderRadius: 16,
     background: '#FFFFFF',
     border: '1px solid #F1F5F9',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
     overflow: 'hidden',
   };
 
@@ -47,8 +47,8 @@ export const AccountKpiCards: React.FC<AccountKpiCardsProps> = ({ accounts, load
                 width: 38,
                 height: 38,
                 borderRadius: 10,
-                background: 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
-                color: '#4F46E5',
+                background: 'linear-gradient(135deg, #CCFBF1 0%, #99F6E4 100%)',
+                color: '#0F766E',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -140,7 +140,7 @@ export const AccountKpiCards: React.FC<AccountKpiCardsProps> = ({ accounts, load
               <div style={{ fontSize: 11.5, fontWeight: 650, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 ADMIN & HR
               </div>
-              <div style={{ fontSize: 26, fontWeight: 750, color: '#8B5CF6', marginTop: 4, lineHeight: 1 }}>
+              <div style={{ fontSize: 26, fontWeight: 750, color: '#0F766E', marginTop: 4, lineHeight: 1 }}>
                 {adminHrCount}
               </div>
             </div>
@@ -149,8 +149,8 @@ export const AccountKpiCards: React.FC<AccountKpiCardsProps> = ({ accounts, load
                 width: 38,
                 height: 38,
                 borderRadius: 10,
-                background: 'linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)',
-                color: '#8B5CF6',
+                background: 'linear-gradient(135deg, #CCFBF1 0%, #99F6E4 100%)',
+                color: '#0F766E',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -160,7 +160,7 @@ export const AccountKpiCards: React.FC<AccountKpiCardsProps> = ({ accounts, load
               <SafetyCertificateOutlined />
             </div>
           </div>
-          <div style={{ fontSize: 11.5, color: '#7C3AED', marginTop: 8, fontWeight: 500 }}>
+          <div style={{ fontSize: 11.5, color: '#0F766E', marginTop: 8, fontWeight: 500 }}>
             Chiếm {adminHrPct}% tổng quyền quản trị
           </div>
         </Card>

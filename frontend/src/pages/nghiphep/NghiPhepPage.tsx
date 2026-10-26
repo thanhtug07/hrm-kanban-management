@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table,
   Button,
@@ -28,6 +28,7 @@ import {
   CloseCircleOutlined,
   CalendarOutlined,
 } from '@ant-design/icons';
+import { PageHeader } from '@/components/PageHeader';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import { useAuthStore } from '@/stores/authStore';
@@ -294,7 +295,7 @@ export const NghiPhepPage: React.FC = () => {
             <div style={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
               {dStart.format('DD/MM/YYYY')} → {dEnd.format('DD/MM/YYYY')}
             </div>
-            <div style={{ fontSize: 11.5, color: '#4F46E5', fontWeight: 600, marginTop: 2 }}>
+            <div style={{ fontSize: 11.5, color: '#0F766E', fontWeight: 600, marginTop: 2 }}>
               Tổng cộng {totalDays} ngày nghỉ
             </div>
           </div>
@@ -341,7 +342,7 @@ export const NghiPhepPage: React.FC = () => {
             <Button
               type="text"
               size="small"
-              icon={<EyeOutlined style={{ color: '#4F46E5', fontSize: 14 }} />}
+              icon={<EyeOutlined style={{ color: '#0F766E', fontSize: 14 }} />}
               onClick={() => {
                 setSelectedLeave(record);
                 setDrawerOpen(true);
@@ -392,65 +393,43 @@ export const NghiPhepPage: React.FC = () => {
   return (
     <div style={{ maxWidth: 1400, margin: '0 auto', paddingBottom: 24 }}>
       {/* 1. Header Trang Chuẩn SaaS */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <Title
-            level={3}
-            style={{
-              margin: 0,
-              fontSize: 24,
-              fontWeight: 700,
-              color: '#1E293B',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Trung Tâm Phê Duyệt Nghỉ Phép
-          </Title>
-          <Text type="secondary" style={{ fontSize: 13, color: '#64748B', marginTop: 4, display: 'block' }}>
-            Quản lý và theo dõi lịch sử nghỉ phép của nhân sự.
-          </Text>
-        </div>
+      <PageHeader
+        title="Trung Tâm Phê Duyệt Nghỉ Phép"
+        subtitle="Quản lý và theo dõi lịch sử nghỉ phép của nhân sự."
+        icon={<CalendarOutlined />}
+        extra={
+          <>
+            <Button
+              icon={<ReloadOutlined />}
+              shape="round"
+              onClick={fetchLeaves}
+              loading={loading}
+              style={{ border: '1px solid #D1D5DB', fontSize: 13, height: 36 }}
+            >
+              Làm mới
+            </Button>
 
-        <Space size={10}>
-          <Button
-            icon={<ReloadOutlined />}
-            shape="round"
-            onClick={fetchLeaves}
-            loading={loading}
-            style={{ border: '1px solid #D1D5DB', fontSize: 13, height: 36 }}
-          >
-            Làm mới
-          </Button>
-
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            shape="round"
-            onClick={() => setCreateModalOpen(true)}
-            style={{
-              backgroundColor: '#4F46E5', // Indigo Accent
-              borderColor: '#4F46E5',
-              fontWeight: 500,
-              fontSize: 13,
-              height: 36,
-              padding: '0 18px',
-              borderRadius: 8,
-              boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)',
-            }}
-          >
-            Tạo đơn nghỉ phép
-          </Button>
-        </Space>
-      </div>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              shape="round"
+              onClick={() => setCreateModalOpen(true)}
+              style={{
+                backgroundColor: '#0F766E',
+                borderColor: '#0F766E',
+                fontWeight: 500,
+                fontSize: 13,
+                height: 36,
+                padding: '0 18px',
+                borderRadius: 8,
+                boxShadow: '0 2px 4px rgba(15, 118, 110, 0.2)',
+              }}
+            >
+              Tạo đơn nghỉ phép
+            </Button>
+          </>
+        }
+      />
 
       {/* 2. Tabs Logic Theo Role */}
       <Tabs

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, message, Alert } from 'antd';
 import { UserOutlined, LockOutlined, TeamOutlined } from '@ant-design/icons';
 import { nhanVienApi } from '@/api/nhanVienApi';
@@ -108,7 +108,7 @@ export const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
       width={520}
       destroyOnClose
       okButtonProps={{
-        style: { backgroundColor: '#4F46E5', borderColor: '#4F46E5', borderRadius: 8 },
+        style: { backgroundColor: '#0F766E', borderColor: '#0F766E', borderRadius: 8 },
       }}
       cancelButtonProps={{ style: { borderRadius: 8 } }}
     >

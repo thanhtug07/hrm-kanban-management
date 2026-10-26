@@ -13,7 +13,7 @@ import {
 
 const { Text } = Typography;
 
-// Mock 6 tháng gần nhất cho xu hướng công việc
+// ponytail: mock, thay bằng API khi có endpoint thống kê theo tháng
 const MOCK_TREND_DATA = [
   { month: 'T5/2026', taoMoi: 14, hoanThanh: 10 },
   { month: 'T6/2026', taoMoi: 18, hoanThanh: 15 },
@@ -43,8 +43,8 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label })
         }}
       >
         <div style={{ fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>{label}</div>
-        <div style={{ color: '#4F46E5', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4F46E5' }} />
+        <div style={{ color: '#0F766E', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#0F766E' }} />
           <span>Tạo mới: <strong>{payload[0]?.value}</strong> tasks</span>
         </div>
         <div style={{ color: '#10B981', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
@@ -88,7 +88,7 @@ export const TaskTrendChart: React.FC = () => {
 
         <Space size={14}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 3, background: '#4F46E5' }} />
+            <span style={{ width: 10, height: 10, borderRadius: 3, background: '#0F766E' }} />
             <span style={{ color: '#64748B' }}>Tạo mới</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
@@ -103,8 +103,8 @@ export const TaskTrendChart: React.FC = () => {
           <AreaChart data={MOCK_TREND_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorTaoMoi" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
+                <stop offset="5%" stopColor="#0F766E" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="#0F766E" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorHoanThanh" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
@@ -127,7 +127,7 @@ export const TaskTrendChart: React.FC = () => {
             <Area
               type="monotone"
               dataKey="taoMoi"
-              stroke="#4F46E5"
+              stroke="#0F766E"
               strokeWidth={2.5}
               fillOpacity={1}
               fill="url(#colorTaoMoi)"

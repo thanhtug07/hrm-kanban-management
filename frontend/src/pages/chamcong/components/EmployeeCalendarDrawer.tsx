@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Drawer,
   Calendar,
@@ -417,7 +417,7 @@ export const EmployeeCalendarDrawer: React.FC<EmployeeCalendarDrawerProps> = ({
             bordered={false}
             style={{
               borderRadius: 16,
-              background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)',
+              background: 'linear-gradient(135deg, #0F766E 0%, #0D9488 50%, #14B8A6 100%)',
               color: '#FFFFFF',
               boxShadow: '0 10px 25px -5px rgba(49, 46, 129, 0.3)',
             }}

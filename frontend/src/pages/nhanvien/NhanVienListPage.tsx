@@ -9,8 +9,8 @@ import {
   Tag,
   Popconfirm,
   message,
-  Typography,
   Avatar,
+  Empty,
 } from 'antd';
 import {
   PlusOutlined,
@@ -18,6 +18,7 @@ import {
   EditOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { NhanVienDto, NhanVienFilterDto } from '@/types/nhanVien';
@@ -25,9 +26,8 @@ import { nhanVienApi } from '@/api/nhanVienApi';
 import { useAuthStore } from '@/stores/authStore';
 import { formatDate } from '@/utils/format';
 import { getInitials, getAvatarStyle } from '@/utils/avatar';
+import { PageHeader } from '@/components/PageHeader';
 import NhanVienFormModal, { PHONG_BAN_OPTIONS, TRANG_THAI_OPTIONS } from './NhanVienFormModal';
-
-const { Title, Text } = Typography;
 
 export const NhanVienListPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -202,7 +202,7 @@ export const NhanVienListPage: React.FC = () => {
         <Space size="small">
           <Button
             type="text"
-            icon={<EditOutlined style={{ color: '#2563eb' }} />}
+            icon={<EditOutlined style={{ color: '#0F766E' }} />}
             onClick={() => {
               setEditingItem(record);
               setModalOpen(true);
@@ -225,46 +225,55 @@ export const NhanVienListPage: React.FC = () => {
   ];
 
   return (
-    <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <Title level={4} style={{ margin: 0, fontWeight: 700, color: '#0f172a' }}>
-            Quản Lý Nhân Viên
-          </Title>
-        </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            setEditingItem(null);
-            setModalOpen(true);
-          }}
-        >
-          Thêm Nhân Viên Mới
-        </Button>
-      </div>
+    <div style={{ maxWidth: 1400, margin: '0 auto', paddingBottom: 24 }}>
+      <PageHeader
+        title="Quản Lý Nhân Viên"
+        subtitle="Danh sách, thông tin và trạng thái nhân sự toàn công ty."
+        icon={<TeamOutlined />}
+        extra={
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            shape="round"
+            onClick={() => {
+              setEditingItem(null);
+              setModalOpen(true);
+            }}
+            style={{
+              backgroundColor: '#0F766E',
+              borderColor: '#0F766E',
+              fontWeight: 500,
+              fontSize: 13,
+              height: 36,
+              padding: '0 18px',
+              boxShadow: '0 2px 4px rgba(15, 118, 110, 0.2)',
+            }}
+          >
+            Thêm Nhân Viên Mới
+          </Button>
+        }
+      />
 
       <div
         style={{
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: 8,
-          padding: '12px 16px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
           marginBottom: 16,
+          padding: '12px 16px',
+          background: '#FFFFFF',
+          borderRadius: 16,
+          border: '1px solid #F1F5F9',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
         }}
       >
         <Space wrap size="middle">
           <Input
             placeholder="Tìm theo tên, CCCD, SĐT..."
             prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-            style={{ width: 260 }}
+            style={{ width: 260, borderRadius: 8 }}
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
             allowClear
@@ -276,6 +285,7 @@ export const NhanVienListPage: React.FC = () => {
             value={filters.maPB}
             onChange={(val) => setFilters({ ...filters, maPB: val, page: 1 })}
             options={PHONG_BAN_OPTIONS}
+            dropdownStyle={{ borderRadius: 8 }}
           />
           <Select
             placeholder="Lọc Trạng thái"
@@ -284,21 +294,41 @@ export const NhanVienListPage: React.FC = () => {
             value={filters.trangThai}
             onChange={(val) => setFilters({ ...filters, trangThai: val, page: 1 })}
             options={TRANG_THAI_OPTIONS}
+            dropdownStyle={{ borderRadius: 8 }}
           />
-          <Button icon={<ReloadOutlined />} onClick={() => fetchData()}>
+          <Button icon={<ReloadOutlined />} onClick={() => fetchData()} loading={loading}>
             Làm mới
           </Button>
         </Space>
+
+        <span style={{ fontSize: 12.5, color: '#64748B' }}>
+          Tổng số: <strong style={{ color: '#0F172A' }}>{totalCount}</strong> nhân sự
+        </span>
       </div>
 
-      <Card style={{ borderRadius: 10 }} styles={{ body: { padding: '8px 12px' } }}>
+      <Card
+        style={{
+          borderRadius: 16,
+          border: '1px solid #F1F5F9',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+        }}
+        styles={{ body: { padding: '8px 12px' } }}
+      >
         <Table
           rowKey="maNV"
           columns={columns}
           dataSource={data}
           loading={loading}
           scroll={{ x: 1100, y: 'calc(100vh - 390px)' }}
-          locale={{ emptyText: 'Không có dữ liệu nhân viên nào phù hợp.' }}
+          locale={{
+            emptyText: (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="Chưa có nhân viên nào phù hợp."
+                style={{ padding: '36px 0' }}
+              />
+            ),
+          }}
           pagination={{
             current: filters.page,
             pageSize: filters.pageSize,

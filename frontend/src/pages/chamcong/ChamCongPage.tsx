@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Card,
   Row,
@@ -34,6 +34,7 @@ import {
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import type { ColumnsType } from 'antd/es/table';
+import PageHeader from '@/components/PageHeader';
 import { useAuthStore } from '@/stores/authStore';
 import { chamCongApi } from '@/api/chamCongApi';
 import { nhanVienApi } from '@/api/nhanVienApi';
@@ -524,7 +525,7 @@ export const ChamCongPage: React.FC = () => {
           <Button
             type="text"
             shape="circle"
-            icon={<EditOutlined style={{ color: '#4F46E5', fontSize: 15 }} />}
+            icon={<EditOutlined style={{ color: '#0F766E', fontSize: 15 }} />}
             onClick={() => handleOpenEdit(record)}
           />
         </Tooltip>
@@ -592,7 +593,7 @@ export const ChamCongPage: React.FC = () => {
                 }}
               >
                 <span>Chuyên cần:</span>
-                <span style={{ color: '#4F46E5' }}>
+                <span style={{ color: '#0F766E' }}>
                   {stats.tong > 0 ? Math.round((stats.duCong / stats.tong) * 100) : 0}%
                 </span>
               </div>
@@ -613,7 +614,7 @@ export const ChamCongPage: React.FC = () => {
                 {getInitials(emp.hoTen)}
               </Avatar>
               <div>
-                <div style={{ fontWeight: 600, color: '#1E1B4B', fontSize: 13 }}>
+                <div style={{ fontWeight: 600, color: '#0F172A', fontSize: 13 }}>
                   {emp.hoTen}
                 </div>
                 <div style={{ color: '#64748B', fontSize: 11, fontFamily: 'monospace' }}>
@@ -644,13 +645,12 @@ export const ChamCongPage: React.FC = () => {
       width: 160,
       render: (val: string) => (
         <Tag
-          color="geekblue"
           style={{
             borderRadius: 6,
             fontWeight: 500,
-            backgroundColor: '#EEF2FF',
-            borderColor: '#C7D2FE',
-            color: '#4338CA',
+            backgroundColor: '#F0FDFA',
+            borderColor: '#99F6E4',
+            color: '#0F766E',
           }}
         >
           {val || 'Chưa xếp phòng'}
@@ -763,7 +763,7 @@ export const ChamCongPage: React.FC = () => {
           className="btn-view-calendar"
           icon={<CalendarOutlined />}
           style={{
-            backgroundColor: '#4F46E5',
+            backgroundColor: '#0F766E',
             borderRadius: 6,
             fontWeight: 500,
             fontSize: 12,
@@ -783,54 +783,41 @@ export const ChamCongPage: React.FC = () => {
   return (
     <div style={{ minHeight: '100%', paddingBottom: 32 }}>
       {/* ===================== KHU VỰC HEADER ===================== */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <Title level={3} style={{ margin: 0, fontWeight: 700, color: '#0F172A' }}>
-            {isHrOrAdmin
-              ? 'Quản Lý Điểm Danh & Chấm Công'
-              : 'Điểm Danh & Chấm Công Cá Nhân'}
-          </Title>
-          <Text style={{ color: '#64748B', fontSize: 13 }}>
-            {isHrOrAdmin
-              ? 'Hệ thống tự động đồng bộ từ thiết bị chấm công thông minh, quản lý bảng công và kiểm soát kỷ luật lao động.'
-              : 'Theo dõi thời gian làm việc hàng ngày, thực hiện check-in / check-out trực tiếp trên hệ thống.'}
-          </Text>
-        </div>
-
-        <Space size={12}>
-          <DatePicker
-            picker="month"
-            value={selectedMonth}
-            onChange={(val) => val && setSelectedMonth(val)}
-            format="MM/YYYY"
-            allowClear={false}
-            style={{ borderRadius: 8, height: 38 }}
-          />
-          <Button
-            icon={<ReloadOutlined />}
-            style={{ borderRadius: 8, height: 38 }}
-            onClick={() => {
-              if (isHrOrAdmin) {
-                fetchCompanyList();
-                fetchEmployees();
-              } else {
-                fetchMyHistory();
-              }
-            }}
-          >
-            Làm mới
-          </Button>
-        </Space>
-      </div>
+      <PageHeader
+        title={isHrOrAdmin ? 'Quản Lý Điểm Danh & Chấm Công' : 'Điểm Danh & Chấm Công Cá Nhân'}
+        subtitle={
+          isHrOrAdmin
+            ? 'Hệ thống tự động đồng bộ từ thiết bị chấm công thông minh, quản lý bảng công và kiểm soát kỷ luật lao động.'
+            : 'Theo dõi thời gian làm việc hàng ngày, thực hiện check-in / check-out trực tiếp trên hệ thống.'
+        }
+        icon={<ClockCircleOutlined />}
+        extra={
+          <>
+            <DatePicker
+              picker="month"
+              value={selectedMonth}
+              onChange={(val) => val && setSelectedMonth(val)}
+              format="MM/YYYY"
+              allowClear={false}
+              style={{ borderRadius: 8, height: 38 }}
+            />
+            <Button
+              icon={<ReloadOutlined />}
+              style={{ borderRadius: 8, height: 38 }}
+              onClick={() => {
+                if (isHrOrAdmin) {
+                  fetchCompanyList();
+                  fetchEmployees();
+                } else {
+                  fetchMyHistory();
+                }
+              }}
+            >
+              Làm mới
+            </Button>
+          </>
+        }
+      />
 
       {/* ===================== PHÂN BIỆT THEO ROLE ===================== */}
 
@@ -842,16 +829,16 @@ export const ChamCongPage: React.FC = () => {
             style={{
               marginBottom: 20,
               borderRadius: 16,
-              background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)',
+              background: 'linear-gradient(135deg, #0F766E 0%, #115E59 55%, #0B4F4A 100%)',
               color: '#FFFFFF',
-              boxShadow: '0 10px 25px -5px rgba(49, 46, 129, 0.25)',
+              boxShadow: '0 10px 25px -5px rgba(15, 118, 110, 0.28)',
             }}
             bodyStyle={{ padding: '24px 28px' }}
           >
             <Row gutter={24} align="middle">
               <Col xs={24} md={12}>
                 <div>
-                  <Text style={{ color: '#C7D2FE', fontSize: 14 }}>
+                  <Text style={{ color: '#99F6E4', fontSize: 14 }}>
                     Hôm nay là: {currentTime.format('dddd, DD/MM/YYYY')}
                   </Text>
                   <div
@@ -916,18 +903,18 @@ export const ChamCongPage: React.FC = () => {
                   }}
                   bodyStyle={{ padding: '16px 20px' }}
                 >
-                  <div style={{ color: '#E0E7FF', fontWeight: 600, marginBottom: 10 }}>
+                  <div style={{ color: '#CCFBF1', fontWeight: 600, marginBottom: 10 }}>
                     Trạng thái chấm công hôm nay
                   </div>
                   <Space direction="vertical" style={{ width: '100%' }} size={6}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#C7D2FE' }}>Giờ vào ca:</span>
+                      <span style={{ color: '#99F6E4' }}>Giờ vào ca:</span>
                       <span style={{ color: '#FFFFFF', fontWeight: 600, fontFamily: 'monospace' }}>
                         {formatCleanTime(todayRecord?.gioVao)}
                       </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#C7D2FE' }}>Giờ ra về:</span>
+                      <span style={{ color: '#99F6E4' }}>Giờ ra về:</span>
                       <span style={{ color: '#FFFFFF', fontWeight: 600, fontFamily: 'monospace' }}>
                         {formatCleanTime(todayRecord?.gioRa)}
                       </span>
@@ -940,7 +927,7 @@ export const ChamCongPage: React.FC = () => {
                         marginTop: 4,
                       }}
                     >
-                      <span style={{ color: '#C7D2FE' }}>Trạng thái:</span>
+                      <span style={{ color: '#99F6E4' }}>Trạng thái:</span>
                       {todayRecord ? (
                         renderStatusTag(todayRecord.trangThai, todayRecord.gioVao)
                       ) : (

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { Card, Row, Col, Descriptions, Form, Input, Button, Typography, Tag, message } from 'antd';
-import { KeyOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Descriptions, Form, Input, Button, Tag, message, Avatar, Divider, Typography } from 'antd';
+import { KeyOutlined, UserOutlined, MailOutlined, IdcardOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/stores/authStore';
 import { authApi } from '@/api/authApi';
+import { getInitials, getAvatarStyle } from '@/utils/avatar';
+import PageHeader from '@/components/PageHeader';
 
-const { Title } = Typography;
+const { Text } = Typography;
 
 export const ProfilePage: React.FC = () => {
   const { user } = useAuthStore();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const avatarStyle = getAvatarStyle(user?.hoTen);
 
   const handleChangePassword = async () => {
     try {
@@ -42,63 +45,92 @@ export const ProfilePage: React.FC = () => {
   const getRoleTag = (role?: string) => {
     switch (role) {
       case 'Admin':
-        return <Tag color="red">Quản trị viên (Admin)</Tag>;
+        return <Tag color="red" style={{ borderRadius: 8, fontWeight: 600 }}>Quản trị viên</Tag>;
       case 'HR':
-        return <Tag color="blue">Nhân sự (HR)</Tag>;
+        return <Tag color="blue" style={{ borderRadius: 8, fontWeight: 600 }}>Nhân sự (HR)</Tag>;
       case 'NhanVien':
-        return <Tag color="green">Nhân viên</Tag>;
+        return <Tag color="green" style={{ borderRadius: 8, fontWeight: 600 }}>Nhân viên</Tag>;
       default:
-        return <Tag>{role}</Tag>;
+        return <Tag style={{ borderRadius: 8 }}>{role}</Tag>;
     }
   };
 
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 16 }}>
-        Thông Tin Hồ Sơ & Đổi Mật Khẩu
-      </Title>
+      <PageHeader
+        title="Trang Cá Nhân"
+        subtitle="Thông tin tài khoản và bảo mật mật khẩu"
+        icon={<UserOutlined />}
+      />
 
       <Row gutter={[16, 16]}>
-        {/* User Info Card */}
+        {/* Thẻ hồ sơ */}
         <Col xs={24} lg={14}>
-          <Card
-            title={
-              <span>
-                <UserOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-                Thông Tin Tài Khoản
-              </span>
-            }
-            style={{ borderRadius: 8, height: '100%' }}
-          >
-            <Descriptions column={1} bordered size="middle">
-              <Descriptions.Item label="Mã nhân viên">
-                <strong>{user?.maNV || 'Không áp dụng'}</strong>
-              </Descriptions.Item>
-              <Descriptions.Item label="Họ và tên">
-                <strong>{user?.hoTen}</strong>
-              </Descriptions.Item>
-              <Descriptions.Item label="Tên đăng nhập">{user?.tenDangNhap}</Descriptions.Item>
-              <Descriptions.Item label="Vai trò hệ thống">
+          <Card style={{ borderRadius: 16, height: '100%', border: '1px solid #F1F5F9' }}>
+            {/* Banner + avatar */}
+            <div
+              style={{
+                height: 84,
+                borderRadius: 12,
+                background: 'linear-gradient(135deg,#0F766E 0%,#14B8A6 55%,#5EEAD4 100%)',
+                marginBottom: 44,
+                position: 'relative',
+              }}
+            >
+              <Avatar
+                size={72}
+                style={{
+                  position: 'absolute',
+                  left: 24,
+                  bottom: -36,
+                  backgroundColor: avatarStyle.bg,
+                  color: avatarStyle.text,
+                  border: '4px solid #fff',
+                  fontWeight: 800,
+                  fontSize: 26,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                }}
+              >
+                {getInitials(user?.hoTen)}
+              </Avatar>
+            </div>
+
+            <div style={{ padding: '0 4px 4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 750, color: '#0F172A' }}>
+                  {user?.hoTen || user?.tenDangNhap}
+                </h2>
                 {getRoleTag(user?.vaiTro)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Phòng ban">{user?.tenPB || '---'}</Descriptions.Item>
-              <Descriptions.Item label="Chức vụ">{user?.tenCV || '---'}</Descriptions.Item>
-              <Descriptions.Item label="Email liên hệ">{user?.email || '---'}</Descriptions.Item>
-              <Descriptions.Item label="Số điện thoại">{user?.sdt || '---'}</Descriptions.Item>
-            </Descriptions>
+              </div>
+              <Text style={{ color: '#64748B', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                <MailOutlined /> {user?.email || 'chưa cập nhật email'}
+              </Text>
+
+              <Divider style={{ margin: '16px 0' }} />
+
+              <Descriptions column={1} size="middle">
+                <Descriptions.Item label={<span><IdcardOutlined /> Mã nhân viên</span>}>
+                  <strong>{user?.maNV || '—'}</strong>
+                </Descriptions.Item>
+                <Descriptions.Item label="Tên đăng nhập">{user?.tenDangNhap}</Descriptions.Item>
+                <Descriptions.Item label="Phòng ban">{user?.tenPB || '—'}</Descriptions.Item>
+                <Descriptions.Item label="Chức vụ">{user?.tenCV || '—'}</Descriptions.Item>
+                <Descriptions.Item label="Số điện thoại">{user?.sdt || '—'}</Descriptions.Item>
+                <Descriptions.Item label="Địa chỉ">—</Descriptions.Item>
+              </Descriptions>
+            </div>
           </Card>
         </Col>
 
-        {/* Change Password Card */}
+        {/* Đổi mật khẩu */}
         <Col xs={24} lg={10}>
           <Card
             title={
-              <span>
-                <KeyOutlined style={{ marginRight: 8, color: '#fa8c16' }} />
-                Đổi Mật Khẩu
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <KeyOutlined style={{ color: '#0F766E' }} /> Đổi Mật Khẩu
               </span>
             }
-            style={{ borderRadius: 8, height: '100%' }}
+            style={{ borderRadius: 16, height: '100%', border: '1px solid #F1F5F9' }}
           >
             <Form form={form} layout="vertical" onFinish={handleChangePassword}>
               <Form.Item
@@ -128,14 +160,8 @@ export const ProfilePage: React.FC = () => {
                 <Input.Password placeholder="Nhập lại mật khẩu mới..." />
               </Form.Item>
 
-              <Form.Item style={{ marginTop: 20 }}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  icon={<KeyOutlined />}
-                  loading={loading}
-                  block
-                >
+              <Form.Item style={{ marginTop: 20, marginBottom: 0 }}>
+                <Button type="primary" htmlType="submit" icon={<KeyOutlined />} loading={loading} block size="large">
                   Cập Nhật Mật Khẩu
                 </Button>
               </Form.Item>

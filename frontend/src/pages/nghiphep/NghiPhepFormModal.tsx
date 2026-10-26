@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Modal, Form, Select, DatePicker, Input, message } from 'antd';
 import { CreateNghiPhepDto } from '@/types/nghiPhep';
 import { nghiPhepApi } from '@/api/nghiPhepApi';
@@ -60,7 +60,7 @@ export const NghiPhepFormModal: React.FC<NghiPhepFormModalProps> = ({
       confirmLoading={loading}
       destroyOnClose
       okButtonProps={{
-        style: { backgroundColor: '#4F46E5', borderColor: '#4F46E5', borderRadius: 8 },
+        style: { backgroundColor: '#0F766E', borderColor: '#0F766E', borderRadius: 8 },
       }}
       cancelButtonProps={{ style: { borderRadius: 8 } }}
     >

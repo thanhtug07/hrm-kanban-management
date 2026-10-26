@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, message, Alert } from 'antd';
 import { UserOutlined, LockOutlined, EditOutlined } from '@ant-design/icons';
 import { nhanVienApi } from '@/api/nhanVienApi';
@@ -83,7 +83,7 @@ export const EditAccountModal: React.FC<EditAccountModalProps> = ({
       open={open}
       title={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <EditOutlined style={{ color: '#4F46E5' }} />
+          <EditOutlined style={{ color: '#0F766E' }} />
           <span style={{ fontWeight: 700, fontSize: 16 }}>
             Chỉnh Sửa Tài Khoản: {account?.tenDangNhap}
           </span>
@@ -97,7 +97,7 @@ export const EditAccountModal: React.FC<EditAccountModalProps> = ({
       width={520}
       destroyOnClose
       okButtonProps={{
-        style: { backgroundColor: '#4F46E5', borderColor: '#4F46E5', borderRadius: 8 },
+        style: { backgroundColor: '#0F766E', borderColor: '#0F766E', borderRadius: 8 },
       }}
       cancelButtonProps={{ style: { borderRadius: 8 } }}
     >

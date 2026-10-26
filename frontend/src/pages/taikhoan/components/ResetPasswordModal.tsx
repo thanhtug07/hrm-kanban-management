@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Modal, Typography, message, Alert } from 'antd';
 import { KeyOutlined } from '@ant-design/icons';
 import { taiKhoanApi } from '@/api/taiKhoanApi';
@@ -77,7 +77,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
         <Alert
           message={
             <span>
-              Mật khẩu mới sau khi đặt lại: <strong style={{ color: '#4F46E5' }}>Hrm@123456</strong>
+              Mật khẩu mới sau khi đặt lại: <strong style={{ color: '#0F766E' }}>Hrm@123456</strong>
             </span>
           }
           type="warning"

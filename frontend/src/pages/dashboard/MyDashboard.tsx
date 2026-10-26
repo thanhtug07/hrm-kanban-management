@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, Typography, Space, message, Tag } from 'antd';
+import { Card, Row, Col, Statistic, Tag, message, Skeleton, Empty, Button } from 'antd';
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -7,108 +7,156 @@ import {
   DollarOutlined,
   ExclamationCircleOutlined,
   ScheduleOutlined,
+  DashboardOutlined,
+  UnorderedListOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { dashboardApi } from '@/api/dashboardApi';
 import { DashboardCaNhanDto } from '@/types/dashboard';
 import { formatCurrency } from '@/utils/format';
+import PageHeader from '@/components/PageHeader';
 
-const { Title, Text } = Typography;
+interface TaskStat {
+  key: string;
+  label: string;
+  value: number;
+  color: string;
+  bg: string;
+  icon: React.ReactNode;
+}
 
 export const MyDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState<DashboardCaNhanDto | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await dashboardApi.getMyDashboard();
+      if (res.success && res.data) setData(res.data);
+      else message.error(res?.message || 'Không thể tải dữ liệu Dashboard cá nhân.');
+    } catch {
+      message.error('Không thể tải dữ liệu Dashboard cá nhân.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const res = await dashboardApi.getMyDashboard();
-        if (res.success && res.data) {
-          setData(res.data);
-        }
-      } catch {
-        message.error('Không thể tải dữ liệu Dashboard cá nhân.');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, []);
 
+  const t = data?.taskCuaToi;
+  const taskStats: TaskStat[] = [
+    { key: 'todo', label: 'Chờ làm', value: t?.todo || 0, color: '#64748B', bg: 'linear-gradient(135deg,#F1F5F9,#E2E8F0)', icon: <UnorderedListOutlined /> },
+    { key: 'inProgress', label: 'Đang làm', value: t?.inProgress || 0, color: '#2563EB', bg: 'linear-gradient(135deg,#EFF6FF,#DBEAFE)', icon: <ClockCircleOutlined /> },
+    { key: 'done', label: 'Đã xong', value: t?.done || 0, color: '#16A34A', bg: 'linear-gradient(135deg,#F0FDF4,#DCFCE7)', icon: <CheckCircleOutlined /> },
+    { key: 'quaHan', label: 'Quá hạn', value: t?.quaHan || 0, color: '#DC2626', bg: 'linear-gradient(135deg,#FEF2F2,#FEE2E2)', icon: <ExclamationCircleOutlined /> },
+  ];
+
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 16 }}>
-        Bảng Điều Khiển Cá Nhân
-      </Title>
+      <PageHeader
+        title="Bảng Điều Khiển Cá Nhân"
+        subtitle="Tổng quan nhiệm vụ, chấm công và chế độ của bạn"
+        icon={<DashboardOutlined />}
+        extra={
+          <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading}>
+            Làm mới
+          </Button>
+        }
+      />
 
-      {/* Kanban Task stats */}
-      <Card title="Nhiệm Vụ Của Tôi (Kanban)" loading={loading} style={{ marginBottom: 20, borderRadius: 8 }}>
-        <Row gutter={[16, 16]}>
-          <Col xs={12} sm={6}>
-            <Statistic
-              title="Chờ làm (Todo)"
-              value={data?.taskCuaToi.todo || 0}
-              valueStyle={{ color: '#8c8c8c' }}
-            />
-          </Col>
-          <Col xs={12} sm={6}>
-            <Statistic
-              title="Đang làm (In Progress)"
-              value={data?.taskCuaToi.inProgress || 0}
-              valueStyle={{ color: '#1890ff' }}
-              prefix={<ClockCircleOutlined />}
-            />
-          </Col>
-          <Col xs={12} sm={6}>
-            <Statistic
-              title="Đã xong (Done)"
-              value={data?.taskCuaToi.done || 0}
-              valueStyle={{ color: '#52c41a' }}
-              prefix={<CheckCircleOutlined />}
-            />
-          </Col>
-          <Col xs={12} sm={6}>
-            <Statistic
-              title="Quá hạn"
-              value={data?.taskCuaToi.quaHan || 0}
-              valueStyle={{ color: '#f5222d' }}
-              prefix={<ExclamationCircleOutlined />}
-            />
-          </Col>
-        </Row>
+      {/* Nhiệm vụ Kanban */}
+      <Card
+        title={
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <UnorderedListOutlined style={{ color: '#0F766E' }} /> Nhiệm Vụ Của Tôi (Kanban)
+          </span>
+        }
+        style={{ borderRadius: 16, marginBottom: 20, border: '1px solid #F1F5F9' }}
+        extra={
+          <Button type="link" size="small" onClick={() => navigate('/kanban')}>
+            Xem bảng Kanban →
+          </Button>
+        }
+      >
+        {loading ? (
+          <Skeleton active paragraph={{ rows: 3 }} />
+        ) : (
+          <Row gutter={[16, 16]}>
+            {taskStats.map((s) => (
+              <Col xs={12} sm={6} key={s.key}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 14,
+                    padding: '14px 16px',
+                    borderRadius: 14,
+                    background: s.bg,
+                    border: '1px solid rgba(0,0,0,0.03)',
+                  }}
+                >
+                  <div style={{ fontSize: 22, color: s.color }}>{s.icon}</div>
+                  <div>
+                    <div style={{ fontSize: 26, fontWeight: 750, color: s.color, lineHeight: 1 }}>
+                      {s.value}
+                    </div>
+                    <div style={{ fontSize: 12.5, color: '#64748B', fontWeight: 600, marginTop: 4 }}>
+                      {s.label}
+                    </div>
+                  </div>
+                </div>
+              </Col>
+            ))}
+          </Row>
+        )}
       </Card>
 
       <Row gutter={[16, 16]}>
-        {/* Điểm danh */}
+        {/* Chấm công tháng này */}
         <Col xs={24} md={12}>
           <Card
             title={
-              <Space>
-                <CalendarOutlined style={{ color: '#1890ff' }} />
-                <span>Chấm Công Tháng Này</span>
-              </Space>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <CalendarOutlined style={{ color: '#0F766E' }} /> Chấm Công Tháng Này
+              </span>
             }
-            loading={loading}
-            style={{ borderRadius: 8, height: '100%' }}
+            style={{ borderRadius: 16, height: '100%', border: '1px solid #F1F5F9' }}
+            extra={
+              <Button type="link" size="small" onClick={() => navigate('/chamcong')}>
+                Chi tiết →
+              </Button>
+            }
           >
-            <Row gutter={16}>
-              <Col span={12}>
-                <Statistic
-                  title="Số ngày công tích lũy"
-                  value={data?.chamCongThangNay.soNgayCong || 0}
-                  suffix="ngày"
-                  valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
-                />
-              </Col>
-              <Col span={12}>
-                <Statistic
-                  title="Số lần đi muộn"
-                  value={data?.chamCongThangNay.soLanTre || 0}
-                  suffix="lần"
-                  valueStyle={{ color: data?.chamCongThangNay.soLanTre ? '#fa8c16' : '#52c41a' }}
-                />
-              </Col>
-            </Row>
+            {loading ? (
+              <Skeleton active paragraph={{ rows: 2 }} />
+            ) : (
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Statistic
+                    title="Ngày công tích lũy"
+                    value={data?.chamCongThangNay.soNgayCong || 0}
+                    suffix="ngày"
+                    valueStyle={{ color: '#0F766E', fontWeight: 750 }}
+                  />
+                </Col>
+                <Col span={12}>
+                  <Statistic
+                    title="Số lần đi muộn"
+                    value={data?.chamCongThangNay.soLanTre || 0}
+                    suffix="lần"
+                    valueStyle={{
+                      color: data?.chamCongThangNay.soLanTre ? '#EA580C' : '#16A34A',
+                      fontWeight: 750,
+                    }}
+                  />
+                </Col>
+              </Row>
+            )}
           </Card>
         </Col>
 
@@ -116,43 +164,51 @@ export const MyDashboard: React.FC = () => {
         <Col xs={24} md={12}>
           <Card
             title={
-              <Space>
-                <DollarOutlined style={{ color: '#52c41a' }} />
-                <span>Lương & Chế Độ</span>
-              </Space>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <DollarOutlined style={{ color: '#0F766E' }} /> Lương &amp; Chế Độ
+              </span>
             }
-            loading={loading}
-            style={{ borderRadius: 8, height: '100%' }}
+            style={{ borderRadius: 16, height: '100%', border: '1px solid #F1F5F9' }}
           >
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary">Lương tháng gần nhất:</Text>
-              {data?.luongThangGanNhat ? (
-                <div style={{ marginTop: 4 }}>
-                  <span style={{ fontSize: 24, fontWeight: 'bold', color: '#52c41a' }}>
-                    {formatCurrency(data.luongThangGanNhat.thucLinh)}
-                  </span>
-                  <Tag color="blue" style={{ marginLeft: 8 }}>
-                    Tháng {data.luongThangGanNhat.thang}/{data.luongThangGanNhat.nam}
+            {loading ? (
+              <Skeleton active paragraph={{ rows: 3 }} />
+            ) : (
+              <>
+                <div
+                  style={{
+                    padding: '14px 16px',
+                    borderRadius: 14,
+                    background: 'linear-gradient(135deg,#F0FDF4,#DCFCE7)',
+                    marginBottom: 16,
+                  }}
+                >
+                  <div style={{ fontSize: 12.5, color: '#64748B', fontWeight: 600 }}>
+                    Lương thực lĩnh gần nhất
+                  </div>
+                  {data?.luongThangGanNhat ? (
+                    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 26, fontWeight: 750, color: '#16A34A' }}>
+                        {formatCurrency(data.luongThangGanNhat.thucLinh)}
+                      </span>
+                      <Tag color="green" style={{ borderRadius: 8, fontWeight: 600 }}>
+                        Tháng {data.luongThangGanNhat.thang}/{data.luongThangGanNhat.nam}
+                      </Tag>
+                    </div>
+                  ) : (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu bảng lương" style={{ margin: '8px 0' }} />
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <Tag color="warning" icon={<ScheduleOutlined />} style={{ borderRadius: 8, padding: '4px 10px', fontWeight: 600 }}>
+                    {data?.donNghiPhepCuaToi.choDuyet || 0} đơn chờ duyệt
+                  </Tag>
+                  <Tag color="success" icon={<CheckCircleOutlined />} style={{ borderRadius: 8, padding: '4px 10px', fontWeight: 600 }}>
+                    {data?.donNghiPhepCuaToi.daDuyet || 0} đơn đã duyệt
                   </Tag>
                 </div>
-              ) : (
-                <div>
-                  <Text italic>Chưa có dữ liệu bảng lương tháng gần nhất.</Text>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <Text type="secondary">Trạng thái đơn nghỉ phép:</Text>
-              <div style={{ marginTop: 6, display: 'flex', gap: 16 }}>
-                <Tag color="warning" icon={<ScheduleOutlined />}>
-                  {data?.donNghiPhepCuaToi.choDuyet || 0} đơn đang chờ duyệt
-                </Tag>
-                <Tag color="success" icon={<CheckCircleOutlined />}>
-                  {data?.donNghiPhepCuaToi.daDuyet || 0} đơn đã duyệt
-                </Tag>
-              </div>
-            </div>
+              </>
+            )}
           </Card>
         </Col>
       </Row>

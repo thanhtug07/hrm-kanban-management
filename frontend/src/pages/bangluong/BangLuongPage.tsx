@@ -9,7 +9,6 @@ import {
   Space,
   Row,
   Col,
-  Typography,
   message,
   Avatar,
   Input,
@@ -33,6 +32,7 @@ import {
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import type { ColumnsType } from 'antd/es/table';
+import PageHeader from '@/components/PageHeader';
 import { useAuthStore } from '@/stores/authStore';
 import { bangLuongApi } from '@/api/bangLuongApi';
 import { BangLuongDto } from '@/types/bangLuong';
@@ -42,8 +42,6 @@ import { PHONG_BAN_OPTIONS } from '../nhanvien/NhanVienFormModal';
 import TinhLuongModal from './TinhLuongModal';
 import PhatSinhModal from './components/PhatSinhModal';
 import PayrollDetailDrawer from './components/PayrollDetailDrawer';
-
-const { Title, Text } = Typography;
 
 export const BangLuongPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -204,7 +202,7 @@ export const BangLuongPage: React.FC = () => {
       key: 'kyLuong',
       width: 130,
       render: (_, record) => (
-        <span style={{ fontWeight: 700, color: '#1E1B4B' }}>
+        <span style={{ fontWeight: 700, color: '#0F172A' }}>
           Tháng {record.thang}/{record.nam}
         </span>
       ),
@@ -287,7 +285,7 @@ export const BangLuongPage: React.FC = () => {
         <Button
           type="text"
           shape="circle"
-          icon={<EyeOutlined style={{ color: '#4F46E5', fontSize: 16 }} />}
+          icon={<EyeOutlined style={{ color: '#0F766E', fontSize: 16 }} />}
           onClick={() => {
             setSelectedRecord(record);
             setDetailDrawerOpen(true);
@@ -457,7 +455,7 @@ export const BangLuongPage: React.FC = () => {
           <Button
             type="text"
             shape="circle"
-            icon={<EyeOutlined style={{ fontSize: 17, color: '#4F46E5' }} />}
+            icon={<EyeOutlined style={{ fontSize: 17, color: '#0F766E' }} />}
             onClick={(e) => {
               e.stopPropagation();
               setSelectedRecord(record);
@@ -472,95 +470,84 @@ export const BangLuongPage: React.FC = () => {
   return (
     <div style={{ minHeight: '100%', paddingBottom: 32 }}>
       {/* ===================== KHU VỰC HEADER TRANG ===================== */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <Title level={3} style={{ margin: 0, fontWeight: 700, color: '#0F172A' }}>
-            {isHrOrAdmin ? 'Bảng Lương & Chi Trả Doanh Nghiệp' : 'Phiếu Lương Cá Nhân'}
-          </Title>
-          <Text style={{ color: '#64748B', fontSize: 13 }}>
-            {isHrOrAdmin
-              ? 'Quản lý tính lương tự động, phụ cấp, chi phí phát sinh và kiểm soát quỹ lương toàn công ty.'
-              : 'Theo dõi chi tiết thu nhập, tiền công theo ngày và các khoản khấu trừ từng kỳ.'}
-          </Text>
-        </div>
+      <PageHeader
+        title={isHrOrAdmin ? 'Bảng Lương & Chi Trả Doanh Nghiệp' : 'Phiếu Lương Cá Nhân'}
+        subtitle={
+          isHrOrAdmin
+            ? 'Quản lý tính lương tự động, phụ cấp, chi phí phát sinh và kiểm soát quỹ lương toàn công ty.'
+            : 'Theo dõi chi tiết thu nhập, tiền công theo ngày và các khoản khấu trừ từng kỳ.'
+        }
+        icon={<DollarOutlined />}
+        extra={
+          <>
+            <DatePicker
+              picker="month"
+              value={selectedMonth}
+              onChange={(val) => val && setSelectedMonth(val)}
+              format="MM/YYYY"
+              allowClear={false}
+              style={{ borderRadius: 8, height: 38 }}
+            />
 
-        <Space size={12} wrap>
-          <DatePicker
-            picker="month"
-            value={selectedMonth}
-            onChange={(val) => val && setSelectedMonth(val)}
-            format="MM/YYYY"
-            allowClear={false}
-            style={{ borderRadius: 8, height: 38 }}
-          />
+            <Button
+              icon={<ReloadOutlined />}
+              style={{ borderRadius: 8, height: 38 }}
+              onClick={() => {
+                if (isHrOrAdmin) fetchCompanyPayrolls();
+                else fetchMyPayrolls();
+              }}
+            >
+              Làm mới
+            </Button>
 
-          <Button
-            icon={<ReloadOutlined />}
-            style={{ borderRadius: 8, height: 38 }}
-            onClick={() => {
-              if (isHrOrAdmin) fetchCompanyPayrolls();
-              else fetchMyPayrolls();
-            }}
-          >
-            Làm mới
-          </Button>
+            {isHrOrAdmin && (
+              <>
+                {/* Nút Xuất Excel */}
+                <Button
+                  icon={<DownloadOutlined />}
+                  style={{ borderRadius: 8, height: 38 }}
+                  onClick={handleExportExcel}
+                >
+                  Xuất Excel
+                </Button>
 
-          {isHrOrAdmin && (
-            <>
-              {/* Nút Xuất Excel */}
-              <Button
-                icon={<DownloadOutlined />}
-                style={{ borderRadius: 8, height: 38 }}
-                onClick={handleExportExcel}
-              >
-                Xuất Excel
-              </Button>
+                {/* Nút Thêm chi phí phát sinh */}
+                <Button
+                  icon={<DollarOutlined />}
+                  style={{
+                    borderRadius: 8,
+                    height: 38,
+                    borderColor: '#CBD5E1',
+                    color: '#334155',
+                    fontWeight: 500,
+                  }}
+                  onClick={() => setPhatSinhModalOpen(true)}
+                >
+                  Thêm chi phí phát sinh
+                </Button>
 
-              {/* Nút Thêm chi phí phát sinh */}
-              <Button
-                icon={<DollarOutlined />}
-                style={{
-                  borderRadius: 8,
-                  height: 38,
-                  borderColor: '#CBD5E1',
-                  color: '#334155',
-                  fontWeight: 500,
-                }}
-                onClick={() => setPhatSinhModalOpen(true)}
-              >
-                Thêm chi phí phát sinh
-              </Button>
-
-              {/* Nút Tính Lương (SP) — chỉ Admin */}
-              {isAdmin && (
-              <Button
-                type="primary"
-                icon={<CalculatorOutlined />}
-                style={{
-                  borderRadius: 8,
-                  height: 38,
-                  backgroundColor: '#4F46E5',
-                  fontWeight: 600,
-                  boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
-                }}
-                onClick={() => setTinhLuongModalOpen(true)}
-              >
-                Tính Lương (SP)
-              </Button>
-              )}
-            </>
-          )}
-        </Space>
-      </div>
+                {/* Nút Tính Lương (SP) — chỉ Admin */}
+                {isAdmin && (
+                  <Button
+                    type="primary"
+                    icon={<CalculatorOutlined />}
+                    style={{
+                      borderRadius: 8,
+                      height: 38,
+                      backgroundColor: '#0F766E',
+                      fontWeight: 600,
+                      boxShadow: '0 4px 12px rgba(15, 118, 110, 0.25)',
+                    }}
+                    onClick={() => setTinhLuongModalOpen(true)}
+                  >
+                    Tính Lương (SP)
+                  </Button>
+                )}
+              </>
+            )}
+          </>
+        }
+      />
 
       {/* ===================== PHẦN 1: 4 THẺ KPI TỔNG QUAN (ADMIN / HR) ===================== */}
       {isHrOrAdmin && (
@@ -742,30 +729,30 @@ export const BangLuongPage: React.FC = () => {
                   width: 44,
                   height: 44,
                   borderRadius: 12,
-                  backgroundColor: '#F5F3FF',
+                  backgroundColor: '#F0FDFA',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#7C3AED',
+                  color: '#0F766E',
                 }}
               >
                 <TeamOutlined style={{ fontSize: 22 }} />
               </div>
-              <div style={{ color: '#7C3AED', fontSize: 12, fontWeight: 700, textTransform: 'uppercase' }}>
+              <div style={{ color: '#0F766E', fontSize: 12, fontWeight: 700, textTransform: 'uppercase' }}>
                 NHÂN SỰ TRONG BẢNG LƯƠNG
               </div>
               <div
                 style={{
                   fontSize: 24,
                   fontWeight: 800,
-                  color: '#6D28D9',
+                  color: '#0D5C55',
                   margin: '6px 0 4px',
                 }}
               >
                 {metrics.countPersonnel}{' '}
                 <span style={{ fontSize: 13, fontWeight: 400, color: '#94A3B8' }}>nhân sự</span>
               </div>
-              <div style={{ fontSize: 12, color: '#8B5CF6' }}>
+              <div style={{ fontSize: 12, color: '#14B8A6' }}>
                 <span>100% nhân viên đã tính công & lương</span>
               </div>
             </Card>

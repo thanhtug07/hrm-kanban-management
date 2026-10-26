@@ -9,10 +9,10 @@ import {
   Switch,
   Popconfirm,
   message,
-  Typography,
   Avatar,
   Tabs,
   Tooltip,
+  Empty,
 } from 'antd';
 import {
   PlusOutlined,
@@ -28,13 +28,12 @@ import { taiKhoanApi } from '@/api/taiKhoanApi';
 import { TaiKhoanDto } from '@/types/taiKhoan';
 import { useAuthStore } from '@/stores/authStore';
 import { getInitials, getAvatarStyle } from '@/utils/avatar';
+import { PageHeader } from '@/components/PageHeader';
 
 import AccountKpiCards from './components/AccountKpiCards';
 import CreateAccountModal from './components/CreateAccountModal';
 import EditAccountModal from './components/EditAccountModal';
 import ProfilePage from '@/pages/profile/ProfilePage';
-
-const { Title, Text } = Typography;
 
 export const TaiKhoanPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -292,7 +291,7 @@ export const TaiKhoanPage: React.FC = () => {
             <Button
               type="text"
               size="small"
-              icon={<EditOutlined style={{ color: '#4F46E5', fontSize: 15 }} />}
+              icon={<EditOutlined style={{ color: '#0F766E', fontSize: 15 }} />}
               onClick={() => {
                 setSelectedAccount(record);
                 setEditModalOpen(true);
@@ -328,64 +327,42 @@ export const TaiKhoanPage: React.FC = () => {
   return (
     <div style={{ maxWidth: 1400, margin: '0 auto', paddingBottom: 24 }}>
       {/* Header Trang */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <Title
-            level={3}
-            style={{
-              margin: 0,
-              fontSize: 24,
-              fontWeight: 700,
-              color: '#0F172A',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Quản Lý Tài Khoản Đăng Nhập
-          </Title>
-          <Text type="secondary" style={{ fontSize: 13, color: '#64748B', marginTop: 4, display: 'block' }}>
-            Quản lý thông tin đăng nhập, vai trò và trạng thái hoạt động của nhân sự.
-          </Text>
-        </div>
+      <PageHeader
+        title="Quản Lý Tài Khoản Đăng Nhập"
+        subtitle="Quản lý thông tin đăng nhập, vai trò và trạng thái hoạt động của nhân sự."
+        icon={<SafetyCertificateOutlined />}
+        extra={
+          <>
+            <Button
+              icon={<ReloadOutlined />}
+              shape="round"
+              onClick={fetchAccounts}
+              loading={loading}
+              style={{ border: '1px solid #D1D5DB', fontSize: 13, height: 36 }}
+            >
+              Làm mới
+            </Button>
 
-        <Space size={10}>
-          <Button
-            icon={<ReloadOutlined />}
-            shape="round"
-            onClick={fetchAccounts}
-            loading={loading}
-            style={{ border: '1px solid #D1D5DB', fontSize: 13, height: 36 }}
-          >
-            Làm mới
-          </Button>
-
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            shape="round"
-            onClick={() => setCreateModalOpen(true)}
-            style={{
-              backgroundColor: '#4F46E5', // Indigo Accent
-              borderColor: '#4F46E5',
-              fontWeight: 500,
-              fontSize: 13,
-              height: 36,
-              padding: '0 18px',
-              boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)',
-            }}
-          >
-            Cấp Tài Khoản Mới
-          </Button>
-        </Space>
-      </div>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              shape="round"
+              onClick={() => setCreateModalOpen(true)}
+              style={{
+                backgroundColor: '#0F766E',
+                borderColor: '#0F766E',
+                fontWeight: 500,
+                fontSize: 13,
+                height: 36,
+                padding: '0 18px',
+                boxShadow: '0 2px 4px rgba(15, 118, 110, 0.2)',
+              }}
+            >
+              Cấp Tài Khoản Mới
+            </Button>
+          </>
+        }
+      />
 
       {/* Tabs Phân Chia: Quản Lý & Cài Đặt Cá Nhân */}
       <Tabs
@@ -415,9 +392,9 @@ export const TaiKhoanPage: React.FC = () => {
                     marginBottom: 16,
                     padding: '12px 16px',
                     background: '#FFFFFF',
-                    borderRadius: 12,
-                    border: '1px solid #E2E8F0',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+                    borderRadius: 16,
+                    border: '1px solid #F1F5F9',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
                   }}
                 >
                   <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, flex: 1 }}>
@@ -467,10 +444,10 @@ export const TaiKhoanPage: React.FC = () => {
                 <div
                   style={{
                     background: '#FFFFFF',
-                    borderRadius: 14,
-                    border: '1px solid #E2E8F0',
+                    borderRadius: 16,
+                    border: '1px solid #F1F5F9',
                     overflow: 'hidden',
-                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
                   }}
                 >
                   <Table
@@ -480,6 +457,15 @@ export const TaiKhoanPage: React.FC = () => {
                     loading={loading}
                     scroll={{ x: 'max-content' }}
                     sticky
+                    locale={{
+                      emptyText: (
+                        <Empty
+                          image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          description="Chưa có tài khoản nào phù hợp."
+                          style={{ padding: '36px 0' }}
+                        />
+                      ),
+                    }}
                     pagination={{
                       pageSize: 8,
                       showSizeChanger: true,

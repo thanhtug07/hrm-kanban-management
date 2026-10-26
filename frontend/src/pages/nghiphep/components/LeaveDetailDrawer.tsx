@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   Drawer,
   Typography,
@@ -252,7 +252,7 @@ export const LeaveDetailDrawer: React.FC<LeaveDetailDrawerProps> = ({
 
           <div style={{ background: '#F8FAFC', padding: '10px 14px', borderRadius: 10, border: '1px solid #F1F5F9' }}>
             <div style={{ fontSize: 11.5, color: '#64748B' }}>Tổng số ngày nghỉ</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#4F46E5', marginTop: 2 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#0F766E', marginTop: 2 }}>
               {totalDays} ngày
             </div>
           </div>
@@ -305,7 +305,7 @@ export const LeaveDetailDrawer: React.FC<LeaveDetailDrawerProps> = ({
         <Timeline
           items={[
             {
-              color: '#3B82F6',
+              color: '#0F766E',
               children: (
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 13, color: '#0F172A' }}>
