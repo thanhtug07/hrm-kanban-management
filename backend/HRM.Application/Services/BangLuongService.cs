@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.BangLuong;
@@ -68,9 +68,13 @@ public class BangLuongService : IBangLuongService
         if (nam.HasValue) psQuery = psQuery.Where(p => p.Nam == nam.Value);
         var phatSinhs = await psQuery.ToListAsync();
 
+
+
+        // Gom nhóm 1 lần bằng Lookup -> tra cứu O(1)
+        var psLookup = phatSinhs.ToLookup(p => p.MaNV);
         foreach (var item in items)
         {
-            var empPs = phatSinhs.Where(p => p.MaNV == item.MaNV).ToList();
+            var empPs = psLookup[item.MaNV].ToList();
             item.ChiPhiPhatSinhs = empPs.Select(p => MapToPhatSinhDto(p, item.HoTen)).ToList();
             item.ThuongPhatSinh = empPs.Where(p => p.Loai == "Thưởng" || p.Loai == "Công tác phí").Sum(p => p.SoTien);
             item.PhatKhauTru = empPs.Where(p => p.Loai == "Phạt" || p.Loai == "Ứng lương").Sum(p => p.SoTien);
@@ -99,9 +103,10 @@ public class BangLuongService : IBangLuongService
             .ToListAsync();
 
         var empPs = await _context.ChiPhiPhatSinhs.AsNoTracking().Where(p => p.MaNV == maNV).ToListAsync();
+        var psByKy = empPs.ToLookup(p => (p.Thang, p.Nam));
         foreach (var item in items)
         {
-            var matchedPs = empPs.Where(p => p.Thang == item.Thang && p.Nam == item.Nam).ToList();
+            var matchedPs = psByKy[(item.Thang, item.Nam)].ToList();
             item.ChiPhiPhatSinhs = matchedPs.Select(p => MapToPhatSinhDto(p, item.HoTen)).ToList();
             item.ThuongPhatSinh = matchedPs.Where(p => p.Loai == "Thưởng" || p.Loai == "Công tác phí").Sum(p => p.SoTien);
             item.PhatKhauTru = matchedPs.Where(p => p.Loai == "Phạt" || p.Loai == "Ứng lương").Sum(p => p.SoTien);

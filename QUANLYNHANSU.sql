@@ -335,6 +335,23 @@
 
     IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_CongViec_Deadline')
         CREATE NONCLUSTERED INDEX IX_CongViec_Deadline ON dbo.CongViec (Deadline) WHERE TrangThai <> N'Done' AND DaXoa = 0;
+    -- Index cho các khóa ngoại (tăng tốc JOIN / DELETE cascade)
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_BinhLuan_MaTask')
+        CREATE NONCLUSTERED INDEX IX_BinhLuan_MaTask ON dbo.BinhLuan (MaTask);
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_BinhLuan_MaNV')
+        CREATE NONCLUSTERED INDEX IX_BinhLuan_MaNV ON dbo.BinhLuan (MaNV);
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_CongViec_MaNV_Giao')
+        CREATE NONCLUSTERED INDEX IX_CongViec_MaNV_Giao ON dbo.CongViec (MaNV_Giao) WHERE DaXoa = 0;
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_HopDong_MaNV')
+        CREATE NONCLUSTERED INDEX IX_HopDong_MaNV ON dbo.HopDong (MaNV);
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_NghiPhep_MaNV')
+        CREATE NONCLUSTERED INDEX IX_NghiPhep_MaNV ON dbo.NghiPhep (MaNV);
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_NghiPhep_MaNV_Duyet')
+        CREATE NONCLUSTERED INDEX IX_NghiPhep_MaNV_Duyet ON dbo.NghiPhep (MaNV_Duyet);
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_PhongBan_MaNV_QL')
+        CREATE NONCLUSTERED INDEX IX_PhongBan_MaNV_QL ON dbo.PhongBan (MaNV_QL);
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_TaiKhoan_MaNV')
+        CREATE NONCLUSTERED INDEX IX_TaiKhoan_MaNV ON dbo.TaiKhoan (MaNV);
     GO
 
     PRINT N'====================================================================';

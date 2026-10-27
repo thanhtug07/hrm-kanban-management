@@ -53,7 +53,15 @@ public class ChamCongService : IChamCongService
         };
 
         _context.ChamCongs.Add(chamCong);
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            // Race condition: 2 request đồng thời cùng ngày -> UNIQUE(MaNV,Ngay) chặn
+            return ApiResponse<ChamCongDto>.Fail("Bạn đã check-in hôm nay rồi (ghi nhận trùng).", ErrorCode.Conflict);
+        }
         _logger.LogInformation("CheckIn: MaNV={MaNV}, Time={Time}, Status={Status}", maNV, nowTime, trangThai);
 
         var nv = await _context.NhanViens.AsNoTracking().FirstOrDefaultAsync(n => n.MaNV == maNV);
@@ -80,7 +88,14 @@ public class ChamCongService : IChamCongService
             return ApiResponse<ChamCongDto>.Fail($"Chưa hết giờ làm việc. Chỉ được check-out sau {cfg.GioKetThuc:HH:mm}.");
 
         existing.GioRa = nowTime;
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return ApiResponse<ChamCongDto>.Fail("Cập nhật check-out thất bại, vui lòng thử lại.", ErrorCode.Conflict);
+        }
         _logger.LogInformation("CheckOut: MaNV={MaNV}, Time={Time}", maNV, nowTime);
 
         var nv = await _context.NhanViens.AsNoTracking().FirstOrDefaultAsync(n => n.MaNV == maNV);
@@ -184,7 +199,7 @@ public class ChamCongService : IChamCongService
 
         var items = await query
             .OrderByDescending(c => c.Ngay)
-            .Take(1000)
+            .Take(5000)  // ponytail: cap an toàn cho 1 tháng toàn công ty; chuyển PagedResult nếu vượt
             .Select(c => MapToDto(c, c.NhanVien != null ? c.NhanVien.HoTen : c.MaNV, c.NhanVien != null && c.NhanVien.PhongBan != null ? c.NhanVien.PhongBan.TenPB : null))
             .ToListAsync();
 
