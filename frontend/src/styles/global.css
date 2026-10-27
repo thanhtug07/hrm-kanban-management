@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 * {
   box-sizing: border-box;
@@ -177,6 +177,24 @@ body {
   }
   /* Ẩn tên user trên mobile, chỉ hiện avatar */
   .ant-layout-header .ant-space .ant-typography.ant-typography-ellipsis {
+    display: none !important;
+  }
+}
+/* Header: đảm bảo user-menu không phóng to/đè, gọn gàng */
+.ant-layout-header {
+  overflow: visible;
+}
+.ant-layout-header > .ant-space:last-child {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.ant-layout-header .ant-dropdown-trigger {
+  display: inline-flex !important;
+  align-items: center;
+}
+/* Ẩn role tag trên màn hình hẹp để tránh chồng lấn */
+@media (max-width: 1200px) {
+  .ant-layout-header > .ant-space:last-child > .ant-space-item:first-child {
     display: none !important;
   }
 }

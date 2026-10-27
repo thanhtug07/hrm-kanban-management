@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Layout, Button, Dropdown, Space, Avatar, Typography, MenuProps, Tag, Breadcrumb } from 'antd';
 import {
   MenuFoldOutlined,
@@ -135,7 +135,7 @@ export const HeaderBar: React.FC = () => {
         />
       </Space>
 
-      <Space size="middle">
+      <Space size="middle" style={{ flexShrink: 0 }}>
         {getRoleTag(user?.vaiTro)}
 
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
@@ -147,6 +147,9 @@ export const HeaderBar: React.FC = () => {
               border: '1px solid #e2e8f0',
               background: '#f8fafc',
               transition: 'background 0.2s',
+              flexShrink: 0,
+              maxWidth: 220,
+              overflow: 'hidden',
             }}
           >
             <Avatar
@@ -161,7 +164,7 @@ export const HeaderBar: React.FC = () => {
             >
               {getInitials(user?.hoTen)}
             </Avatar>
-            <Text strong style={{ fontSize: 13, color: '#1e293b', maxWidth: 140 }} ellipsis>
+            <Text strong style={{ fontSize: 13, color: "#1e293b", maxWidth: 120, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {user?.hoTen || user?.tenDangNhap}
             </Text>
           </Space>
