@@ -13,6 +13,16 @@ echo    Backend (ASP.NET Core 8)  +  Frontend (React 19)
 echo ============================================================
 echo.
 
+REM ============================================================
+REM 0. DON TIEN TRINH CU (tranh lock file khi build)
+REM ============================================================
+echo [0/4] Don tien trinh cu (neu co)...
+taskkill /F /IM HRM.API.exe >nul 2>nul
+taskkill /F /IM dotnet.exe >nul 2>nul
+echo   [OK] Da don
+
+echo.
+
 echo [1/4] Kiem tra cong cu...
 where dotnet >nul 2>nul
 if errorlevel 1 goto :no_dotnet
@@ -48,9 +58,9 @@ echo.
 
 echo [4/4] Khoi dong Backend + Frontend...
 start "HRM Backend :5100" cmd /k "chcp 65001 >nul && cd /d ""%ROOT%\backend"" && echo === BACKEND http://localhost:5100 === && dotnet run --project HRM.API --launch-profile http --no-build"
-timeout /t 4 /nobreak >nul
+timeout /t 5 /nobreak >nul
 start "HRM Frontend :5173" cmd /k "chcp 65001 >nul && cd /d ""%ROOT%\frontend"" && echo === FRONTEND http://localhost:5173 === && npm run dev"
-timeout /t 7 /nobreak >nul
+timeout /t 8 /nobreak >nul
 start "" "http://localhost:5173"
 
 echo.
@@ -74,7 +84,8 @@ goto :halt
 echo   [X] npm install that bai.
 goto :halt
 :build_fail
-echo   [X] Build backend that bai.
+echo   [X] Build backend that bai. Xem loi ben tren.
+echo   [i] Goi y: dong cac cua so HRM dang chay roi thu lai.
 goto :halt
 :halt
 echo.

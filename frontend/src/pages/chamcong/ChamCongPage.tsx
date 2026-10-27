@@ -84,6 +84,7 @@ export const ChamCongPage: React.FC = () => {
   // Edit modal (HR/Admin)
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [cauHinhModalOpen, setCauHinhModalOpen] = useState(false);
+  const [cauHinhGio, setCauHinhGio] = useState<{ gioBatDau: string; gioKetThuc: string; phutChoPhepSom: number; phutChoPhepTre: number; batBuocCheckOutSauKetThuc: boolean } | null>(null);
   const [editingRecord, setEditingRecord] = useState<ChamCongDto | null>(null);
   const [form] = Form.useForm();
 
@@ -102,6 +103,31 @@ export const ChamCongPage: React.FC = () => {
   const todayRecord = myHistory.find(
     (item) => item.ngay.split('T')[0] === currentTime.format('YYYY-MM-DD')
   );
+
+  // Fetch cấu hình khung giờ chấm công
+  useEffect(() => {
+    chamCongApi.getCauHinh()
+      .then((res: any) => { if (res?.success && res.data) setCauHinhGio(res.data); })
+      .catch(() => {});
+  }, []);
+
+  // Kiểm tra cửa sổ thời gian cho phép chấm công
+  const timeWindow = (() => {
+    if (!cauHinhGio) return { canCheckIn: true, canCheckOut: true, reasonIn: "", reasonOut: "" };
+    const toMin = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+    const nowMin = currentTime.hour() * 60 + currentTime.minute();
+    const start = toMin(cauHinhGio.gioBatDau);
+    const end = toMin(cauHinhGio.gioKetThuc);
+    const earliest = start - cauHinhGio.phutChoPhepSom;
+    const latest = end + cauHinhGio.phutChoPhepTre;
+    const canCheckIn = nowMin >= earliest && nowMin <= latest;
+    const canCheckOut = !cauHinhGio.batBuocCheckOutSauKetThuc || nowMin >= end;
+    let reasonIn = "";
+    if (nowMin < earliest) reasonIn = `Chưa đến giờ check-in (từ ${cauHinhGio.gioBatDau}${cauHinhGio.phutChoPhepSom > 0 ? `, sớm ${cauHinhGio.phutChoPhepSom}p` : ""})`;
+    else if (nowMin > latest) reasonIn = `Đã quá giờ check-in (ca kết thúc ${cauHinhGio.gioKetThuc})`;
+    const reasonOut = canCheckOut ? "" : `Chưa hết giờ làm việc (check-out sau ${cauHinhGio.gioKetThuc})`;
+    return { canCheckIn, canCheckOut, reasonIn, reasonOut };
+  })();
 
   // Fetch Personal History
   const fetchMyHistory = useCallback(async () => {
@@ -866,6 +892,18 @@ export const ChamCongPage: React.FC = () => {
                     }}
                   >
                     {currentTime.format('HH:mm:ss')}
+                  {cauHinhGio && (
+                    <div style={{ color: "#99F6E4", fontSize: 13, marginBottom: 12 }}>
+                      Ca làm việc: <b style={{ color: "#FFFFFF" }}>{cauHinhGio.gioBatDau.slice(0,5)} - {cauHinhGio.gioKetThuc.slice(0,5)}</b>
+                      {cauHinhGio.phutChoPhepSom > 0 && <> · check-in sớm tối đa {cauHinhGio.phutChoPhepSom} phút</>}
+                    </div>
+                  )}
+                  {(!timeWindow.canCheckIn && !todayRecord?.gioVao) && (
+                    <div style={{ color: "#FCD34D", fontSize: 12.5, marginBottom: 10 }}>⚠ {timeWindow.reasonIn}</div>
+                  )}
+                  {(!timeWindow.canCheckOut && todayRecord?.gioVao && !todayRecord?.gioRa) && (
+                    <div style={{ color: "#FCD34D", fontSize: 12.5, marginBottom: 10 }}>⚠ {timeWindow.reasonOut}</div>
+                  )}
                   </div>
                   <Space size={14}>
                     <Button
@@ -873,7 +911,7 @@ export const ChamCongPage: React.FC = () => {
                       size="large"
                       icon={<LoginOutlined />}
                       onClick={handleCheckIn}
-                      disabled={!!todayRecord?.gioVao}
+                      disabled={!!todayRecord?.gioVao || !timeWindow.canCheckIn}
                       style={{
                         height: 44,
                         padding: '0 24px',
@@ -890,7 +928,7 @@ export const ChamCongPage: React.FC = () => {
                       size="large"
                       icon={<LogoutOutlined />}
                       onClick={handleCheckOut}
-                      disabled={!todayRecord?.gioVao || !!todayRecord?.gioRa}
+                      disabled={!todayRecord?.gioVao || !!todayRecord?.gioRa || !timeWindow.canCheckOut}
                       style={{
                         height: 44,
                         padding: '0 24px',

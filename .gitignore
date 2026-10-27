@@ -1,4 +1,4 @@
-﻿# ===== .NET / C# =====
+# ===== .NET / C# =====
 [Bb]in/
 [Oo]bj/
 *.user
@@ -50,3 +50,7 @@ tmp/
 # SSMS solution/project
 *.sqlproj
 *.ssmssln
+
+# File chay tam
+_be.bat
+_fe.bat
