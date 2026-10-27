@@ -18,4 +18,19 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        advancedChunks: {
+          groups: [
+            { name: 'react-vendor', test: /[\\/]node_modules[\\/](react|react-dom|react-router)/ },
+            { name: 'antd-vendor', test: /[\\/]node_modules[\\/](antd|@ant-design)/ },
+            { name: 'chart-vendor', test: /[\\/]node_modules[\\/]recharts/ },
+            { name: 'dnd-vendor', test: /[\\/]node_modules[\\/]@hello-pangea/ },
+          ],
+        },
+      },
+    },
+  },
 });

@@ -1,29 +1,40 @@
-﻿import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { Spin } from 'antd';
 import MainLayout from '@/layouts/MainLayout';
 import ProtectedRoute from './ProtectedRoute';
 
-// Pages
-import LoginPage from '@/pages/auth/LoginPage';
-import ForbiddenPage from '@/pages/ForbiddenPage';
-import NotFoundPage from '@/pages/NotFoundPage';
-import RoleDashboard from '@/pages/dashboard/RoleDashboard';
-import KanbanBoardPage from '@/pages/kanban/KanbanBoardPage';
-import NhanVienListPage from '@/pages/nhanvien/NhanVienListPage';
-import ChamCongPage from '@/pages/chamcong/ChamCongPage';
-import NghiPhepPage from '@/pages/nghiphep/NghiPhepPage';
-import BangLuongPage from '@/pages/bangluong/BangLuongPage';
-import ProfilePage from '@/pages/profile/ProfilePage';
-import TaiKhoanPage from '@/pages/taikhoan/TaiKhoanPage';
+// Lazy-load các trang (code splitting) — giảm bundle ban đầu
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const ForbiddenPage = lazy(() => import('@/pages/ForbiddenPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const RoleDashboard = lazy(() => import('@/pages/dashboard/RoleDashboard'));
+const KanbanBoardPage = lazy(() => import('@/pages/kanban/KanbanBoardPage'));
+const NhanVienListPage = lazy(() => import('@/pages/nhanvien/NhanVienListPage'));
+const ChamCongPage = lazy(() => import('@/pages/chamcong/ChamCongPage'));
+const NghiPhepPage = lazy(() => import('@/pages/nghiphep/NghiPhepPage'));
+const BangLuongPage = lazy(() => import('@/pages/bangluong/BangLuongPage'));
+const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
+const TaiKhoanPage = lazy(() => import('@/pages/taikhoan/TaiKhoanPage'));
+
+const Loading = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+    <Spin size="large" tip="Đang tải...">
+      <div style={{ padding: 24 }} />
+    </Spin>
+  </div>
+);
+
+const withSuspense = (node: React.ReactNode) => <Suspense fallback={<Loading />}>{node}</Suspense>;
 
 export const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: withSuspense(<LoginPage />),
   },
   {
     path: '/403',
-    element: <ForbiddenPage />,
+    element: withSuspense(<ForbiddenPage />),
   },
   {
     path: '/',
@@ -39,17 +50,17 @@ export const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <RoleDashboard />,
+        element: withSuspense(<RoleDashboard />),
       },
       {
         path: 'kanban',
-        element: <KanbanBoardPage />,
+        element: withSuspense(<KanbanBoardPage />),
       },
       {
         path: 'nhanvien',
         element: (
           <ProtectedRoute allowedRoles={['Admin', 'HR']}>
-            <NhanVienListPage />
+            {withSuspense(<NhanVienListPage />)}
           </ProtectedRoute>
         ),
       },
@@ -57,31 +68,31 @@ export const router = createBrowserRouter([
         path: 'taikhoan',
         element: (
           <ProtectedRoute allowedRoles={['Admin', 'HR']}>
-            <TaiKhoanPage />
+            {withSuspense(<TaiKhoanPage />)}
           </ProtectedRoute>
         ),
       },
       {
         path: 'chamcong',
-        element: <ChamCongPage />,
+        element: withSuspense(<ChamCongPage />),
       },
       {
         path: 'nghiphep',
-        element: <NghiPhepPage />,
+        element: withSuspense(<NghiPhepPage />),
       },
       {
         path: 'bangluong',
-        element: <BangLuongPage />,
+        element: withSuspense(<BangLuongPage />),
       },
       {
         path: 'profile',
-        element: <ProfilePage />,
+        element: withSuspense(<ProfilePage />),
       },
     ],
   },
   {
     path: '*',
-    element: <NotFoundPage />,
+    element: withSuspense(<NotFoundPage />),
   },
 ]);
 

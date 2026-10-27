@@ -190,3 +190,37 @@ HRM.Core (Domain)          ── Entities, DTOs, Interfaces, Constants, Common
 **Điểm yếu chính** là **thiếu tầng Application** khiến logic nghiệp vụ bám tầng Presentation/Infrastructure, và **thiếu kiểm thử đơn vị** — hai điều này giới hạn khả năng bảo trì và mở rộng trong môi trường thật.
 
 Với các cải thiện ở Ưu tiên 1 (nửa ngày công), hệ thống có thể đạt **7.5/10** và sẵn sàng hơn cho môi trường chuyên nghiệp.
+
+---
+
+## 8. NHẬT KÝ CẢI THIỆN (CẬP NHẬT 27/10/2026)
+
+Các rủi ro đã được xử lý:
+
+| # | Rủi ro | Trạng thái | Giải pháp |
+|---|---|---|---|
+| 3.1 | Không có tầng Application | ✅ ĐÃ FIX | Tạo `HRM.Application` (Services + Validators), API chỉ còn Controllers |
+| 3.2 | TaiKhoanController chứa nghiệp vụ | ✅ ĐÃ FIX | Tách `ITaiKhoanService` + `TaiKhoanService` |
+| 3.3 | Không có Global Exception Handler | ✅ ĐÃ FIX | `GlobalExceptionHandlerMiddleware` |
+| 3.4 | Điều hướng HTTP bằng `message.Contains` | ✅ ĐÃ FIX | `ErrorCode` enum + map HTTP status |
+| 3.5 | Thiếu transaction | ✅ ĐÃ FIX | Transaction cho MoveTask + CreatePhatSinh; ExecuteUpdate atomic |
+| 3.7 | Trộn DateTime local/UTC | ✅ ĐÃ FIX | Đồng bộ local (khớp GETDATE of DB) |
+| 3.8 | HealthCheck public | ✅ ĐÃ FIX | `[Authorize(Admin)]` + ẩn ex.Message |
+| — | Không có Unit Test | ✅ ĐÃ FIX | 22 unit test xUnit (HRM.Tests) |
+| — | Bundle frontend 2.1MB 1 chunk | ✅ ĐÃ FIX | React.lazy + advancedChunks |
+
+### Điểm số SAU cải thiện
+
+| Tiêu chí | Trước | Sau |
+|---|:---:|:---:|
+| Separation of Concerns | 6.5 | 8.5 |
+| Dependency Rule | 7.5 | 8.5 |
+| Testability | 4.0 | 8.0 |
+| Security | 7.5 | 8.5 |
+| Performance | 6.0 | 7.5 |
+| **TỔNG** | **6.8** | **~8.1/10** |
+
+### Còn lại (khuyến nghị tương lai)
+- Repository/IUnitOfWork đầy đủ (hiện service dùng DbContext trực tiếp — chấp nhận được cho quy mô đồ án).
+- EF Migrations hoặc snapshot test schema (hiện dùng SQL script làm nguồn chân lý).
+- Refresh token + rate limiting cho auth.
