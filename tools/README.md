@@ -57,3 +57,43 @@ python db_viewer.py
 4. Quay lại tab viewer — số dòng + dữ liệu đã nhảy.
 
 > 💡 Muốn xem chi tiết thì click vào bảng tương ứng (ví dụ `TaiKhoan`, `NhanVien`) và bấm F5 để làm mới.
+
+---
+
+## 🩺 Health Check — Kiểm tra sức khỏe hệ thống
+
+Công cụ kiểm tra chi tiết: SQL Server, Database, schema, dữ liệu, ràng buộc, và Backend API.
+
+### Cách dùng
+
+**Cách 1 — Nhấp đúp:**
+```
+tools\health_check.bat
+```
+
+**Cách 2 — PowerShell:**
+```powershell
+cd tools
+.\HEALTH_CHECK.ps1
+```
+
+### Tùy chọn
+
+```powershell
+.\HEALTH_CHECK.ps1 -Server "localhost" -Database "QUANLYNHANSU" -ApiUrl "http://localhost:5100"
+.\HEALTH_CHECK.ps1 -Json          # in JSON
+```
+
+### Kiểm tra gì
+
+| Mục | Nội dung |
+|---|---|
+| 1. SQL Server | Kết nối, version, edition, service |
+| 2. Database | Tồn tại, trạng thái ONLINE |
+| 3. Schema | Số bảng (>=11), view (>=6), SP (>=3), trigger (>=3), index |
+| 4. Dữ liệu | Đếm dòng từng bảng + tài khoản theo vai trò |
+| 5. Ràng buộc | FK, CHECK, FK thiếu index |
+| 6. Cấu hình | Khung giờ chấm công |
+| 7. Backend API | API sống, đăng nhập admin |
+
+Kết quả: liệt kê `[OK]`/`[!]`/`[X]` + tổng kết PASS/WARN/FAIL. Báo cáo JSON lưu vào `tools\health-report.json`.
