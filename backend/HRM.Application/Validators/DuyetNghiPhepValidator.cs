@@ -1,7 +1,7 @@
-using FluentValidation;
+﻿using FluentValidation;
 using HRM.Core.DTOs.NghiPhep;
 
-namespace HRM.API.Validators;
+namespace HRM.Application.Validators;
 
 public class DuyetNghiPhepValidator : AbstractValidator<DuyetNghiPhepDto>
 {

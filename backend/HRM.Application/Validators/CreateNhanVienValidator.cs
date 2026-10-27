@@ -1,7 +1,7 @@
-using FluentValidation;
+﻿using FluentValidation;
 using HRM.Core.DTOs.NhanVien;
 
-namespace HRM.API.Validators;
+namespace HRM.Application.Validators;
 
 public class CreateNhanVienValidator : AbstractValidator<CreateNhanVienDto>
 {

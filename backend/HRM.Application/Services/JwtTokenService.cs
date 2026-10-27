@@ -1,4 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using HRM.Core.Constants;
@@ -7,7 +7,7 @@ using HRM.Core.Entities;
 using HRM.Core.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
-namespace HRM.API.Services;
+namespace HRM.Application.Services;
 
 public class JwtTokenService : IJwtTokenService
 {

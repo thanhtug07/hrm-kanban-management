@@ -1,7 +1,7 @@
-using FluentValidation;
+﻿using FluentValidation;
 using HRM.Core.DTOs.BangLuong;
 
-namespace HRM.API.Validators;
+namespace HRM.Application.Validators;
 
 public class CreateChiPhiPhatSinhValidator : AbstractValidator<CreateChiPhiPhatSinhDto>
 {

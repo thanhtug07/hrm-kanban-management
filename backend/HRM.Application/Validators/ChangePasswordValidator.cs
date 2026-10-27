@@ -1,7 +1,7 @@
-using FluentValidation;
+﻿using FluentValidation;
 using HRM.Core.DTOs.Auth;
 
-namespace HRM.API.Validators;
+namespace HRM.Application.Validators;
 
 public class ChangePasswordValidator : AbstractValidator<ChangePasswordDto>
 {

@@ -6,7 +6,7 @@ using HRM.Core.Interfaces;
 using HRM.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace HRM.API.Services;
+namespace HRM.Application.Services;
 
 public class TaiKhoanService : ITaiKhoanService
 {

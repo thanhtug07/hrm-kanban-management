@@ -9,7 +9,7 @@ using HRM.Infrastructure.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace HRM.API.Services;
+namespace HRM.Application.Services;
 
 public class NhanVienService : INhanVienService
 {

@@ -1,7 +1,7 @@
-using FluentValidation;
+﻿using FluentValidation;
 using HRM.Core.DTOs.Kanban;
 
-namespace HRM.API.Validators;
+namespace HRM.Application.Validators;
 
 public class CreateBinhLuanValidator : AbstractValidator<CreateBinhLuanDto>
 {

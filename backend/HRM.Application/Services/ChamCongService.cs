@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.DTOs.ChamCong;
 using HRM.Core.Entities;
@@ -6,7 +6,7 @@ using HRM.Core.Interfaces;
 using HRM.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace HRM.API.Services;
+namespace HRM.Application.Services;
 
 public class ChamCongService : IChamCongService
 {

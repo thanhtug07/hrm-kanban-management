@@ -1,9 +1,9 @@
-﻿using System.Text;
+using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using HRM.API.Middleware;
-using HRM.API.Services;
-using HRM.API.Validators;
+using HRM.Application.Services;
+using HRM.Application.Validators;
 using HRM.Core.Interfaces;
 using HRM.Infrastructure.Data;
 using HRM.Infrastructure.Security;
