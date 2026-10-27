@@ -1,4 +1,4 @@
-﻿using HRM.Core.Common;
+using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.Kanban;
 using HRM.Core.Interfaces;
@@ -55,7 +55,7 @@ public class CongViecController : ControllerBase
     /// Tạo công việc mới (Chỉ Admin và HR được phép)
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Managers)]
     [ProducesResponseType(typeof(ApiResponse<TaskItemDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<TaskItemDto>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateTask([FromBody] CreateTaskDto dto)
@@ -73,7 +73,7 @@ public class CongViecController : ControllerBase
     /// Cập nhật thông tin chi tiết công việc (Chỉ Admin và HR được phép)
     /// </summary>
     [HttpPut("{id:int}")]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Managers)]
     [ProducesResponseType(typeof(ApiResponse<TaskItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<TaskItemDto>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<TaskItemDto>), StatusCodes.Status404NotFound)]
@@ -113,7 +113,7 @@ public class CongViecController : ControllerBase
     /// Xóa mềm công việc (Chỉ Admin và HR được phép)
     /// </summary>
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Managers)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteTask(int id)

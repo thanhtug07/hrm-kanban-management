@@ -1,4 +1,4 @@
-﻿using HRM.Core.Common;
+using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.NghiPhep;
 using HRM.Core.Interfaces;
@@ -51,11 +51,11 @@ public class NghiPhepController : ControllerBase
     /// Danh sách toàn bộ đơn nghỉ phép trong công ty (Admin/HR)
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Managers)]
     [ProducesResponseType(typeof(ApiResponse<List<NghiPhepDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllLeaves([FromQuery] string? trangThai, [FromQuery] string? maNV)
     {
-        var result = await _nghiPhepService.GetAllLeavesAsync(trangThai, maNV);
+        var result = await _nghiPhepService.GetAllLeavesAsync(trangThai, maNV, User);
         return Ok(result);
     }
 
@@ -63,7 +63,7 @@ public class NghiPhepController : ControllerBase
     /// Phê duyệt hoặc từ chối đơn nghỉ phép (Admin/HR - kích hoạt Trigger tự sinh chấm công)
     /// </summary>
     [HttpPut("{id:int}/duyet")]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Managers)]
     [ProducesResponseType(typeof(ApiResponse<NghiPhepDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<NghiPhepDto>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<NghiPhepDto>), StatusCodes.Status403Forbidden)]

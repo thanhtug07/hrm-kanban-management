@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.Constants;
@@ -22,13 +22,18 @@ public class NhanVienService : INhanVienService
         _logger = logger;
     }
 
-    public async Task<ApiResponse<PagedResult<NhanVienDto>>> GetListAsync(NhanVienFilterDto filter)
+    public async Task<ApiResponse<PagedResult<NhanVienDto>>> GetListAsync(NhanVienFilterDto filter, ClaimsPrincipal user)
     {
         var query = _context.NhanViens
             .AsNoTracking()
             .Include(n => n.PhongBan)
             .Include(n => n.ChucVu)
             .AsQueryable();
+
+        // Trưởng phòng: chỉ xem nhân viên thuộc phòng mình phụ trách
+        var managedPB = await GetManagedDepartmentAsync(user);
+        if (managedPB != null)
+            query = query.Where(n => n.MaPB == managedPB);
 
         if (!string.IsNullOrWhiteSpace(filter.MaPB))
             query = query.Where(n => n.MaPB == filter.MaPB.Trim());
@@ -82,6 +87,16 @@ public class NhanVienService : INhanVienService
         if (role == RoleConstants.NhanVien && maNV.Trim() != userMaNV?.Trim())
         {
             return ApiResponse<NhanVienDto>.Fail("Bạn không có quyền xem thông tin của nhân viên khác.", ErrorCode.Forbidden);
+        }
+
+        // Trưởng phòng: chỉ xem nhân viên thuộc phòng mình
+        var managedPB = await GetManagedDepartmentAsync(user);
+        if (managedPB != null && maNV.Trim() != userMaNV?.Trim())
+        {
+            var empPB = await _context.NhanViens.AsNoTracking()
+                .Where(n => n.MaNV == maNV.Trim()).Select(n => n.MaPB).FirstOrDefaultAsync();
+            if (empPB != null && empPB != managedPB)
+                return ApiResponse<NhanVienDto>.Fail("Bạn chỉ được xem nhân viên thuộc phòng mình phụ trách.", ErrorCode.Forbidden);
         }
 
         var nv = await _context.NhanViens
@@ -220,13 +235,16 @@ public class NhanVienService : INhanVienService
         return ApiResponse<bool>.Ok(true, "Xóa nhân viên thành công (đã chuyển trạng thái Nghỉ việc).");
     }
 
-    public async Task<ApiResponse<List<NhanVienDto>>> SearchAsync(string keyword)
+    public async Task<ApiResponse<List<NhanVienDto>>> SearchAsync(string keyword, ClaimsPrincipal user)
     {
         var search = (keyword ?? string.Empty).Trim().ToLower();
-        var items = await _context.NhanViens
-            .AsNoTracking()
+        var managedPB = await GetManagedDepartmentAsync(user);
+        var query = _context.NhanViens.AsNoTracking()
             .Include(n => n.PhongBan)
             .Include(n => n.ChucVu)
+            .AsQueryable();
+        if (managedPB != null) query = query.Where(n => n.MaPB == managedPB);
+        var items = await query
             .Where(n => n.HoTen.ToLower().Contains(search)
                      || n.MaNV.ToLower().Contains(search)
                      || (n.Email != null && n.Email.ToLower().Contains(search))
@@ -236,6 +254,20 @@ public class NhanVienService : INhanVienService
             .ToListAsync();
 
         return ApiResponse<List<NhanVienDto>>.Ok(items);
+    }
+
+    /// <summary>
+    /// Lấy mã phòng ban mà user hiện là trưởng phòng (PhongBan.MaNV_QL). Null nếu không phải.
+    /// </summary>
+    private async Task<string?> GetManagedDepartmentAsync(ClaimsPrincipal user)
+    {
+        var role = user.FindFirstValue(ClaimTypes.Role);
+        if (role != RoleConstants.TruongPhong) return null;
+        var maNV = user.FindFirstValue("MaNV");
+        if (string.IsNullOrWhiteSpace(maNV)) return null;
+        return await _context.PhongBans.AsNoTracking()
+            .Where(p => p.MaNV_QL == maNV.Trim())
+            .Select(p => p.MaPB).FirstOrDefaultAsync();
     }
 
     private static NhanVienDto MapToDto(NhanVien n) => new()

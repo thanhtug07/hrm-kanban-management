@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using HRM.Core.Constants;
@@ -36,6 +36,7 @@ public class JwtTokenService : IJwtTokenService
         {
             "Admin" => RoleConstants.Admin,
             "HR" => RoleConstants.HR,
+            "TruongPhong" => RoleConstants.TruongPhong,
             "NhanVien" => RoleConstants.NhanVien,
             _ => RoleConstants.NhanVien
         };

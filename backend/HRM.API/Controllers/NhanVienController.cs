@@ -1,4 +1,4 @@
-﻿using HRM.Core.Common;
+using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.NhanVien;
 using HRM.Core.Interfaces;
@@ -23,11 +23,11 @@ public class NhanVienController : ControllerBase
     /// Danh sách nhân viên có phân trang, bộ lọc và sắp xếp (Admin/HR)
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Managers)]
     [ProducesResponseType(typeof(ApiResponse<PagedResult<NhanVienDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetList([FromQuery] NhanVienFilterDto filter)
     {
-        var result = await _nhanVienService.GetListAsync(filter);
+        var result = await _nhanVienService.GetListAsync(filter, User);
         return Ok(result);
     }
 
@@ -35,11 +35,11 @@ public class NhanVienController : ControllerBase
     /// Tìm kiếm nhanh nhân viên theo từ khóa (Admin/HR)
     /// </summary>
     [HttpGet("search")]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Managers)]
     [ProducesResponseType(typeof(ApiResponse<List<NhanVienDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Search([FromQuery] string keyword)
     {
-        var result = await _nhanVienService.SearchAsync(keyword);
+        var result = await _nhanVienService.SearchAsync(keyword, User);
         return Ok(result);
     }
 

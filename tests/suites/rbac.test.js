@@ -1,4 +1,4 @@
-﻿/**
+/**
  * rbac.test.js — Kiểm tra phân quyền theo vai trò (RBAC + IDOR).
  * Chạy: node suites/rbac.test.js
  */
@@ -39,15 +39,12 @@ const { Runner, launchBrowser, login, sleep, config } = require('../helpers');
 
   // HR KHÔNG được gán vai trò Admin (leo thang đặc quyền)
   const hrSetAdmin = await api.post(config.API + '/api/taikhoan', { headers: H(hrTok), data: { tenDangNhap: 'hack_' + Date.now(), matKhau: 'Test@12345', vaiTro: 'Admin' } });
-  r.check('HR tạo tài khoản Admin -> 403', hrSetAdmin.status() === 403, `status=${hrSetAdmin.status()}`);
+  r.check('HR quản lý tài khoản -> 403 (chỉ Admin)', hrSetAdmin.status() === 403, `status=${hrSetAdmin.status()}`);
 
   // HR gán 'Admin ' (khoảng trắng) -> chặn
-  const accList = await (await api.get(config.API + '/api/taikhoan', { headers: H(hrTok) })).json();
-  const nvAcc = accList?.data?.items?.find((a) => a.vaiTro === 'NhanVien');
-  if (nvAcc) {
-    const hrSetAdminSpace = await api.put(config.API + `/api/taikhoan/${nvAcc.maTK}`, { headers: H(hrTok), data: { vaiTro: 'Admin ' } });
-    r.check('HR gán vai trò "Admin " -> chặn', hrSetAdminSpace.status() === 403 || hrSetAdminSpace.status() === 400, `status=${hrSetAdminSpace.status()}`);
-  }
+  // HR bi chan hoan toan khoi quan ly tai khoan (chi Admin)
+  const hrGetAcc = await api.get(config.API + '/api/taikhoan', { headers: H(hrTok) });
+  r.check('HR GET /api/taikhoan -> 403', hrGetAcc.status() === 403, `status=${hrGetAcc.status()}`);
 
   // Admin tạo tài khoản Admin -> OK
   const adminCreate = await api.post(config.API + '/api/taikhoan', { headers: H(adminTok), data: { tenDangNhap: 'ok_' + Date.now(), matKhau: 'Test@12345', vaiTro: 'Admin' } });

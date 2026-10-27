@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.DTOs.TaiKhoan;
 using HRM.Core.Entities;
@@ -13,7 +13,7 @@ public class TaiKhoanService : ITaiKhoanService
     private readonly AppDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ILogger<TaiKhoanService> _logger;
-    private static readonly string[] ValidRoles = { "Admin", "HR", "NhanVien" };
+    private static readonly string[] ValidRoles = { "Admin", "HR", "TruongPhong", "NhanVien" };
 
     public TaiKhoanService(
         AppDbContext context,

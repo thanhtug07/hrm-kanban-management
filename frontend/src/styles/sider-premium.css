@@ -269,6 +269,7 @@
 .hrm-user-role.is-admin { color: #dc2626; }
 .hrm-user-role.is-hr { color: #2563eb; }
 .hrm-user-role.is-nv { color: #16a34a; }
+.hrm-user-role.is-tp { color: #7c3aed; }
 
 .hrm-status-row {
   display: flex;

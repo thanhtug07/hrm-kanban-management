@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.Kanban;
@@ -33,7 +33,19 @@ public class CongViecService : ICongViecService
         // Phân quyền: Nhân viên chỉ xem task mình phụ trách
         if (role == RoleConstants.NhanVien)
         {
+            // Nhân viên: chỉ xem task mình phụ trách
             query = query.Where(x => x.MaNV_PhuTrach == userMaNV);
+        }
+        else if (role == RoleConstants.TruongPhong)
+        {
+            // Trưởng phòng: chỉ xem task của nhân viên thuộc phòng mình phụ trách
+            var managedPB = await GetManagedDepartmentAsync(user);
+            if (managedPB != null)
+            {
+                var deptEmpIds = _context.NhanViens.AsNoTracking()
+                    .Where(n => n.MaPB == managedPB).Select(n => n.MaNV);
+                query = query.Where(x => deptEmpIds.Contains(x.MaNV_PhuTrach) || x.MaNV_Giao == userMaNV);
+            }
         }
         else if (!string.IsNullOrWhiteSpace(maNV))
         {
@@ -391,6 +403,15 @@ public class CongViecService : ICongViecService
 
         await _context.SaveChangesAsync();
         return pos;
+    }
+
+    private async Task<string?> GetManagedDepartmentAsync(ClaimsPrincipal user)
+    {
+        if (user.FindFirstValue(ClaimTypes.Role) != RoleConstants.TruongPhong) return null;
+        var maNV = user.FindFirstValue("MaNV");
+        if (string.IsNullOrWhiteSpace(maNV)) return null;
+        return await _context.PhongBans.AsNoTracking()
+            .Where(p => p.MaNV_QL == maNV.Trim()).Select(p => p.MaPB).FirstOrDefaultAsync();
     }
 
     private static TaskItemDto MapToDto(BoardKanbanItem item) => new()

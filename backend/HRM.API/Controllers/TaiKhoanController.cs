@@ -9,7 +9,7 @@ namespace HRM.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = RoleConstants.AdminOrHR)]
+[Authorize(Roles = RoleConstants.Admin)]
 public class TaiKhoanController : ControllerBase
 {
     private readonly ITaiKhoanService _taiKhoanService;

@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.NghiPhep;
@@ -81,13 +81,18 @@ public class NghiPhepService : INghiPhepService
         return ApiResponse<List<NghiPhepDto>>.Ok(items);
     }
 
-    public async Task<ApiResponse<List<NghiPhepDto>>> GetAllLeavesAsync(string? trangThai, string? maNV)
+    public async Task<ApiResponse<List<NghiPhepDto>>> GetAllLeavesAsync(string? trangThai, string? maNV, ClaimsPrincipal user)
     {
         var query = _context.NghiPheps
             .AsNoTracking()
             .Include(n => n.NhanVien)
             .Include(n => n.NhanVienDuyet)
             .AsQueryable();
+
+        // Trưởng phòng: chỉ xem đơn của nhân viên thuộc phòng mình
+        var managedPB = await GetManagedDepartmentAsync(user);
+        if (managedPB != null)
+            query = query.Where(n => n.NhanVien != null && n.NhanVien.MaPB == managedPB);
 
         if (!string.IsNullOrWhiteSpace(trangThai))
             query = query.Where(n => n.TrangThai == trangThai.Trim());
@@ -123,6 +128,16 @@ public class NghiPhepService : INghiPhepService
         if (don.MaNV.Trim() == maNVHienTai)
         {
             return ApiResponse<NghiPhepDto>.Fail("Bạn không có quyền tự phê duyệt đơn nghỉ phép của chính mình.", ErrorCode.Forbidden);
+        }
+
+        // Trưởng phòng: chỉ duyệt đơn của nhân viên trong phòng mình
+        var managedPB = await GetManagedDepartmentAsync(user);
+        if (managedPB != null)
+        {
+            var empPB = await _context.NhanViens.AsNoTracking()
+                .Where(n => n.MaNV == don.MaNV).Select(n => n.MaPB).FirstOrDefaultAsync();
+            if (empPB != null && empPB != managedPB)
+                return ApiResponse<NghiPhepDto>.Fail("Bạn chỉ được duyệt đơn của nhân viên thuộc phòng mình phụ trách.", ErrorCode.Forbidden);
         }
 
         don.TrangThai = dto.TrangThai; // "Đã duyệt" hoặc "Từ chối"
@@ -165,6 +180,15 @@ public class NghiPhepService : INghiPhepService
 
         _logger.LogInformation("NghiPhepCancelled: MaNP={MaNP}, Actor={Actor}", id, maNV);
         return ApiResponse<bool>.Ok(true, "Hủy đơn nghỉ phép thành công.");
+    }
+
+    private async Task<string?> GetManagedDepartmentAsync(ClaimsPrincipal user)
+    {
+        if (user.FindFirstValue(ClaimTypes.Role) != RoleConstants.TruongPhong) return null;
+        var maNV = user.FindFirstValue("MaNV");
+        if (string.IsNullOrWhiteSpace(maNV)) return null;
+        return await _context.PhongBans.AsNoTracking()
+            .Where(p => p.MaNV_QL == maNV.Trim()).Select(p => p.MaPB).FirstOrDefaultAsync();
     }
 
     private static NghiPhepDto MapToDto(NghiPhep n, string? hoTen, string? tenDuyet) => new()

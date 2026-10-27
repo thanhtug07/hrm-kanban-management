@@ -68,11 +68,11 @@ public class ChamCongController : ControllerBase
     /// Danh sách bảng chấm công toàn công ty theo tháng/năm/trạng thái (Admin/HR)
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Managers)]
     [ProducesResponseType(typeof(ApiResponse<List<ChamCongDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetList([FromQuery] ChamCongFilterDto filter)
     {
-        var result = await _chamCongService.GetListAsync(filter);
+        var result = await _chamCongService.GetListAsync(filter, User);
         return Ok(result);
     }
 
@@ -80,7 +80,7 @@ public class ChamCongController : ControllerBase
     /// Cập nhật điều chỉnh bản ghi chấm công (Admin/HR)
     /// </summary>
     [HttpPut("{id:int}")]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Managers)]
     [ProducesResponseType(typeof(ApiResponse<ChamCongDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<ChamCongDto>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateChamCongDto dto)

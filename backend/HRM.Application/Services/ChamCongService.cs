@@ -1,5 +1,6 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using HRM.Core.Common;
+using HRM.Core.Constants;
 using HRM.Core.DTOs.ChamCong;
 using HRM.Core.Entities;
 using HRM.Core.Interfaces;
@@ -107,13 +108,18 @@ public class ChamCongService : IChamCongService
         return ApiResponse<List<ChamCongDto>>.Ok(items);
     }
 
-    public async Task<ApiResponse<List<ChamCongDto>>> GetListAsync(ChamCongFilterDto filter)
+    public async Task<ApiResponse<List<ChamCongDto>>> GetListAsync(ChamCongFilterDto filter, ClaimsPrincipal user)
     {
         var query = _context.ChamCongs
             .AsNoTracking()
             .Include(c => c.NhanVien)
                 .ThenInclude(n => n.PhongBan)
             .AsQueryable();
+
+        // Trưởng phòng: chỉ xem chấm công của nhân viên thuộc phòng mình
+        var managedPB = await GetManagedDepartmentAsync(user);
+        if (managedPB != null)
+            query = query.Where(c => c.NhanVien != null && c.NhanVien.MaPB == managedPB);
 
         if (!string.IsNullOrWhiteSpace(filter.MaNV))
             query = query.Where(c => c.MaNV == filter.MaNV.Trim());
@@ -151,6 +157,15 @@ public class ChamCongService : IChamCongService
 
         await _context.SaveChangesAsync();
         return ApiResponse<ChamCongDto>.Ok(MapToDto(cc, cc.NhanVien?.HoTen, cc.NhanVien?.PhongBan?.TenPB), "Cập nhật bản ghi chấm công thành công.");
+    }
+
+    private async Task<string?> GetManagedDepartmentAsync(ClaimsPrincipal user)
+    {
+        if (user.FindFirstValue(ClaimTypes.Role) != RoleConstants.TruongPhong) return null;
+        var maNV = user.FindFirstValue("MaNV");
+        if (string.IsNullOrWhiteSpace(maNV)) return null;
+        return await _context.PhongBans.AsNoTracking()
+            .Where(p => p.MaNV_QL == maNV.Trim()).Select(p => p.MaPB).FirstOrDefaultAsync();
     }
 
     private static ChamCongDto MapToDto(ChamCong c, string? hoTen, string? tenPB = null) => new()

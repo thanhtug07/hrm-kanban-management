@@ -251,10 +251,18 @@
             NgayTao DATETIME NOT NULL DEFAULT GETDATE(),
             CONSTRAINT PK_TaiKhoan PRIMARY KEY CLUSTERED (MaTK),
             CONSTRAINT UQ_TaiKhoan_TenDangNhap UNIQUE (TenDangNhap),
-            CONSTRAINT CK_TaiKhoan_VaiTro CHECK (VaiTro IN (N'Admin', N'HR', N'NhanVien')),
+            CONSTRAINT CK_TaiKhoan_VaiTro CHECK (VaiTro IN (N'Admin', N'HR', N'TruongPhong', N'NhanVien')),
             CONSTRAINT FK_TaiKhoan_NhanVien FOREIGN KEY (MaNV) REFERENCES dbo.NhanVien(MaNV) ON DELETE SET NULL
         );
     END
+    GO
+
+    -- Đảm bảo CHECK VaiTro cho phép TruongPhong (cho DB cũ đã tạo thiếu)
+    IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_TaiKhoan_VaiTro')
+    BEGIN
+        ALTER TABLE dbo.TaiKhoan DROP CONSTRAINT CK_TaiKhoan_VaiTro;
+    END
+    ALTER TABLE dbo.TaiKhoan ADD CONSTRAINT CK_TaiKhoan_VaiTro CHECK (VaiTro IN (N'Admin', N'HR', N'TruongPhong', N'NhanVien'));
     GO
 
     -- 1.10. BẢNG BÌNH LUẬN TRÊN TASK (BinhLuan)

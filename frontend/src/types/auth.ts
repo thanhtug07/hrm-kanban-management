@@ -1,4 +1,4 @@
-export type Role = 'Admin' | 'HR' | 'NhanVien';
+export type Role = 'Admin' | 'HR' | 'TruongPhong' | 'NhanVien';
 
 export interface LoginRequest {
   tenDangNhap: string;

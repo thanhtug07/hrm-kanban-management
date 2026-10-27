@@ -1,4 +1,4 @@
-﻿# 🏢 HRM Portal — Hệ thống Quản lý Nhân sự & Kanban
+# 🏢 HRM Portal — Hệ thống Quản lý Nhân sự & Kanban
 
 > **Hệ thống quản trị nhân sự (HRM) kết hợp bảng công việc Kanban** — Bài tập lớn môn Cơ sở Dữ liệu.
 > Xây dựng theo kiến trúc tách tầng (Clean Architecture) với **ASP.NET Core 8 Web API + SQL Server** ở backend và **React 19 + TypeScript** ở frontend.

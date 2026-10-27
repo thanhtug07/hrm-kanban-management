@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Layout, Menu, Avatar, Tooltip } from 'antd';
 import {
   DashboardOutlined,
@@ -32,12 +32,14 @@ interface NavSection {
 const ROLE_LABEL: Record<string, string> = {
   Admin: 'Quản trị viên',
   HR: 'Nhân sự (HR)',
+  TruongPhong: 'Trưởng phòng',
   NhanVien: 'Nhân viên',
 };
 
 const ROLE_CLASS: Record<string, string> = {
   Admin: 'is-admin',
   HR: 'is-hr',
+  TruongPhong: 'is-tp',
   NhanVien: 'is-nv',
 };
 
@@ -49,6 +51,8 @@ export const SiderMenu: React.FC = () => {
 
   const vaiTro = user?.vaiTro;
   const isAdminOrHr = vaiTro === 'Admin' || vaiTro === 'HR';
+  const isAdmin = vaiTro === 'Admin';
+  const isManager = vaiTro === 'Admin' || vaiTro === 'HR' || vaiTro === 'TruongPhong';
 
   const sections = useMemo<NavSection[]>(() => {
     const sections: NavSection[] = [
@@ -65,7 +69,7 @@ export const SiderMenu: React.FC = () => {
           { key: '/chamcong', icon: <CalendarOutlined />, label: 'Điểm danh & Chấm công' },
           { key: '/nghiphep', icon: <ScheduleOutlined />, label: 'Quản lý Nghỉ phép' },
           { key: '/bangluong', icon: <DollarOutlined />, label: 'Bảng lương & Chi trả' },
-          ...(isAdminOrHr
+          ...(isManager
             ? [{ key: '/nhanvien', icon: <TeamOutlined />, label: 'Quản lý Nhân viên' }]
             : []),
         ],
@@ -74,13 +78,13 @@ export const SiderMenu: React.FC = () => {
 
     sections.push({
       label: 'Quản trị',
-      items: isAdminOrHr
+      items: isAdmin
         ? [{ key: '/taikhoan', icon: <SafetyCertificateOutlined />, label: 'Quản lý tài khoản' }]
         : [{ key: '/profile', icon: <UserOutlined />, label: 'Trang cá nhân' }],
     });
 
     return sections;
-  }, [isAdminOrHr]);
+  }, [isAdmin, isManager]);
 
   const selectedKey = '/' + location.pathname.split('/')[1];
   const avatarStyle = getAvatarStyle(user?.hoTen);

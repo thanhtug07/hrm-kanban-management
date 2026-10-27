@@ -119,7 +119,10 @@ USING (VALUES
     ('hr02',  '$2a$11$5p51Wi1CqP0XuoeS1dCRueIcJGVQhjdRLmo3NjiB90YefMO.FwO3m', N'HR',       'NV010', 1),
     ('nv001', '$2a$11$fCjjPd0/hu4XYOjdSAdI5Os9Fn/UZXD3S4izg7Xd8WpCnQjM2b7Ra', N'NhanVien', 'NV006', 1),
     ('nv002', '$2a$11$WsMbIuPJvOmvLDQUhVyQeeno9wI84Ne0OaZkP5IU3KY8teb.UZU6G', N'NhanVien', 'NV007', 1),
-    ('nv003', '$2a$11$fCjjPd0/hu4XYOjdSAdI5Os9Fn/UZXD3S4izg7Xd8WpCnQjM2b7Ra', N'NhanVien', 'NV008', 1)
+    ('nv003', '$2a$11$fCjjPd0/hu4XYOjdSAdI5Os9Fn/UZXD3S4izg7Xd8WpCnQjM2b7Ra', N'NhanVien', 'NV008', 1),
+    ('tp01',  '$2a$11$ZbOXYsdJoZSC/.7xlxTNDef02SgNrBjS0lAozqVIcGCD9Ste8Cn/S', N'TruongPhong', 'NV001', 1),
+    ('tp02',  '$2a$11$ZbOXYsdJoZSC/.7xlxTNDef02SgNrBjS0lAozqVIcGCD9Ste8Cn/S', N'TruongPhong', 'NV002', 1),
+    ('tp03',  '$2a$11$ZbOXYsdJoZSC/.7xlxTNDef02SgNrBjS0lAozqVIcGCD9Ste8Cn/S', N'TruongPhong', 'NV003', 1)
 ) AS source (TenDangNhap, MatKhauHash, VaiTro, MaNV, TrangThai)
 ON target.TenDangNhap = source.TenDangNhap
 WHEN MATCHED THEN
