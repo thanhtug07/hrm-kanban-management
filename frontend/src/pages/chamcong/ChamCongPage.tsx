@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Card,
   Row,
@@ -30,11 +30,13 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
+  SettingOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '@/components/PageHeader';
+import CauHinhGioModal from './components/CauHinhGioModal';
 import { useAuthStore } from '@/stores/authStore';
 import { chamCongApi } from '@/api/chamCongApi';
 import { nhanVienApi } from '@/api/nhanVienApi';
@@ -52,7 +54,8 @@ const { Title, Text } = Typography;
 
 export const ChamCongPage: React.FC = () => {
   const { user } = useAuthStore();
-  const isHrOrAdmin = user?.vaiTro === 'Admin' || user?.vaiTro === 'HR';
+  const isHrOrAdmin = user?.vaiTro === 'Admin' || user?.vaiTro === 'HR' || user?.vaiTro === 'TruongPhong';
+  const isAdmin = user?.vaiTro === 'Admin';
 
   const [currentTime, setCurrentTime] = useState(dayjs());
   const [selectedMonth, setSelectedMonth] = useState<Dayjs>(dayjs());
@@ -80,6 +83,7 @@ export const ChamCongPage: React.FC = () => {
 
   // Edit modal (HR/Admin)
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [cauHinhModalOpen, setCauHinhModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ChamCongDto | null>(null);
   const [form] = Form.useForm();
 
@@ -793,6 +797,16 @@ export const ChamCongPage: React.FC = () => {
         icon={<ClockCircleOutlined />}
         extra={
           <>
+            {isAdmin && (
+              <Button
+                icon={<SettingOutlined />}
+                shape="round"
+                style={{ borderRadius: 8, height: 38 }}
+                onClick={() => setCauHinhModalOpen(true)}
+              >
+                Cấu hình giờ
+              </Button>
+            )}
             <DatePicker
               picker="month"
               value={selectedMonth}
@@ -1298,6 +1312,10 @@ export const ChamCongPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
+      <CauHinhGioModal
+        open={cauHinhModalOpen}
+        onClose={() => setCauHinhModalOpen(false)}
+      />
     </div>
   );
 };

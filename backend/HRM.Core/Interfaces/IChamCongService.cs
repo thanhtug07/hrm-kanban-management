@@ -11,4 +11,6 @@ public interface IChamCongService
     Task<ApiResponse<List<ChamCongDto>>> GetMyAttendanceAsync(int? thang, int? nam, ClaimsPrincipal user);
     Task<ApiResponse<List<ChamCongDto>>> GetListAsync(ChamCongFilterDto filter, ClaimsPrincipal user);
     Task<ApiResponse<ChamCongDto>> UpdateAsync(int id, UpdateChamCongDto dto);
+    Task<ApiResponse<CauHinhChamCongDto>> GetCauHinhDtoAsync();
+    Task<ApiResponse<CauHinhChamCongDto>> UpdateCauHinhAsync(UpdateCauHinhChamCongDto dto);
 }

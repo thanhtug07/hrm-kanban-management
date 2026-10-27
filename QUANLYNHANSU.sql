@@ -281,6 +281,33 @@
     END
     GO
 
+    -- 1.11. BẢNG CẤU HÌNH KHUNG GIỜ CHẤM CÔNG (CauHinhChamCong)
+    IF OBJECT_ID(N'dbo.CauHinhChamCong', N'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.CauHinhChamCong (
+            MaCH INT IDENTITY(1,1) NOT NULL,
+            GioBatDau TIME NOT NULL,      -- giờ bắt đầu ca (ví dụ 08:00)
+            GioKetThuc TIME NOT NULL,     -- giờ kết thúc ca (ví dụ 17:30)
+            PhutChoPhepSom INT NOT NULL DEFAULT 15, -- cho phép check-in sớm tối đa (phút)
+            PhutChoPhepTre INT NOT NULL DEFAULT 0,  -- cho phép check-in trễ tối đa (phút)
+            BatBuocCheckOutSauKetThuc BIT NOT NULL DEFAULT 1, -- chỉ check-out sau giờ kết thúc
+            NgayCapNhat DATETIME NOT NULL DEFAULT GETDATE(),
+            CONSTRAINT PK_CauHinhChamCong PRIMARY KEY CLUSTERED (MaCH),
+            CONSTRAINT CK_CauHinh_Gio CHECK (GioKetThuc > GioBatDau),
+            CONSTRAINT CK_CauHinh_PhutSom CHECK (PhutChoPhepSom >= 0 AND PhutChoPhepSom <= 120),
+            CONSTRAINT CK_CauHinh_PhutTre CHECK (PhutChoPhepTre >= 0 AND PhutChoPhepTre <= 120)
+        );
+    END
+    GO
+
+    -- Seed cấu hình mặc định: ca 08:00 - 17:30, cho sớm 15 phút, trễ 0 phút
+    IF NOT EXISTS (SELECT 1 FROM dbo.CauHinhChamCong)
+    BEGIN
+        INSERT INTO dbo.CauHinhChamCong (GioBatDau, GioKetThuc, PhutChoPhepSom, PhutChoPhepTre, BatBuocCheckOutSauKetThuc)
+        VALUES ('08:00', '17:30', 15, 0, 1);
+    END
+    GO
+
     -- CÁC CHỈ MỤC NON-CLUSTERED INDEXES TỐI ƯU
     IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_NhanVien_MaPB')
         CREATE NONCLUSTERED INDEX IX_NhanVien_MaPB ON dbo.NhanVien (MaPB);

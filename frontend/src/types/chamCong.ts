@@ -22,3 +22,21 @@ export interface UpdateChamCongDto {
   gioRa?: string;
   trangThai: string;
 }
+
+export interface CauHinhChamCongDto {
+  maCH: number;
+  gioBatDau: string;
+  gioKetThuc: string;
+  phutChoPhepSom: number;
+  phutChoPhepTre: number;
+  batBuocCheckOutSauKetThuc: boolean;
+  ngayCapNhat: string;
+}
+
+export interface UpdateCauHinhChamCongDto {
+  gioBatDau: string;
+  gioKetThuc: string;
+  phutChoPhepSom: number;
+  phutChoPhepTre: number;
+  batBuocCheckOutSauKetThuc: boolean;
+}

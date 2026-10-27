@@ -27,33 +27,36 @@ public class ChamCongService : IChamCongService
             return ApiResponse<ChamCongDto>.Fail("Không xác định được mã nhân viên từ tài khoản.");
 
         var today = DateOnly.FromDateTime(DateTime.Today);
-        var existing = await _context.ChamCongs
-            .FirstOrDefaultAsync(c => c.MaNV == maNV && c.Ngay == today);
-
+        var existing = await _context.ChamCongs.FirstOrDefaultAsync(c => c.MaNV == maNV && c.Ngay == today);
         if (existing != null)
-        {
             return ApiResponse<ChamCongDto>.Fail($"Bạn đã check-in hôm nay lúc {existing.GioVao:HH:mm:ss}.");
+
+        // Kiểm tra khung giờ cho phép check-in
+        var cfg = await GetCauHinhAsync();
+        var nowTime = TimeOnly.FromDateTime(DateTime.Now);
+        if (nowTime < cfg.GioBatDau)
+        {
+            var earliest = cfg.GioBatDau.AddMinutes(-cfg.PhutChoPhepSom);
+            if (nowTime < earliest)
+                return ApiResponse<ChamCongDto>.Fail($"Chưa đến giờ check-in. Ca bắt đầu {cfg.GioBatDau:HH:mm}, chỉ được check-in sớm tối đa {cfg.PhutChoPhepSom} phút (từ {earliest:HH:mm}).");
         }
 
-        var nowTime = TimeOnly.FromDateTime(DateTime.Now);
-        var trangThai = nowTime > new TimeOnly(8, 30) ? "Trễ" : "Đủ công";
+        var latest = cfg.GioKetThuc.AddMinutes(cfg.PhutChoPhepTre);
+        if (nowTime > latest)
+            return ApiResponse<ChamCongDto>.Fail($"Đã quá giờ check-in. Ca kết thúc {cfg.GioKetThuc:HH:mm}" + (cfg.PhutChoPhepTre > 0 ? $" (cho phép trễ tối đa {cfg.PhutChoPhepTre} phút, hạn {latest:HH:mm})" : "") + ".");
+
+        var trangThai = nowTime > cfg.GioBatDau ? "Trễ" : "Đủ công";
 
         var chamCong = new ChamCong
         {
-            MaNV = maNV,
-            Ngay = today,
-            GioVao = nowTime,
-            GioRa = null,
-            TrangThai = trangThai
+            MaNV = maNV, Ngay = today, GioVao = nowTime, GioRa = null, TrangThai = trangThai
         };
 
         _context.ChamCongs.Add(chamCong);
         await _context.SaveChangesAsync();
-
         _logger.LogInformation("CheckIn: MaNV={MaNV}, Time={Time}, Status={Status}", maNV, nowTime, trangThai);
 
         var nv = await _context.NhanViens.AsNoTracking().FirstOrDefaultAsync(n => n.MaNV == maNV);
-
         return ApiResponse<ChamCongDto>.Ok(MapToDto(chamCong, nv?.HoTen), "Check-in thành công.");
     }
 
@@ -64,28 +67,71 @@ public class ChamCongService : IChamCongService
             return ApiResponse<ChamCongDto>.Fail("Không xác định được mã nhân viên.");
 
         var today = DateOnly.FromDateTime(DateTime.Today);
-        var existing = await _context.ChamCongs
-            .FirstOrDefaultAsync(c => c.MaNV == maNV && c.Ngay == today);
-
+        var existing = await _context.ChamCongs.FirstOrDefaultAsync(c => c.MaNV == maNV && c.Ngay == today);
         if (existing == null)
-        {
             return ApiResponse<ChamCongDto>.Fail("Bạn chưa check-in ngày hôm nay.");
-        }
-
         if (existing.GioRa.HasValue)
-        {
             return ApiResponse<ChamCongDto>.Fail($"Bạn đã check-out hôm nay lúc {existing.GioRa.Value:HH:mm:ss}.");
-        }
 
+        // Kiểm tra khung giờ cho phép check-out
+        var cfg = await GetCauHinhAsync();
         var nowTime = TimeOnly.FromDateTime(DateTime.Now);
+        if (cfg.BatBuocCheckOutSauKetThuc && nowTime < cfg.GioKetThuc)
+            return ApiResponse<ChamCongDto>.Fail($"Chưa hết giờ làm việc. Chỉ được check-out sau {cfg.GioKetThuc:HH:mm}.");
+
         existing.GioRa = nowTime;
         await _context.SaveChangesAsync();
-
         _logger.LogInformation("CheckOut: MaNV={MaNV}, Time={Time}", maNV, nowTime);
 
         var nv = await _context.NhanViens.AsNoTracking().FirstOrDefaultAsync(n => n.MaNV == maNV);
         return ApiResponse<ChamCongDto>.Ok(MapToDto(existing, nv?.HoTen), "Check-out thành công.");
     }
+
+    public async Task<ApiResponse<CauHinhChamCongDto>> GetCauHinhDtoAsync()
+    {
+        var cfg = await GetCauHinhAsync();
+        return ApiResponse<CauHinhChamCongDto>.Ok(MapCauHinh(cfg));
+    }
+
+    public async Task<ApiResponse<CauHinhChamCongDto>> UpdateCauHinhAsync(UpdateCauHinhChamCongDto dto)
+    {
+        if (dto.GioKetThuc <= dto.GioBatDau)
+            return ApiResponse<CauHinhChamCongDto>.Fail("Giờ kết thúc phải sau giờ bắt đầu.");
+        if (dto.PhutChoPhepSom < 0 || dto.PhutChoPhepSom > 120)
+            return ApiResponse<CauHinhChamCongDto>.Fail("Phút cho phép sớm phải từ 0 đến 120.");
+        if (dto.PhutChoPhepTre < 0 || dto.PhutChoPhepTre > 120)
+            return ApiResponse<CauHinhChamCongDto>.Fail("Phút cho phép trễ phải từ 0 đến 120.");
+
+        var cfg = await _context.CauHinhChamCongs.FirstOrDefaultAsync();
+        if (cfg == null)
+        {
+            cfg = new CauHinhChamCong();
+            _context.CauHinhChamCongs.Add(cfg);
+        }
+        cfg.GioBatDau = dto.GioBatDau;
+        cfg.GioKetThuc = dto.GioKetThuc;
+        cfg.PhutChoPhepSom = dto.PhutChoPhepSom;
+        cfg.PhutChoPhepTre = dto.PhutChoPhepTre;
+        cfg.BatBuocCheckOutSauKetThuc = dto.BatBuocCheckOutSauKetThuc;
+        cfg.NgayCapNhat = DateTime.Now;
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("UpdateCauHinhChamCong: {BatDau}-{KetThuc}, som={Som}, tre={Tre}", dto.GioBatDau, dto.GioKetThuc, dto.PhutChoPhepSom, dto.PhutChoPhepTre);
+        return ApiResponse<CauHinhChamCongDto>.Ok(MapCauHinh(cfg), "Cập nhật cấu hình giờ chấm công thành công.");
+    }
+
+    private async Task<CauHinhChamCong> GetCauHinhAsync()
+    {
+        var cfg = await _context.CauHinhChamCongs.AsNoTracking().FirstOrDefaultAsync();
+        return cfg ?? new CauHinhChamCong { GioBatDau = new TimeOnly(8, 0), GioKetThuc = new TimeOnly(17, 30), PhutChoPhepSom = 15, PhutChoPhepTre = 0, BatBuocCheckOutSauKetThuc = true };
+    }
+
+    private static CauHinhChamCongDto MapCauHinh(CauHinhChamCong c) => new()
+    {
+        MaCH = c.MaCH, GioBatDau = c.GioBatDau, GioKetThuc = c.GioKetThuc,
+        PhutChoPhepSom = c.PhutChoPhepSom, PhutChoPhepTre = c.PhutChoPhepTre,
+        BatBuocCheckOutSauKetThuc = c.BatBuocCheckOutSauKetThuc, NgayCapNhat = c.NgayCapNhat
+    };
 
     public async Task<ApiResponse<List<ChamCongDto>>> GetMyAttendanceAsync(int? thang, int? nam, ClaimsPrincipal user)
     {

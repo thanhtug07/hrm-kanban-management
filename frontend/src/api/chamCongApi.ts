@@ -4,6 +4,8 @@ import {
   ChamCongDto,
   ChamCongFilterDto,
   UpdateChamCongDto,
+  CauHinhChamCongDto,
+  UpdateCauHinhChamCongDto,
 } from '@/types/chamCong';
 
 export const chamCongApi = {
@@ -25,5 +27,12 @@ export const chamCongApi = {
 
   update: async (maCC: number, data: UpdateChamCongDto): Promise<ApiResponse<ChamCongDto>> => {
     return axiosClient.put(`/api/chamcong/${maCC}`, data);
+  },
+  getCauHinh: async (): Promise<ApiResponse<CauHinhChamCongDto>> => {
+    return axiosClient.get('/api/chamcong/cauhinh');
+  },
+
+  updateCauHinh: async (data: UpdateCauHinhChamCongDto): Promise<ApiResponse<CauHinhChamCongDto>> => {
+    return axiosClient.put('/api/chamcong/cauhinh', data);
   },
 };

@@ -22,6 +22,7 @@ public class AppDbContext : DbContext
     public virtual DbSet<TaiKhoan> TaiKhoans => Set<TaiKhoan>();
     public virtual DbSet<BinhLuan> BinhLuans => Set<BinhLuan>();
     public virtual DbSet<BoardKanbanItem> BoardKanbanItems => Set<BoardKanbanItem>();
+    public virtual DbSet<CauHinhChamCong> CauHinhChamCongs => Set<CauHinhChamCong>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

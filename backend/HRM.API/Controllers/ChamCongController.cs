@@ -93,4 +93,24 @@ public class ChamCongController : ControllerBase
 
         return Ok(result);
     }
+
+    /// <summary>Lấy cấu hình khung giờ chấm công (mọi người dùng đã đăng nhập đều xem được)</summary>
+    [HttpGet("cauhinh")]
+    [ProducesResponseType(typeof(ApiResponse<CauHinhChamCongDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCauHinh()
+    {
+        var result = await _chamCongService.GetCauHinhDtoAsync();
+        return Ok(result);
+    }
+
+    /// <summary>Cập nhật khung giờ chấm công (Chỉ Admin)</summary>
+    [HttpPut("cauhinh")]
+    [Authorize(Roles = RoleConstants.Admin)]
+    [ProducesResponseType(typeof(ApiResponse<CauHinhChamCongDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateCauHinh([FromBody] UpdateCauHinhChamCongDto dto)
+    {
+        var result = await _chamCongService.UpdateCauHinhAsync(dto);
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
+    }
 }
