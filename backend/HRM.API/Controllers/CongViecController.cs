@@ -42,7 +42,7 @@ public class CongViecController : ControllerBase
         var result = await _congViecService.GetByIdAsync(id, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("quyền"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.Forbidden)
                 return StatusCode(StatusCodes.Status403Forbidden, result);
 
             return NotFound(result);
@@ -100,7 +100,7 @@ public class CongViecController : ControllerBase
         var result = await _congViecService.MoveTaskAsync(id, dto, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("quyền"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.Forbidden)
                 return StatusCode(StatusCodes.Status403Forbidden, result);
 
             return NotFound(result);
@@ -139,7 +139,7 @@ public class CongViecController : ControllerBase
         var result = await _congViecService.GetCommentsAsync(id, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("quyền"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.Forbidden)
                 return StatusCode(StatusCodes.Status403Forbidden, result);
 
             return NotFound(result);
@@ -160,7 +160,7 @@ public class CongViecController : ControllerBase
         var result = await _congViecService.AddCommentAsync(id, dto, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("quyền"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.Forbidden)
                 return StatusCode(StatusCodes.Status403Forbidden, result);
 
             return NotFound(result);

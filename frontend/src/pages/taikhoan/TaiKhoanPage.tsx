@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table,
   Button,
@@ -58,7 +58,7 @@ export const TaiKhoanPage: React.FC = () => {
     try {
       const res: any = await taiKhoanApi.getAll();
       if (res && res.success && res.data) {
-        setAccounts(res.data);
+        setAccounts(res.data.items || []);
       } else {
         message.error(res?.message || 'Không thể tải danh sách tài khoản.');
       }

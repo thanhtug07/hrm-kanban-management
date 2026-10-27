@@ -1,4 +1,4 @@
-using HRM.Core.Common;
+﻿using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.NghiPhep;
 using HRM.Core.Interfaces;
@@ -73,10 +73,10 @@ public class NghiPhepController : ControllerBase
         var result = await _nghiPhepService.DuyetAsync(id, dto, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("Không thể tự duyệt") || result.Message.Contains("quyền"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.Forbidden)
                 return StatusCode(StatusCodes.Status403Forbidden, result);
 
-            if (result.Message.Contains("không tồn tại"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.NotFound)
                 return NotFound(result);
 
             return BadRequest(result);
@@ -98,10 +98,10 @@ public class NghiPhepController : ControllerBase
         var result = await _nghiPhepService.DeleteAsync(id, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("quyền"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.Forbidden)
                 return StatusCode(StatusCodes.Status403Forbidden, result);
 
-            if (result.Message.Contains("không tồn tại"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.NotFound)
                 return NotFound(result);
 
             return BadRequest(result);

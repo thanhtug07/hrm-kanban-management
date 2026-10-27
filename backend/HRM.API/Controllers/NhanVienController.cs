@@ -1,4 +1,4 @@
-using HRM.Core.Common;
+﻿using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.NhanVien;
 using HRM.Core.Interfaces;
@@ -55,7 +55,7 @@ public class NhanVienController : ControllerBase
         var result = await _nhanVienService.GetByIdAsync(maNV, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("quyền"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.Forbidden)
                 return StatusCode(StatusCodes.Status403Forbidden, result);
 
             return NotFound(result);
@@ -77,7 +77,7 @@ public class NhanVienController : ControllerBase
         var result = await _nhanVienService.CreateAsync(dto, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("tồn tại"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.Conflict)
                 return Conflict(result);
 
             return BadRequest(result);
@@ -99,7 +99,7 @@ public class NhanVienController : ControllerBase
         var result = await _nhanVienService.UpdateAsync(maNV, dto, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("Không tìm thấy"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.NotFound)
                 return NotFound(result);
 
             return BadRequest(result);
@@ -121,7 +121,7 @@ public class NhanVienController : ControllerBase
         var result = await _nhanVienService.DeleteAsync(maNV, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("Không tìm thấy"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.NotFound)
                 return NotFound(result);
 
             return BadRequest(result);

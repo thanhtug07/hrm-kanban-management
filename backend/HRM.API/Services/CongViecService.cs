@@ -82,7 +82,7 @@ public class CongViecService : ICongViecService
 
         if (role == RoleConstants.NhanVien && item.MaNV_PhuTrach.Trim() != userMaNV?.Trim())
         {
-            return ApiResponse<TaskItemDto>.Fail("Bạn không có quyền xem chi tiết công việc này.");
+            return ApiResponse<TaskItemDto>.Fail("Bạn không có quyền xem chi tiết công việc này.", ErrorCode.Forbidden);
         }
 
         return ApiResponse<TaskItemDto>.Ok(MapToDto(item));
@@ -113,7 +113,7 @@ public class CongViecService : ICongViecService
             DoUuTien = dto.DoUuTien,
             NgayBatDau = dto.NgayBatDau,
             Deadline = dto.Deadline,
-            NgayTao = DateTime.UtcNow,
+            NgayTao = DateTime.Now,
             DaXoa = false
         };
 
@@ -149,7 +149,7 @@ public class CongViecService : ICongViecService
         task.DoUuTien = dto.DoUuTien;
         task.NgayBatDau = dto.NgayBatDau;
         task.Deadline = dto.Deadline;
-        task.NgayCapNhat = DateTime.UtcNow;
+        task.NgayCapNhat = DateTime.Now;
 
         await _context.SaveChangesAsync();
 
@@ -174,21 +174,35 @@ public class CongViecService : ICongViecService
         // Phân quyền di chuyển task
         if (role == RoleConstants.NhanVien && task.MaNV_PhuTrach.Trim() != userMaNV?.Trim())
         {
-            return ApiResponse<TaskItemDto>.Fail("Bạn không có quyền di chuyển công việc này (chỉ được di chuyển công việc của mình).");
+            return ApiResponse<TaskItemDto>.Fail("Bạn không có quyền di chuyển công việc này (chỉ được di chuyển công việc của mình).", ErrorCode.Forbidden);
         }
 
         var fromStatus = task.TrangThai;
 
-        // Tính toán vị trí theo thuật toán Gap-based 1000 + Rebalance
-        int viTriMoi = await TinhViTriMoiAsync(dto.TrangThaiMoi, dto.MaTaskTruoc, dto.MaTaskSau, id);
+        // Bọc transaction: rebalance (nhiều lệnh ghi) + SP di chuyển phải NGUYÊN TỬ
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            // Tính toán vị trí theo thuật toán Gap-based 1000 + Rebalance
+            int viTriMoi = await TinhViTriMoiAsync(dto.TrangThaiMoi, dto.MaTaskTruoc, dto.MaTaskSau, id);
 
-        // LỚP BẢO VỆ 2: Gọi Stored Procedure SP_DiChuyenTask
-        await _context.Database.ExecuteSqlRawAsync(
-            "EXEC dbo.SP_DiChuyenTask @MaTask = {0}, @TrangThaiMoi = {1}, @ViTriMoi = {2}",
-            id, dto.TrangThaiMoi, viTriMoi);
+            // LỚP BẢO VỆ 2: Gọi Stored Procedure SP_DiChuyenTask
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.SP_DiChuyenTask @MaTask = {0}, @TrangThaiMoi = {1}, @ViTriMoi = {2}",
+                id, dto.TrangThaiMoi, viTriMoi);
 
-        _logger.LogInformation("TaskMoved: ActorMaNV={ActorMaNV}, TaskId={TaskId}, FromStatus={FromStatus}, ToStatus={ToStatus}, ViTriMoi={ViTriMoi}",
-            userMaNV, id, fromStatus, dto.TrangThaiMoi, viTriMoi);
+            await transaction.CommitAsync();
+
+            _logger.LogInformation("TaskMoved: ActorMaNV={ActorMaNV}, TaskId={TaskId}, FromStatus={FromStatus}, ToStatus={ToStatus}, ViTriMoi={ViTriMoi}",
+                userMaNV, id, fromStatus, dto.TrangThaiMoi, viTriMoi);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "MoveTaskFailed: TaskId={TaskId}, ToStatus={ToStatus}", id, dto.TrangThaiMoi);
+            return ApiResponse<TaskItemDto>.Fail("Di chuyển công việc thất bại, đã hoàn tác thay đổi.");
+        }
+
 
         // Query lại View để lấy thông tin đầy đủ nhất (kèm cờ quá hạn & ngày hoàn thành do trigger tính)
         var movedItem = await _context.BoardKanbanItems.AsNoTracking()
@@ -206,7 +220,7 @@ public class CongViecService : ICongViecService
         }
 
         task.DaXoa = true;
-        task.NgayCapNhat = DateTime.UtcNow;
+        task.NgayCapNhat = DateTime.Now;
         await _context.SaveChangesAsync();
 
         var userMaNV = user.FindFirstValue("MaNV");
@@ -231,7 +245,7 @@ public class CongViecService : ICongViecService
 
         if (!canView)
         {
-            return ApiResponse<List<BinhLuanDto>>.Fail("Bạn không có quyền xem bình luận của công việc này.");
+            return ApiResponse<List<BinhLuanDto>>.Fail("Bạn không có quyền xem bình luận của công việc này.", ErrorCode.Forbidden);
         }
 
         var comments = await _context.BinhLuans.AsNoTracking()
@@ -268,7 +282,7 @@ public class CongViecService : ICongViecService
 
         if (!canComment)
         {
-            return ApiResponse<BinhLuanDto>.Fail("Bạn không có quyền bình luận trên công việc này.");
+            return ApiResponse<BinhLuanDto>.Fail("Bạn không có quyền bình luận trên công việc này.", ErrorCode.Forbidden);
         }
 
         var comment = new BinhLuan
@@ -276,7 +290,7 @@ public class CongViecService : ICongViecService
             MaTask = taskId,
             MaNV = userMaNV,
             NoiDung = dto.NoiDung.Trim(),
-            ThoiGian = DateTime.UtcNow
+            ThoiGian = DateTime.Now
         };
 
         _context.BinhLuans.Add(comment);

@@ -1,6 +1,7 @@
-using System.Text;
+﻿using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using HRM.API.Middleware;
 using HRM.API.Services;
 using HRM.API.Validators;
 using HRM.Core.Interfaces;
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IChamCongService, ChamCongService>();
 builder.Services.AddScoped<INghiPhepService, NghiPhepService>();
 builder.Services.AddScoped<IBangLuongService, BangLuongService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<ITaiKhoanService, TaiKhoanService>();
 
 // 4. Cấu hình FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
@@ -154,6 +156,8 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = "swagger";
     });
 }
+
+app.UseGlobalExceptionHandler();
 
 app.UseSerilogRequestLogging();
 

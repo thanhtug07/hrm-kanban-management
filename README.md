@@ -171,6 +171,22 @@ Frontend khởi động tại **http://localhost:5173**
 | `hr02` | `Hr@123` | **HR** | NV010 | Nghiệp vụ nhân sự & Kanban |
 | `nv001` | `Nv@123` | **Nhân viên** | NV006 | Xem hồ sơ, nghỉ phép, kéo task của mình |
 | `nv002` | `Nv@123` | **Nhân viên** | NV007 | Xem hồ sơ, phiếu lương, kéo task của mình |
+| `nv003` | `Nv@123` | **Nhân viên** | NV008 | Tài khoản nhân viên demo |
+| `hr03` | `Hr@123` | **HR** | NV012 | Tài khoản HR demo |
+| `hr04` | `Hr@123` | **HR** | NV023 | Tài khoản HR demo |
+| `hr05` | `Hr@123` | **HR** | NV032 | Tài khoản HR demo |
+| `nv004` | `Nv@123` | **Nhân viên** | NV009 | Tài khoản nhân viên demo |
+| `nv005` | `Nv@123` | **Nhân viên** | NV011 | Tài khoản nhân viên demo |
+| `nv006` | `Nv@123` | **Nhân viên** | NV013 | Tài khoản nhân viên demo |
+| `nv007` | `Nv@123` | **Nhân viên** | NV014 | Tài khoản nhân viên demo |
+| `nv008` | `Nv@123` | **Nhân viên** | NV015 | Tài khoản nhân viên demo |
+| `nv009` | `Nv@123` | **Nhân viên** | NV016 | Tài khoản nhân viên demo |
+| `nv010` | `Nv@123` | **Nhân viên** | NV017 | Tài khoản nhân viên demo |
+| `nv011` | `Nv@123` | **Nhân viên** | NV018 | Tài khoản nhân viên demo |
+| `nv012` | `Nv@123` | **Nhân viên** | NV021 | Tài khoản nhân viên demo |
+| `nv013` | `Nv@123` | **Nhân viên** | NV022 | Tài khoản nhân viên demo |
+| `nv014` | `Nv@123` | **Nhân viên** | NV024 | Tài khoản nhân viên demo |
+| `nv015` | `Nv@123` | **Nhân viên** | NV025 | Tài khoản nhân viên demo |
 
 ---
 

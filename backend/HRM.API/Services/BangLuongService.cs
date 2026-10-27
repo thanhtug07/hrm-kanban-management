@@ -117,7 +117,7 @@ public class BangLuongService : IBangLuongService
 
         if (role == RoleConstants.NhanVien && maNV.Trim() != userMaNV?.Trim())
         {
-            return ApiResponse<BangLuongDto>.Fail("Bạn không có quyền xem bảng lương của nhân viên khác.");
+            return ApiResponse<BangLuongDto>.Fail("Bạn không có quyền xem bảng lương của nhân viên khác.", ErrorCode.Forbidden);
         }
 
         var bl = await _context.BangLuongs
@@ -162,23 +162,40 @@ public class BangLuongService : IBangLuongService
             NgayTao = DateTime.Now
         };
 
-        _context.ChiPhiPhatSinhs.Add(ps);
-
-        // Cập nhật vào BangLuong tương ứng nếu có
-        var bl = await _context.BangLuongs.FirstOrDefaultAsync(b => b.MaNV == dto.MaNV.Trim() && b.Thang == dto.Thang && b.Nam == dto.Nam);
-        if (bl != null)
+        // Bọc transaction + atomic update để tránh lost-update khi nhiều request đồng thời
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            if (dto.Loai == "Thưởng" || dto.Loai == "Công tác phí")
-            {
-                bl.PhuCap += dto.SoTien;
-            }
-            else if (dto.Loai == "Phạt" || dto.Loai == "Ứng lương")
-            {
-                bl.KhauTru += dto.SoTien;
-            }
-        }
+            _context.ChiPhiPhatSinhs.Add(ps);
 
-        await _context.SaveChangesAsync();
+            var loai = dto.Loai.Trim();
+            var maNV = dto.MaNV.Trim();
+            bool isThuong = loai == "Thưởng" || loai == "Công tác phí";
+            bool isPhat = loai == "Phạt" || loai == "Ứng lương";
+
+            // Cập nhật atomic vào BangLuong tương ứng (nếu có) — chỉ 1 lệnh SQL, không đọc-rồi-ghi
+            if (isThuong)
+            {
+                await _context.BangLuongs
+                    .Where(b => b.MaNV == maNV && b.Thang == dto.Thang && b.Nam == dto.Nam)
+                    .ExecuteUpdateAsync(s => s.SetProperty(b => b.PhuCap, b => b.PhuCap + dto.SoTien));
+            }
+            else if (isPhat)
+            {
+                await _context.BangLuongs
+                    .Where(b => b.MaNV == maNV && b.Thang == dto.Thang && b.Nam == dto.Nam)
+                    .ExecuteUpdateAsync(s => s.SetProperty(b => b.KhauTru, b => b.KhauTru + dto.SoTien));
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "CreatePhatSinhFailed: MaNV={MaNV}, Ky={Thang}/{Nam}", dto.MaNV, dto.Thang, dto.Nam);
+            return ApiResponse<ChiPhiPhatSinhDto>.Fail("Thêm chi phí phát sinh thất bại, đã hoàn tác thay đổi.");
+        }
 
         _logger.LogInformation("CreatePhatSinh: MaNV={MaNV}, Loai={Loai}, SoTien={SoTien}, Ky={Thang}/{Nam}",
             dto.MaNV, dto.Loai, dto.SoTien, dto.Thang, dto.Nam);

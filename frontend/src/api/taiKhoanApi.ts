@@ -1,5 +1,5 @@
-import axiosClient from './axiosClient';
-import { ApiResponse } from '@/types/common';
+﻿import axiosClient from './axiosClient';
+import { ApiResponse, PagedResult } from '@/types/common';
 import {
   TaiKhoanDto,
   CreateTaiKhoanDto,

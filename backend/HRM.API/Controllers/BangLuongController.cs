@@ -1,4 +1,4 @@
-using HRM.Core.Common;
+﻿using HRM.Core.Common;
 using HRM.Core.Constants;
 using HRM.Core.DTOs.BangLuong;
 using HRM.Core.Interfaces;
@@ -67,7 +67,7 @@ public class BangLuongController : ControllerBase
         var result = await _bangLuongService.GetDetailAsync(maNV, thang, nam, User);
         if (!result.Success)
         {
-            if (result.Message.Contains("quyền"))
+            if (result.ErrorCode == HRM.Core.Common.ErrorCode.Forbidden)
                 return StatusCode(StatusCodes.Status403Forbidden, result);
 
             return NotFound(result);

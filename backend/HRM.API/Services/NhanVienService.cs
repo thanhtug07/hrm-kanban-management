@@ -81,7 +81,7 @@ public class NhanVienService : INhanVienService
 
         if (role == RoleConstants.NhanVien && maNV.Trim() != userMaNV?.Trim())
         {
-            return ApiResponse<NhanVienDto>.Fail("Bạn không có quyền xem thông tin của nhân viên khác.");
+            return ApiResponse<NhanVienDto>.Fail("Bạn không có quyền xem thông tin của nhân viên khác.", ErrorCode.Forbidden);
         }
 
         var nv = await _context.NhanViens
@@ -91,7 +91,7 @@ public class NhanVienService : INhanVienService
             .FirstOrDefaultAsync(n => n.MaNV == maNV.Trim());
 
         if (nv == null)
-            return ApiResponse<NhanVienDto>.Fail($"Không tìm thấy nhân viên với mã '{maNV}'.");
+            return ApiResponse<NhanVienDto>.Fail($"Không tìm thấy nhân viên với mã '{maNV}'.", ErrorCode.NotFound);
 
         return ApiResponse<NhanVienDto>.Ok(MapToDto(nv));
     }
@@ -105,7 +105,7 @@ public class NhanVienService : INhanVienService
             return ApiResponse<NhanVienDto>.Fail($"Chức vụ '{dto.MaCV}' không tồn tại.");
 
         if (await _context.NhanViens.AnyAsync(n => n.CCCD == dto.CCCD.Trim()))
-            return ApiResponse<NhanVienDto>.Fail($"Số CCCD '{dto.CCCD}' đã tồn tại trong hệ thống.");
+            return ApiResponse<NhanVienDto>.Fail($"Số CCCD '{dto.CCCD}' đã tồn tại trong hệ thống.", ErrorCode.Conflict);
 
         var maNVParam = new SqlParameter
         {
@@ -155,7 +155,7 @@ public class NhanVienService : INhanVienService
     {
         var nv = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaNV == maNV.Trim());
         if (nv == null)
-            return ApiResponse<NhanVienDto>.Fail($"Không tìm thấy nhân viên với mã '{maNV}'.");
+            return ApiResponse<NhanVienDto>.Fail($"Không tìm thấy nhân viên với mã '{maNV}'.", ErrorCode.NotFound);
 
         if (!await _context.PhongBans.AnyAsync(p => p.MaPB == dto.MaPB))
             return ApiResponse<NhanVienDto>.Fail($"Phòng ban '{dto.MaPB}' không tồn tại.");
@@ -164,7 +164,7 @@ public class NhanVienService : INhanVienService
             return ApiResponse<NhanVienDto>.Fail($"Chức vụ '{dto.MaCV}' không tồn tại.");
 
         if (await _context.NhanViens.AnyAsync(n => n.CCCD == dto.CCCD.Trim() && n.MaNV != nv.MaNV))
-            return ApiResponse<NhanVienDto>.Fail($"Số CCCD '{dto.CCCD}' đã được sử dụng bởi nhân viên khác.");
+            return ApiResponse<NhanVienDto>.Fail($"Số CCCD '{dto.CCCD}' đã được sử dụng bởi nhân viên khác.", ErrorCode.Conflict);
 
         nv.HoTen = dto.HoTen.Trim();
         nv.GioiTinh = dto.GioiTinh;
@@ -194,7 +194,7 @@ public class NhanVienService : INhanVienService
         var cleanMaNV = maNV.Trim();
         var nv = await _context.NhanViens.FirstOrDefaultAsync(n => n.MaNV == cleanMaNV);
         if (nv == null)
-            return ApiResponse<bool>.Fail($"Không tìm thấy nhân viên '{cleanMaNV}'.");
+            return ApiResponse<bool>.Fail($"Không tìm thấy nhân viên '{cleanMaNV}'.", ErrorCode.NotFound);
 
         // Kiểm tra ràng buộc: Có tài khoản đang hoạt động không?
         var hasActiveAccount = await _context.TaiKhoans.AnyAsync(t => t.MaNV == cleanMaNV && t.TrangThai);

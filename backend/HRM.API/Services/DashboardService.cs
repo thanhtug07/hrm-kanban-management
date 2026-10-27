@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using HRM.Core.Common;
 using HRM.Core.DTOs.Dashboard;
 using HRM.Core.Interfaces;
@@ -19,7 +19,7 @@ public class DashboardService : IDashboardService
     public async Task<ApiResponse<DashboardDto>> GetDashboardSummaryAsync()
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
 
         var tongNhanVien = await _context.NhanViens.CountAsync();
         var nhanVienDangLam = await _context.NhanViens.CountAsync(n => n.TrangThai == "Đang làm");

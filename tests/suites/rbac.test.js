@@ -43,7 +43,7 @@ const { Runner, launchBrowser, login, sleep, config } = require('../helpers');
 
   // HR gán 'Admin ' (khoảng trắng) -> chặn
   const accList = await (await api.get(config.API + '/api/taikhoan', { headers: H(hrTok) })).json();
-  const nvAcc = accList?.data?.find((a) => a.vaiTro === 'NhanVien');
+  const nvAcc = accList?.data?.items?.find((a) => a.vaiTro === 'NhanVien');
   if (nvAcc) {
     const hrSetAdminSpace = await api.put(config.API + `/api/taikhoan/${nvAcc.maTK}`, { headers: H(hrTok), data: { vaiTro: 'Admin ' } });
     r.check('HR gán vai trò "Admin " -> chặn', hrSetAdminSpace.status() === 403 || hrSetAdminSpace.status() === 400, `status=${hrSetAdminSpace.status()}`);
@@ -51,7 +51,7 @@ const { Runner, launchBrowser, login, sleep, config } = require('../helpers');
 
   // Admin tạo tài khoản Admin -> OK
   const adminCreate = await api.post(config.API + '/api/taikhoan', { headers: H(adminTok), data: { tenDangNhap: 'ok_' + Date.now(), matKhau: 'Test@12345', vaiTro: 'Admin' } });
-  r.check('Admin tạo tài khoản Admin -> 200', adminCreate.status() === 200, `status=${adminCreate.status()}`);
+  r.check('Admin tạo tài khoản Admin -> 200', adminCreate.status() === 200 || adminCreate.status() === 201, `status=${adminCreate.status()}`);
 
   // ==== UI level ====
   const { browser, page } = await launchBrowser();

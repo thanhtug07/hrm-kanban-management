@@ -1,4 +1,4 @@
-# ===== .NET / C# =====
+﻿# ===== .NET / C# =====
 [Bb]in/
 [Oo]bj/
 *.user
@@ -46,3 +46,7 @@ secrets.json
 # ===== Tạm =====
 *.tmp
 tmp/
+
+# SSMS solution/project
+*.sqlproj
+*.ssmssln

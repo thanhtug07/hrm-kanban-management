@@ -107,7 +107,7 @@ public class NghiPhepService : INghiPhepService
     {
         var don = await _context.NghiPheps.FirstOrDefaultAsync(n => n.MaNP == id);
         if (don == null)
-            return ApiResponse<NghiPhepDto>.Fail("Đơn nghỉ phép không tồn tại.");
+            return ApiResponse<NghiPhepDto>.Fail("Đơn nghỉ phép không tồn tại.", ErrorCode.NotFound);
 
         if (don.TrangThai != "Chờ duyệt")
             return ApiResponse<NghiPhepDto>.Fail("Chỉ có thể duyệt đơn nghỉ phép đang ở trạng thái Chờ duyệt.");
@@ -122,12 +122,12 @@ public class NghiPhepService : INghiPhepService
         // Quy tắc: Không được tự duyệt đơn của chính mình
         if (don.MaNV.Trim() == maNVHienTai)
         {
-            return ApiResponse<NghiPhepDto>.Fail("Bạn không có quyền tự phê duyệt đơn nghỉ phép của chính mình.");
+            return ApiResponse<NghiPhepDto>.Fail("Bạn không có quyền tự phê duyệt đơn nghỉ phép của chính mình.", ErrorCode.Forbidden);
         }
 
         don.TrangThai = dto.TrangThai; // "Đã duyệt" hoặc "Từ chối"
         don.MaNV_Duyet = maNVHienTai;
-        don.NgayDuyet = DateTime.UtcNow;
+        don.NgayDuyet = DateTime.Now;
 
         // Lưu thay đổi -> Kích hoạt Trigger TR_NghiPhep_Update sinh bản ghi ChamCong nếu Đã duyệt
         await _context.SaveChangesAsync();
@@ -145,14 +145,14 @@ public class NghiPhepService : INghiPhepService
     {
         var don = await _context.NghiPheps.FirstOrDefaultAsync(n => n.MaNP == id);
         if (don == null)
-            return ApiResponse<bool>.Fail("Đơn nghỉ phép không tồn tại.");
+            return ApiResponse<bool>.Fail("Đơn nghỉ phép không tồn tại.", ErrorCode.NotFound);
 
         var maNV = user.FindFirstValue("MaNV");
         var role = user.FindFirstValue(ClaimTypes.Role);
 
         if (role == RoleConstants.NhanVien && don.MaNV.Trim() != maNV?.Trim())
         {
-            return ApiResponse<bool>.Fail("Bạn không có quyền hủy đơn nghỉ phép của người khác.");
+            return ApiResponse<bool>.Fail("Bạn không có quyền hủy đơn nghỉ phép của người khác.", ErrorCode.Forbidden);
         }
 
         if (don.TrangThai != "Chờ duyệt")
