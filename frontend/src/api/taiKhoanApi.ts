@@ -9,8 +9,9 @@ import {
 } from '@/types/taiKhoan';
 
 export const taiKhoanApi = {
-  getAll: async (): Promise<ApiResponse<TaiKhoanDto[]>> => {
-    return axiosClient.get('/api/taikhoan');
+  // Backend trả về PagedResult (không phải mảng). Lấy 1 trang lớn vì trang này lọc phía client.
+  getAll: async (): Promise<ApiResponse<PagedResult<TaiKhoanDto>>> => {
+    return axiosClient.get('/api/taikhoan', { params: { page: 1, pageSize: 100 } });
   },
 
   create: async (data: CreateTaiKhoanDto): Promise<ApiResponse<TaiKhoanDto>> => {

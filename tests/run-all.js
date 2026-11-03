@@ -12,6 +12,7 @@ const suites = [
   ['API FUZZ', 'suites/api-fuzz.test.js'],
   ['RBAC', 'suites/rbac.test.js'],
   ['E2E', 'suites/e2e.test.js'],
+  ['CLICK-ALL', 'suites/click-all.test.js'],
 ];
 
 console.log('╔══════════════════════════════════════════════════╗');

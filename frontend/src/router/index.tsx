@@ -82,7 +82,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'bangluong',
-        element: withSuspense(<BangLuongPage />),
+        element: (
+          <ProtectedRoute allowedRoles={['Admin', 'NhanVien']}>
+            {withSuspense(<BangLuongPage />)}
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'profile',

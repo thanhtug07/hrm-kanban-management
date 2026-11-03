@@ -25,8 +25,12 @@ const { Runner, launchBrowser, login, sleep, config } = require('../helpers');
 
     const title = 'AUTO-TEST-' + Date.now();
     const giao = page.getByRole('button', { name: /giao việc mới/i });
+    await giao.first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
     if (await giao.count() > 0) {
       await giao.first().click(); await sleep(1200);
+      // Chờ modal thật sự hiện trước khi điền (tránh flaky khi chạy nối tiếp nhiều suite)
+      await page.waitForSelector('.ant-modal:visible', { timeout: 15000 });
+      await page.getByPlaceholder(/Ví dụ: Thiết kế/i).waitFor({ state: 'visible', timeout: 15000 });
       await page.getByPlaceholder(/Ví dụ: Thiết kế/i).fill(title);
       const sel = page.locator('.ant-modal:visible .ant-select');
       await sel.nth(0).click(); await sleep(800);

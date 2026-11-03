@@ -213,7 +213,7 @@ Mật khẩu dùng chung theo nhóm vai trò:
 | Nhóm | Mật khẩu | Vai trò | Ghi chú |
 | :--- | :--- | :---: | :--- |
 | `admin` | `Admin@123` | **Admin** | Nhân viên NV000 — toàn quyền hệ thống |
-| `hr01` … `hr09` | `Hr@123` | **HR** | Quản lý nhân sự, chấm công, tính lương, giao task |
+| `hr01` … `hr09` | `Hr@123` | **HR** | Quản lý nhân sự, chấm công, duyệt nghỉ phép, giao task (không có Bảng lương) |
 | `tp01` … `tp10` | `Hr@123` | **HR** (Trưởng phòng) | Quản lý phòng ban mình phụ trách qua `MaNV_QL` |
 | `nv001` … `nv030` | `Nv@123` | **Nhân viên** | Xem hồ sơ, nghỉ phép, kéo task của mình |
 
@@ -279,8 +279,10 @@ UNION ALL SELECT 'BangLuong', COUNT(*) FROM dbo.BangLuong;
 ## 🧭 Hướng dẫn sử dụng (theo vai trò)
 
 ### 1. Đăng nhập
-Mở http://localhost:5173 → nhập `admin` / `Admin@123`. Sidebar tự thay đổi theo vai trò
-(Admin/HR thấy nhiều menu hơn Nhân viên).
+Mở http://localhost:5173 → nhập `admin` / `Admin@123`. Sidebar tự thay đổi theo vai trò:
+**Admin** thấy nhiều menu nhất (kèm *Bảng lương* và *Quản lý tài khoản*), **HR** thấy menu nghiệp vụ
+(không có *Bảng lương*, không có *Quản lý tài khoản*), **Nhân viên** chỉ thấy các trang tự phục vụ
+(*Tổng quan, Kanban, Chấm công, Nghỉ phép, Bảng lương của mình, Trang cá nhân*).
 
 ### 2. Kanban (📋)
 - **Kéo thả thẻ** giữa 4 cột `Todo → InProgress → Review → Done`. Hệ thống dùng thứ tự
@@ -308,7 +310,9 @@ tự động **bỏ qua Thứ Bảy và Chủ Nhật**.
 ### 6. Bảng lương (💰)
 - Admin bấm **Tính lương** cho tháng/năm → gọi `SP_TinhLuongThang`, tính lại toàn bộ theo chấm công.
 - Xem thưởng/phạt/ứng lương ở tab Chi phí phát sinh.
-- Nhân viên chỉ xem được phiếu lương của mình (kiểm tra quyền ở server, không chỉ ẩn UI).
+- **Chỉ Admin xem được bảng lương toàn công ty.** Nhân viên chỉ xem phiếu lương của mình
+  (kiểm tra quyền ở server, không chỉ ẩn UI).
+- Trang này **bị ẩn với vai trò HR** (không có mục menu, vào thẳng URL sẽ bị đẩy sang `/403`).
 
 ### 7. Dashboard (📊)
 Admin/HR xem KPI toàn công ty; nhân viên chỉ xem số liệu cá nhân (`/api/dashboard/me`).
@@ -319,7 +323,8 @@ Admin/HR xem KPI toàn công ty; nhân viên chỉ xem số liệu cá nhân (`/
 | `GET /api/nhanvien` | ✅ | ✅ | ❌ 403 |
 | `PUT /api/congviec/{id}/move` — task của mình | ✅ | ✅ | ✅ |
 | `PUT /api/congviec/{id}/move` — task người khác | ✅ | ✅ | ❌ 403 |
-| `GET /api/bangluong?maNV=...` của người khác | ✅ | ✅ | ❌ 403 |
+| `GET /api/bangluong` — bảng lương toàn công ty | ✅ | ❌ 403 | ❌ 403 |
+| `GET /api/bangluong/me` — phiếu lương của mình | ✅ | ✅ | ✅ |
 
 ---
 
@@ -329,13 +334,13 @@ Admin/HR xem KPI toàn công ty; nhân viên chỉ xem số liệu cá nhân (`/
 |---|:---:|:---:|:---:|
 | Dashboard tổng quan | ✅ | ✅ | ❌ (chỉ xem cá nhân) |
 | Quản lý nhân viên | ✅ | ✅ | ❌ |
-| Quản lý tài khoản | ✅ | ✅ | ❌ (chỉ trang cá nhân) |
+| Quản lý tài khoản | ✅ | ❌ | ❌ (chỉ trang cá nhân) |
 | Kanban — tạo/giao task | ✅ | ✅ | ❌ |
 | Kanban — kéo task của mình | ✅ | ✅ | ✅ |
 | Chấm công | ✅ | ✅ | ✅ (của mình) |
 | Nghỉ phép — duyệt đơn | ✅ | ✅ | ❌ |
 | Bảng lương — tính lương | ✅ | ❌ | ❌ |
-| Bảng lương — xem | ✅ | ✅ | ✅ (của mình) |
+| Bảng lương — xem | ✅ | ❌ | ✅ (của mình) |
 
 ---
 

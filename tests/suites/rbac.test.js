@@ -46,17 +46,32 @@ const { Runner, launchBrowser, login, sleep, config } = require('../helpers');
   const hrGetAcc = await api.get(config.API + '/api/taikhoan', { headers: H(hrTok) });
   r.check('HR GET /api/taikhoan -> 403', hrGetAcc.status() === 403, `status=${hrGetAcc.status()}`);
 
-  // Admin tạo tài khoản Admin -> OK
+  // Nhân viên tự xem được phiếu lương của mình nhưng không xem được toàn công ty
+  const nvMine = await api.get(config.API + '/api/bangluong/me', { headers: H(nvTok) });
+  r.check('NV xem lương của mình -> 200', nvMine.status() === 200, `status=${nvMine.status()}`);
+
+  // Admin tạo tài khoản Admin -> OK (tạo xong phải xóa, tránh làm bẩn dữ liệu seed)
   const adminCreate = await api.post(config.API + '/api/taikhoan', { headers: H(adminTok), data: { tenDangNhap: 'ok_' + Date.now(), matKhau: 'Test@12345', vaiTro: 'Admin' } });
   r.check('Admin tạo tài khoản Admin -> 200', adminCreate.status() === 200 || adminCreate.status() === 201, `status=${adminCreate.status()}`);
+  const createdId = (await adminCreate.json().catch(() => null))?.data?.maTK;
+  if (createdId) {
+    const del = await api.delete(config.API + '/api/taikhoan/' + createdId, { headers: H(adminTok) });
+    r.check('Dọn tài khoản test -> 200', del.status() === 200, `status=${del.status()}`);
+  }
 
   // ==== UI level ====
   const { browser, page } = await launchBrowser();
   try {
     await login(page, 'nv001', 'Nv@123');
-    const menu = (await page.locator('.hrm-sider .ant-menu').allInnerTexts()).join('\n');
-    r.check('NV ẩn menu "Quản lý tài khoản"', !/Quản lý tài khoản/i.test(menu));
+    // Lấy nhãn menu bằng cách đọc trực tiếp .ant-menu-item (tránh .allInnerTexts() trả rỗng)
+    const readMenu = async () => (await page.evaluate(() =>
+      [...document.querySelectorAll('.hrm-sider .ant-menu-item')].map((e) => e.innerText.trim())
+    )).join('\n');
+    await page.waitForSelector('.hrm-sider .ant-menu-item', { timeout: 15000 }).catch(() => {});
+    const menu = await readMenu();
+    r.check('NV ẩn menu "Quản lý tài khoản"', !/Quản lý tài khoản/i.test(menu), menu.replace(/\n/g, ' / '));
     r.check('NV ẩn menu "Quản lý Nhân viên"', !/Quản lý Nhân viên/i.test(menu));
+    r.check('NV vẫn thấy menu "Bảng lương & Chi trả" (xem phiếu của mình)', /Bảng lương/i.test(menu));
 
     await page.goto(config.FRONTEND + '/taikhoan', { waitUntil: 'networkidle' }); await sleep(1200);
     r.check('NV truy cập /taikhoan -> 403', page.url().includes('/403'), page.url());
@@ -64,11 +79,22 @@ const { Runner, launchBrowser, login, sleep, config } = require('../helpers');
     await page.goto(config.FRONTEND + '/nhanvien', { waitUntil: 'networkidle' }); await sleep(1200);
     r.check('NV truy cập /nhanvien -> 403', page.url().includes('/403'), page.url());
 
-    // HR thấy nút cần thiết
+    // HR: KHÔNG có quyền xem Bảng lương & Chi trả (đã ẩn khỏi menu + chặn route)
     await login(page, 'hr01', 'Hr@123');
+    await page.waitForSelector('.hrm-sider .ant-menu-item', { timeout: 15000 }).catch(() => {});
+    const hrMenu = await readMenu();
+    r.check('HR ẩn menu "Bảng lương & Chi trả"', !/Bảng lương/i.test(hrMenu), hrMenu.replace(/\n/g, ' / '));
+    r.check('HR ẩn menu "Quản lý tài khoản"', !/Quản lý tài khoản/i.test(hrMenu));
+    r.check('HR vẫn thấy menu "Quản lý Nhân viên"', /Quản lý Nhân viên/i.test(hrMenu));
+
+    await page.goto(config.FRONTEND + '/bangluong', { waitUntil: 'networkidle' }); await sleep(1800);
+    r.check('HR truy cập /bangluong -> 403', page.url().includes('/403'), page.url());
+
+    // Trang lương của nhân viên không có nút Tính Lương (chỉ Admin)
+    await login(page, 'nv001', 'Nv@123');
     await page.goto(config.FRONTEND + '/bangluong', { waitUntil: 'networkidle' }); await sleep(1800);
     const hrBtn = await page.getByRole('button', { name: /Tính Lương/i }).count();
-    r.check('HR KHÔNG thấy nút Tính Lương', hrBtn === 0, `count=${hrBtn}`);
+    r.check('Nhân viên KHÔNG thấy nút Tính Lương', hrBtn === 0, `count=${hrBtn}`);
   } catch (e) {
     r.fail('Lỗi script UI', e.message);
   }

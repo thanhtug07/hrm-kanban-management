@@ -52,6 +52,8 @@ export const SiderMenu: React.FC = () => {
   const vaiTro = user?.vaiTro;
   const isAdmin = vaiTro === 'Admin';
   const isManager = vaiTro === 'Admin' || vaiTro === 'HR' || vaiTro === 'TruongPhong';
+  // Bảng lương & Chi trả: chỉ Admin và nhân viên xem phiếu lương của chính mình
+  const canSeePayroll = vaiTro === 'Admin' || vaiTro === 'NhanVien';
 
   const sections = useMemo<NavSection[]>(() => {
     const sections: NavSection[] = [
@@ -67,7 +69,9 @@ export const SiderMenu: React.FC = () => {
         items: [
           { key: '/chamcong', icon: <CalendarOutlined />, label: 'Điểm danh & Chấm công' },
           { key: '/nghiphep', icon: <ScheduleOutlined />, label: 'Quản lý Nghỉ phép' },
-          { key: '/bangluong', icon: <DollarOutlined />, label: 'Bảng lương & Chi trả' },
+          ...(canSeePayroll
+            ? [{ key: '/bangluong', icon: <DollarOutlined />, label: 'Bảng lương & Chi trả' }]
+            : []),
           ...(isManager
             ? [{ key: '/nhanvien', icon: <TeamOutlined />, label: 'Quản lý Nhân viên' }]
             : []),
@@ -83,7 +87,7 @@ export const SiderMenu: React.FC = () => {
     });
 
     return sections;
-  }, [isAdmin, isManager]);
+  }, [isAdmin, isManager, canSeePayroll]);
 
   const selectedKey = '/' + location.pathname.split('/')[1];
   const avatarStyle = getAvatarStyle(user?.hoTen);

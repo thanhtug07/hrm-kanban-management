@@ -17,7 +17,10 @@ export const LoginPage: React.FC = () => {
   const location = useLocation();
   const { setAuth } = useAuthStore();
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
+  // 'from' do ProtectedRoute gắn vào khi bị chặn. Nếu là trang lỗi (/403, /login, /404)
+  // thì bỏ qua, tránh đăng nhập xong bị đẩy thẳng vào trang không có quyền.
+  const rawFrom = (location.state as { from?: { pathname: string } })?.from?.pathname;
+  const from = rawFrom && !/^\/(403|404|login)\b/.test(rawFrom) ? rawFrom : '/dashboard';
 
   const handleSubmit = async (values: LoginRequest) => {
     setLoading(true);

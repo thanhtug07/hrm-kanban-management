@@ -44,9 +44,12 @@ async function launchBrowser() {
 
 // Đăng nhập qua UI
 async function login(page, user, pass) {
+  // Bắt đầu từ trang trắng để xóa lịch sử SPA của phiên trước (tránh bị điều hướng
+  // về trang cũ như /taikhoan -> /403 khi đổi vai trò trên cùng một trình duyệt).
+  await page.goto('about:blank');
   await page.goto(config.FRONTEND + '/login', { waitUntil: 'networkidle' });
   await page.evaluate(() => localStorage.clear());
-  await page.goto(config.FRONTEND + '/login', { waitUntil: 'networkidle' });
+  await page.reload({ waitUntil: 'networkidle' });
   const inputs = page.locator('input');
   await inputs.nth(0).fill(user);
   await inputs.nth(1).fill(pass);
