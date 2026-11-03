@@ -9,9 +9,11 @@
     GO
 
     -- 1. KHỞI TẠO CƠ SỞ DỮ LIỆU RIÊNG BIỆT (QUANLYNHANSU)
+    -- Lưu ý: CSDL dùng collation mong đợi là Vietnamese_CI_AS (tạo mới sẽ đặt collation này).
+    -- Nếu CSDL đã tồn tại thì câu CREATE bên dưới được bỏ qua và collation hiện có được giữ nguyên.
     IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'QUANLYNHANSU')
     BEGIN
-        CREATE DATABASE QUANLYNHANSU;
+        CREATE DATABASE QUANLYNHANSU COLLATE Vietnamese_CI_AS;
         PRINT N'-> Đã tạo mới cơ sở dữ liệu QUANLYNHANSU thành công.';
     END
     GO
@@ -367,7 +369,8 @@
         nv.HoTen,
         nv.GioiTinh,
         nv.NgaySinh,
-        DATEDIFF(YEAR, nv.NgaySinh, GETDATE()) AS Tuoi,
+        DATEDIFF(YEAR, nv.NgaySinh, GETDATE())
+            - CASE WHEN MONTH(nv.NgaySinh) * 100 + DAY(nv.NgaySinh) > MONTH(GETDATE()) * 100 + DAY(GETDATE()) THEN 1 ELSE 0 END AS Tuoi,
         nv.CCCD,
         nv.SDT,
         nv.Email,
@@ -623,6 +626,9 @@
             IF @Thang NOT BETWEEN 1 AND 12 OR @Nam < 2000
                 RAISERROR(N'Tháng hoặc năm tính lương không hợp lệ!', 16, 1);
 
+            -- Giữ khóa khoảng (range lock) trên kỳ lương để 2 lần chạy đồng thời không đan xen DELETE/INSERT
+            IF NOT EXISTS (SELECT 1 FROM dbo.BangLuong WITH (UPDLOCK, HOLDLOCK) WHERE Thang = @Thang AND Nam = @Nam) SELECT 1;
+
             DELETE FROM dbo.BangLuong WHERE Thang = @Thang AND Nam = @Nam;
 
             INSERT INTO dbo.BangLuong (MaNV, Thang, Nam, SoNgayCong, LuongCoBan, PhuCap, KhauTru)
@@ -631,9 +637,10 @@
                 @Thang,
                 @Nam,
                 ISNULL(cc.SoNgayCong, 0) AS SoNgayCong,
-                ROUND((cv.LuongCoBan / 22.0) * ISNULL(cc.SoNgayCong, 0), 0) AS LuongCoBan,
-                500000.00 AS PhuCap,
-                ISNULL(cc.SoLanTre, 0) * 50000.00 AS KhauTru
+                -- Làm tròn nửa lên (thay cho ROUND half-to-even của SQL Server); lương luôn >= 0 nên +0.5 rồi FLOOR là an toàn
+                CAST(FLOOR((cv.LuongCoBan / 22.0) * ISNULL(cc.SoNgayCong, 0) + 0.5) AS DECIMAL(18,2)) AS LuongCoBan,
+                500000.00 + ISNULL(ps.TienThuong, 0) AS PhuCap,
+                ISNULL(cc.SoLanTre, 0) * 50000.00 + ISNULL(ps.TienPhat, 0) AS KhauTru
             FROM dbo.NhanVien nv
             JOIN dbo.ChucVu cv ON nv.MaCV = cv.MaCV
             LEFT JOIN (
@@ -642,9 +649,20 @@
                     COUNT(CASE WHEN TrangThai = N'Đủ công' THEN 1 END) AS SoNgayCong,
                     COUNT(CASE WHEN TrangThai = N'Trễ' THEN 1 END) AS SoLanTre
                 FROM dbo.ChamCong
-                WHERE MONTH(Ngay) = @Thang AND YEAR(Ngay) = @Nam
+                -- Dùng điều kiện range để tận dụng index IX_ChamCong_MaNV_Ngay (tránh bọc hàm lên cột Ngay)
+                WHERE Ngay >= DATEFROMPARTS(@Nam, @Thang, 1) AND Ngay < DATEADD(MONTH, 1, DATEFROMPARTS(@Nam, @Thang, 1))
                 GROUP BY MaNV
             ) cc ON nv.MaNV = cc.MaNV
+            -- Tổng hợp thưởng/phạt từ ChiPhiPhatSinh tại thời điểm tính lương (SP là nguồn dữ liệu duy nhất)
+            LEFT JOIN (
+                SELECT 
+                    MaNV,
+                    SUM(CASE WHEN Loai IN (N'Thưởng', N'Công tác phí') THEN SoTien ELSE 0 END) AS TienThuong,
+                    SUM(CASE WHEN Loai IN (N'Phạt', N'Ứng lương') THEN SoTien ELSE 0 END) AS TienPhat
+                FROM dbo.ChiPhiPhatSinh
+                WHERE Thang = @Thang AND Nam = @Nam
+                GROUP BY MaNV
+            ) ps ON nv.MaNV = ps.MaNV
             WHERE nv.TrangThai = N'Đang làm';
 
             COMMIT TRANSACTION;
@@ -702,42 +720,38 @@
 
         IF UPDATE(TrangThai)
         BEGIN
-            DECLARE @MaNP INT, @MaNV CHAR(5), @TuNgay DATE, @DenNgay DATE;
-            DECLARE curDuyet CURSOR LOCAL FAST_FORWARD FOR
-                SELECT i.MaNP, i.MaNV, i.TuNgay, i.DenNgay
+            -- Sinh tập ngày (set-based) cho các đơn vừa chuyển sang 'Đã duyệt', bỏ Thứ 7 / Chủ nhật
+            -- Mapping: '19000101' là Thứ Hai => offset % 7 = 5 là Thứ 7, 6 là Chủ nhật (độc lập DATEFIRST/ngôn ngữ)
+            ;WITH NgayNghi AS (
+                SELECT 
+                    i.MaNV,
+                    DATEADD(DAY, n.N, i.TuNgay) AS Ngay
                 FROM inserted i
                 JOIN deleted d ON i.MaNP = d.MaNP
-                WHERE i.TrangThai = N'Đã duyệt' AND d.TrangThai <> N'Đã duyệt';
+                CROSS JOIN (
+                    SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1 AS N
+                    FROM sys.all_objects
+                ) n
+                WHERE i.TrangThai = N'Đã duyệt' AND d.TrangThai <> N'Đã duyệt'
+                AND n.N <= DATEDIFF(DAY, i.TuNgay, i.DenNgay)
+            )
+            SELECT MaNV, Ngay INTO #NgayNghi
+            FROM NgayNghi
+            WHERE (DATEDIFF(DAY, '19000101', Ngay) % 7) NOT IN (5, 6);
 
-            OPEN curDuyet;
-            FETCH NEXT FROM curDuyet INTO @MaNP, @MaNV, @TuNgay, @DenNgay;
+            -- Cập nhật các bản ghi chấm công đã tồn tại
+            UPDATE cc
+            SET cc.TrangThai = N'Nghỉ phép', cc.GioVao = NULL, cc.GioRa = NULL
+            FROM dbo.ChamCong cc
+            JOIN #NgayNghi n ON cc.MaNV = n.MaNV AND cc.Ngay = n.Ngay;
 
-            WHILE @@FETCH_STATUS = 0
-            BEGIN
-                DECLARE @CurrentDate DATE = @TuNgay;
-                WHILE @CurrentDate <= @DenNgay
-                BEGIN
-                    IF ((DATEPART(dw, @CurrentDate) + @@DATEFIRST - 1) % 7) NOT IN (0, 6)
-                    BEGIN
-                        IF EXISTS (SELECT 1 FROM dbo.ChamCong WHERE MaNV = @MaNV AND Ngay = @CurrentDate)
-                        BEGIN
-                            UPDATE dbo.ChamCong 
-                            SET TrangThai = N'Nghỉ phép', GioVao = NULL, GioRa = NULL
-                            WHERE MaNV = @MaNV AND Ngay = @CurrentDate;
-                        END
-                        ELSE
-                        BEGIN
-                            INSERT INTO dbo.ChamCong (MaNV, Ngay, GioVao, GioRa, TrangThai)
-                            VALUES (@MaNV, @CurrentDate, NULL, NULL, N'Nghỉ phép');
-                        END
-                    END
-                    SET @CurrentDate = DATEADD(DAY, 1, @CurrentDate);
-                END
-                FETCH NEXT FROM curDuyet INTO @MaNP, @MaNV, @TuNgay, @DenNgay;
-            END
+            -- Thêm mới các bản ghi chấm công còn thiếu
+            INSERT INTO dbo.ChamCong (MaNV, Ngay, GioVao, GioRa, TrangThai)
+            SELECT n.MaNV, n.Ngay, NULL, NULL, N'Nghỉ phép'
+            FROM #NgayNghi n
+            WHERE NOT EXISTS (SELECT 1 FROM dbo.ChamCong cc WHERE cc.MaNV = n.MaNV AND cc.Ngay = n.Ngay);
 
-            CLOSE curDuyet;
-            DEALLOCATE curDuyet;
+            DROP TABLE #NgayNghi;
         END
     END;
     GO

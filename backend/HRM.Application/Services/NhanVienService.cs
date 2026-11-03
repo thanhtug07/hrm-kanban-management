@@ -31,9 +31,18 @@ public class NhanVienService : INhanVienService
             .AsQueryable();
 
         // Trưởng phòng: chỉ xem nhân viên thuộc phòng mình phụ trách
+        var role = user.FindFirstValue(ClaimTypes.Role);
         var managedPB = await GetManagedDepartmentAsync(user);
         if (managedPB != null)
             query = query.Where(n => n.MaPB == managedPB);
+        else if (role == RoleConstants.TruongPhong)
+        {
+            // Trưởng phòng không gắn phòng ban nào -> không được xem toàn công ty
+            var emptyPage = filter.Page > 0 ? filter.Page : 1;
+            var emptySize = Math.Clamp(filter.PageSize > 0 ? filter.PageSize : 20, 1, 100);
+            return ApiResponse<PagedResult<NhanVienDto>>.Ok(
+                PagedResult<NhanVienDto>.Create(new List<NhanVienDto>(), 0, emptyPage, emptySize));
+        }
 
         if (!string.IsNullOrWhiteSpace(filter.MaPB))
             query = query.Where(n => n.MaPB == filter.MaPB.Trim());

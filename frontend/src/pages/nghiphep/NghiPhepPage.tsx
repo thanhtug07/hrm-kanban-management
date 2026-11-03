@@ -72,14 +72,9 @@ export const NghiPhepPage: React.FC = () => {
   const fetchLeaves = useCallback(async () => {
     setLoading(true);
     try {
-      let res: any;
-      if (isApprover) {
-        // Admin & HR lấy toàn bộ đơn
-        res = await nghiPhepApi.getAllLeaves();
-      } else {
-        // Nhân viên chỉ lấy đơn cá nhân
-        res = await nghiPhepApi.getMyLeaves();
-      }
+      const res = isApprover
+        ? await nghiPhepApi.getAllLeaves()
+        : await nghiPhepApi.getMyLeaves();
 
       if (res && res.success && res.data) {
         setLeaves(res.data);
@@ -101,7 +96,7 @@ export const NghiPhepPage: React.FC = () => {
   const handleQuickApprove = async (record: NghiPhepDto) => {
     setActionLoadingId(record.maNP);
     try {
-      const res: any = await nghiPhepApi.duyet(record.maNP, { trangThai: 'Đã duyệt' });
+      const res = await nghiPhepApi.duyet(record.maNP, { trangThai: 'Đã duyệt' });
       if (res && res.success) {
         message.success(`Đã phê duyệt đơn nghỉ của ${record.hoTen || record.maNV}!`);
         fetchLeaves();
@@ -119,7 +114,7 @@ export const NghiPhepPage: React.FC = () => {
   const handleQuickReject = async (record: NghiPhepDto) => {
     setActionLoadingId(record.maNP);
     try {
-      const res: any = await nghiPhepApi.duyet(record.maNP, {
+      const res = await nghiPhepApi.duyet(record.maNP, {
         trangThai: 'Từ chối',
         lyDoTuChoi: 'Không đáp ứng điều kiện nghỉ phép',
       });

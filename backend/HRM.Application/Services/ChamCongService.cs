@@ -41,9 +41,9 @@ public class ChamCongService : IChamCongService
                 return ApiResponse<ChamCongDto>.Fail($"Chưa đến giờ check-in. Ca bắt đầu {cfg.GioBatDau:HH:mm}, chỉ được check-in sớm tối đa {cfg.PhutChoPhepSom} phút (từ {earliest:HH:mm}).");
         }
 
-        var latest = cfg.GioKetThuc.AddMinutes(cfg.PhutChoPhepTre);
+        var latest = cfg.GioBatDau.AddMinutes(cfg.PhutChoPhepTre);
         if (nowTime > latest)
-            return ApiResponse<ChamCongDto>.Fail($"Đã quá giờ check-in. Ca kết thúc {cfg.GioKetThuc:HH:mm}" + (cfg.PhutChoPhepTre > 0 ? $" (cho phép trễ tối đa {cfg.PhutChoPhepTre} phút, hạn {latest:HH:mm})" : "") + ".");
+            return ApiResponse<ChamCongDto>.Fail($"Đã quá giờ check-in. Ca bắt đầu {cfg.GioBatDau:HH:mm}" + (cfg.PhutChoPhepTre > 0 ? $" (cho phép trễ tối đa {cfg.PhutChoPhepTre} phút, hạn {latest:HH:mm})" : "") + ".");
 
         var trangThai = nowTime > cfg.GioBatDau ? "Trễ" : "Đủ công";
 
@@ -206,11 +206,16 @@ public class ChamCongService : IChamCongService
         return ApiResponse<List<ChamCongDto>>.Ok(items);
     }
 
-    public async Task<ApiResponse<ChamCongDto>> UpdateAsync(int id, UpdateChamCongDto dto)
+    public async Task<ApiResponse<ChamCongDto>> UpdateAsync(int id, UpdateChamCongDto dto, ClaimsPrincipal user)
     {
         var cc = await _context.ChamCongs.Include(c => c.NhanVien).ThenInclude(n => n.PhongBan).FirstOrDefaultAsync(c => c.MaCC == id);
         if (cc == null)
             return ApiResponse<ChamCongDto>.Fail("Bản ghi chấm công không tồn tại.");
+
+        // Trưởng phòng: chỉ được sửa chấm công của nhân viên thuộc phòng mình
+        var managedPB = await GetManagedDepartmentAsync(user);
+        if (cc.NhanVien?.MaPB != managedPB)
+            return ApiResponse<ChamCongDto>.Fail("Bạn chỉ được sửa chấm công của nhân viên thuộc phòng mình phụ trách.", ErrorCode.Forbidden);
 
         cc.GioVao = dto.GioVao;
         cc.GioRa = dto.GioRa;

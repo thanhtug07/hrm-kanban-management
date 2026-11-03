@@ -81,7 +81,7 @@ public class TaiKhoanService : ITaiKhoanService
 
         var vaiTroMoi = string.IsNullOrWhiteSpace(dto.VaiTro) ? "NhanVien" : dto.VaiTro.Trim();
         if (!ValidRoles.Contains(vaiTroMoi))
-            return ApiResponse<TaiKhoanDto>.Fail("Vai trò không hợp lệ (chỉ nhận Admin, HR, NhanVien).");
+            return ApiResponse<TaiKhoanDto>.Fail($"Vai trò không hợp lệ (chỉ nhận {string.Join(", ", ValidRoles)}).");
 
         // Chỉ Admin được tạo tài khoản có vai trò Admin
         if (vaiTroMoi == "Admin" && !user.IsInRole("Admin"))
@@ -106,6 +106,10 @@ public class TaiKhoanService : ITaiKhoanService
                     return ApiResponse<TaiKhoanDto>.Fail($"Nhân viên {emp.HoTen} ({dto.MaNV}) đã có tài khoản trong hệ thống.", ErrorCode.Conflict);
                 validMaNV = emp.MaNV;
                 linkedEmp = emp;
+            }
+            else
+            {
+                return ApiResponse<TaiKhoanDto>.Fail($"Mã nhân viên '{dto.MaNV}' không tồn tại.", ErrorCode.NotFound);
             }
         }
 
@@ -169,7 +173,7 @@ public class TaiKhoanService : ITaiKhoanService
         {
             var vaiTroMoi = dto.VaiTro.Trim();
             if (!ValidRoles.Contains(vaiTroMoi))
-                return ApiResponse<TaiKhoanDto>.Fail("Vai trò không hợp lệ (chỉ nhận Admin, HR, NhanVien).");
+                return ApiResponse<TaiKhoanDto>.Fail($"Vai trò không hợp lệ (chỉ nhận {string.Join(", ", ValidRoles)}).");
             if (vaiTroMoi == "Admin" && !user.IsInRole("Admin"))
                 return ApiResponse<TaiKhoanDto>.Fail("Chỉ Admin được gán vai trò Admin.", ErrorCode.Forbidden);
             account.VaiTro = vaiTroMoi;

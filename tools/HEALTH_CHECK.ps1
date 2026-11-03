@@ -9,7 +9,7 @@
 #>
 
 param(
-    [string]$Server = "localhost",
+    [string]$Server = "(localdb)\MSSQLLocalDB",  # mac dinh khop voi run.ps1 va db_viewer.py
     [string]$Database = "QUANLYNHANSU",
     [string]$ApiUrl = "http://localhost:5100",
     [switch]$Json
@@ -18,6 +18,12 @@ param(
 $ErrorActionPreference = "Continue"
 $result = [ordered]@{}
 $pass = 0; $fail = 0; $warn = 0
+
+# Kiem tra cong cu truoc khi dung
+if (-not (Get-Command sqlcmd -ErrorAction SilentlyContinue)) {
+    Write-Host "[X] Khong tim thay sqlcmd. Cai SQL Server Command Line Utilities." -ForegroundColor Red
+    exit 1
+}
 
 function Section($title) {
     if (-not $Json) { Write-Host ""; Write-Host ("=" * 60) -ForegroundColor Cyan; Write-Host "  $title" -ForegroundColor Cyan; Write-Host ("=" * 60) -ForegroundColor Cyan }
@@ -46,7 +52,7 @@ $checks = @()
 Section "1. KET NOI SQL SERVER"
 $ver = SqlScalar "SELECT SERVERPROPERTY('ProductVersion')"
 if ($ver) { $checks += Check "SQL Server ket noi duoc ($Server)" $true "v$ver" }
-else { $checks += Check "SQL Server ket noi duoc ($Server)" $false "Khong ket noi duoc"; if (-not $Json) { Write-Host "`n  [DUNG] Khong the ket noi SQL Server. Kiem tra service MSSQLSERVER dang chay." -ForegroundColor Red; if($Json){$result.db=$checks|ConvertTo-Json; $result|ConvertTo-Json -Depth 5}; exit 1 } }
+else { $checks += Check "SQL Server ket noi duoc ($Server)" $false "Khong ket noi duoc"; if (-not $Json) { Write-Host "`n  [DUNG] Khong the ket noi SQL Server. Kiem tra service MSSQLSERVER dang chay." -ForegroundColor Red; if($Json){$result.checks=$checks|ConvertTo-Json; $result|ConvertTo-Json -Depth 5}; exit 1 } }
 
 $edition = SqlScalar "SELECT SERVERPROPERTY('Edition')"
 $checks += Check "Edition" $true $edition

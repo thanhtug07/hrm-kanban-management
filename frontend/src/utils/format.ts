@@ -11,6 +11,6 @@ export const formatDateTime = (date: string | null | undefined): string => {
 };
 
 export const formatCurrency = (amount: number | null | undefined): string => {
-  if (amount == null || amount <= 0 || Math.abs(amount) < 0.0001) return '0 ₫';
+  if (amount == null || Number.isNaN(amount)) return '0 ₫';
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };

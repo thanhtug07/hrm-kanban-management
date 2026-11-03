@@ -79,7 +79,7 @@ export const HeaderBar: React.FC = () => {
       ),
     },
     { type: 'divider' },
-    ...(user?.vaiTro === 'Admin' || user?.vaiTro === 'HR'
+    ...(user?.vaiTro === 'Admin'
       ? [
           {
             key: 'taikhoan',
@@ -150,6 +150,9 @@ export const HeaderBar: React.FC = () => {
               flexShrink: 0,
               maxWidth: 220,
               overflow: 'hidden',
+              height: 44,
+              alignItems: 'center',
+              lineHeight: 1,
             }}
           >
             <Avatar

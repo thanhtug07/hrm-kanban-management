@@ -57,6 +57,11 @@ if (string.IsNullOrWhiteSpace(jwtSecretKey))
     throw new InvalidOperationException(
         "JWT SecretKey chưa được cấu hình. Đặt biến môi trường 'JWT_SECRET_KEY' hoặc 'JwtSettings:SecretKey' (tối thiểu 32 ký tự).");
 }
+if (jwtSecretKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "JWT SecretKey quá ngắn. Yêu cầu tối thiểu 32 ký tự để đảm bảo an toàn cho HMAC-SHA256.");
+}
 
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "HRM.API";
 var jwtAudience = builder.Configuration["JwtSettings:Audience"] ?? "HRM.Client";

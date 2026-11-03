@@ -125,6 +125,16 @@ public class BangLuongService : IBangLuongService
             return ApiResponse<BangLuongDto>.Fail("Bạn không có quyền xem bảng lương của nhân viên khác.", ErrorCode.Forbidden);
         }
 
+        // Trưởng phòng: chỉ xem bảng lương của nhân viên trong phòng mình
+        var managedPB = await GetManagedDepartmentAsync(user);
+        if (managedPB != null)
+        {
+            var empPB = await _context.NhanViens.AsNoTracking()
+                .Where(n => n.MaNV == maNV.Trim()).Select(n => n.MaPB).FirstOrDefaultAsync();
+            if (empPB != managedPB)
+                return ApiResponse<BangLuongDto>.Fail("Bạn chỉ được xem bảng lương của nhân viên thuộc phòng mình phụ trách.", ErrorCode.Forbidden);
+        }
+
         var bl = await _context.BangLuongs
             .AsNoTracking()
             .Include(b => b.NhanVien)
@@ -167,45 +177,60 @@ public class BangLuongService : IBangLuongService
             NgayTao = DateTime.Now
         };
 
-        // Bọc transaction + atomic update để tránh lost-update khi nhiều request đồng thời
-        await using var transaction = await _context.Database.BeginTransactionAsync();
+        // Bọc transaction + atomic update để tránh lost-update khi nhiều request đồng thời.
+        // Phải chạy qua execution strategy vì EnableRetryOnFailure không cho phép transaction do người dùng khởi tạo.
+        var strategy = _context.Database.CreateExecutionStrategy();
         try
         {
-            _context.ChiPhiPhatSinhs.Add(ps);
-
-            var loai = dto.Loai.Trim();
-            var maNV = dto.MaNV.Trim();
-            bool isThuong = loai == "Thưởng" || loai == "Công tác phí";
-            bool isPhat = loai == "Phạt" || loai == "Ứng lương";
-
-            // Cập nhật atomic vào BangLuong tương ứng (nếu có) — chỉ 1 lệnh SQL, không đọc-rồi-ghi
-            if (isThuong)
+            return await strategy.ExecuteAsync(async () =>
             {
-                await _context.BangLuongs
-                    .Where(b => b.MaNV == maNV && b.Thang == dto.Thang && b.Nam == dto.Nam)
-                    .ExecuteUpdateAsync(s => s.SetProperty(b => b.PhuCap, b => b.PhuCap + dto.SoTien));
-            }
-            else if (isPhat)
-            {
-                await _context.BangLuongs
-                    .Where(b => b.MaNV == maNV && b.Thang == dto.Thang && b.Nam == dto.Nam)
-                    .ExecuteUpdateAsync(s => s.SetProperty(b => b.KhauTru, b => b.KhauTru + dto.SoTien));
-            }
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
+                _context.ChiPhiPhatSinhs.Add(ps);
+
+                var loai = dto.Loai.Trim();
+                var maNV = dto.MaNV.Trim();
+                bool isThuong = loai == "Thưởng" || loai == "Công tác phí";
+                bool isPhat = loai == "Phạt" || loai == "Ứng lương";
+
+                // Cập nhật atomic vào BangLuong tương ứng (nếu có) — chỉ 1 lệnh SQL, không đọc-rồi-ghi
+                int affected = 0;
+                if (isThuong)
+                {
+                    affected = await _context.BangLuongs
+                        .Where(b => b.MaNV == maNV && b.Thang == dto.Thang && b.Nam == dto.Nam)
+                        .ExecuteUpdateAsync(s => s.SetProperty(b => b.PhuCap, b => b.PhuCap + dto.SoTien));
+                }
+                else if (isPhat)
+                {
+                    affected = await _context.BangLuongs
+                        .Where(b => b.MaNV == maNV && b.Thang == dto.Thang && b.Nam == dto.Nam)
+                        .ExecuteUpdateAsync(s => s.SetProperty(b => b.KhauTru, b => b.KhauTru + dto.SoTien));
+                }
+
+                // 0 dòng = chưa có bảng lương kỳ này -> hoàn tác, tránh ghi phát sinh mồ côi
+                if (affected == 0)
+                {
+                    await transaction.RollbackAsync();
+                    _context.ChangeTracker.Clear();
+                    return ApiResponse<ChiPhiPhatSinhDto>.Fail(
+                        $"Chưa có bảng lương kỳ {dto.Thang}/{dto.Nam} cho nhân viên '{maNV}' nên không thể áp dụng khoản phát sinh.");
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("CreatePhatSinh: MaNV={MaNV}, Loai={Loai}, SoTien={SoTien}, Ky={Thang}/{Nam}",
+                    dto.MaNV, dto.Loai, dto.SoTien, dto.Thang, dto.Nam);
+
+                return ApiResponse<ChiPhiPhatSinhDto>.Ok(MapToPhatSinhDto(ps, nv.HoTen), "Thêm chi phí phát sinh thành công.");
+            });
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
             _logger.LogError(ex, "CreatePhatSinhFailed: MaNV={MaNV}, Ky={Thang}/{Nam}", dto.MaNV, dto.Thang, dto.Nam);
             return ApiResponse<ChiPhiPhatSinhDto>.Fail("Thêm chi phí phát sinh thất bại, đã hoàn tác thay đổi.");
         }
-
-        _logger.LogInformation("CreatePhatSinh: MaNV={MaNV}, Loai={Loai}, SoTien={SoTien}, Ky={Thang}/{Nam}",
-            dto.MaNV, dto.Loai, dto.SoTien, dto.Thang, dto.Nam);
-
-        return ApiResponse<ChiPhiPhatSinhDto>.Ok(MapToPhatSinhDto(ps, nv.HoTen), "Thêm chi phí phát sinh thành công.");
     }
 
     public async Task<ApiResponse<List<ChiPhiPhatSinhDto>>> GetPhatSinhListAsync(string? maNV, int? thang, int? nam)
@@ -223,10 +248,20 @@ public class BangLuongService : IBangLuongService
 
         var items = await query
             .OrderByDescending(p => p.NgayTao)
+            .Take(5000)  // ponytail: cap an toàn cho 1 kỳ toàn công ty; chuyển PagedResult nếu vượt
             .Select(p => MapToPhatSinhDto(p, p.NhanVien != null ? p.NhanVien.HoTen : p.MaNV))
             .ToListAsync();
 
         return ApiResponse<List<ChiPhiPhatSinhDto>>.Ok(items);
+    }
+
+    private async Task<string?> GetManagedDepartmentAsync(ClaimsPrincipal user)
+    {
+        if (user.FindFirstValue(ClaimTypes.Role) != RoleConstants.TruongPhong) return null;
+        var maNV = user.FindFirstValue("MaNV");
+        if (string.IsNullOrWhiteSpace(maNV)) return null;
+        return await _context.PhongBans.AsNoTracking()
+            .Where(p => p.MaNV_QL == maNV.Trim()).Select(p => p.MaPB).FirstOrDefaultAsync();
     }
 
     private static ChiPhiPhatSinhDto MapToPhatSinhDto(ChiPhiPhatSinh p, string hoTen) => new()

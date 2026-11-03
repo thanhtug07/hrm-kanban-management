@@ -52,11 +52,17 @@ def list_views():
         return [r[0] for r in cur.fetchall()]
 
 
-def count_rows(table):
-    with get_conn() as cn:
+def count_rows(table, cn=None):
+    own = cn is None
+    if own:
+        cn = get_conn()
+    try:
         cur = cn.cursor()
         cur.execute(f"SELECT COUNT(*) FROM dbo.[{table}]")
         return cur.fetchone()[0]
+    finally:
+        if own:
+            cn.close()
 
 
 @app.route("/")
@@ -64,7 +70,8 @@ def index():
     try:
         tables = list_tables()
         views = list_views()
-        overview = [{"name": t, "count": count_rows(t)} for t in tables]
+        with get_conn() as cn:
+            overview = [{"name": t, "count": count_rows(t, cn)} for t in tables]
         total = sum(o["count"] for o in overview)
         return render_template(
             "index.html",
@@ -81,8 +88,12 @@ def index():
 @app.route("/table/<name>")
 def table_detail(name):
     try:
+        # Chan SQL injection: chi cho phep ten nam trong danh sach bang that su
+        if name not in list_tables():
+            return render_template("error.html", error=f"Bang khong ton tai: {name}", db=DATABASE, server=SERVER), 404
+
         page = max(1, int(request.args.get("page", 1)))
-        page_size = int(request.args.get("size", 50))
+        page_size = min(200, max(1, int(request.args.get("size", 50))))
         offset = (page - 1) * page_size
 
         with get_conn() as cn:

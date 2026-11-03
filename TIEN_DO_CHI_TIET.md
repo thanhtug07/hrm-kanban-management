@@ -44,7 +44,7 @@
 | 1 | **Bảng `ChiPhiPhatSinh` thiếu trong script SQL** → API bảng lương crash `Invalid object name` | `QUANLYNHANSU.sql` | Thêm `CREATE TABLE ChiPhiPhatSinh` (MaPS, MaNV, Loai, SoTien, LyDo, Thang, Nam, NgayTao) + FK + 4 CHECK + index `IX_ChiPhiPhatSinh_MaNV_Thang_Nam`. |
 | 2 | **Leo thang đặc quyền: HR tạo/sửa được tài khoản Admin** | `TaiKhoanController.cs` | Thêm guard `Forbid()`: chỉ Admin được set vai trò Admin; chỉ Admin sửa/khóa/reset tài khoản Admin. |
 | 3 | **ResetPassword trả mật khẩu plaintext trong response** | `TaiKhoanController.cs:278` | Bỏ echo mật khẩu, chỉ thông báo "đã đặt lại về mật khẩu mặc định". |
-| 4 | **JWT SecretKey hardcode trong repo** | `appsettings.json` | Để trống; secret dev chuyển sang `appsettings.Development.json`; đọc từ biến môi trường `JWT_SECRET_KEY` trước. |
+| 4 | **JWT SecretKey hardcode trong repo** | `appsettings.json` | Để trống; đọc từ biến môi trường `JWT_SECRET_KEY` trước (fallback `JwtSettings:SecretKey`). Từ đợt tăng cường sau, backend **bắt buộc** secret ≥32 ký tự, nếu thiếu sẽ không khởi động. |
 | 5 | **`RequireHttpsMetadata = false` cả production** | `Program.cs` | Đổi thành `!builder.Environment.IsDevelopment()`. |
 | 6 | **Logic overlap nghỉ phép SAI** — bỏ sót trường hợp đơn mới bao trùm đơn cũ | `NghiPhepService.cs:36-40` | Đổi điều kiện sang chuẩn overlap: `dto.TuNgay <= n.DenNgay && dto.DenNgay >= n.TuNgay`. |
 | 7 | **Lệch port**: BE listen 5100, FE gọi 5000, tài liệu ghi 5055 → API không kết nối | `.env`, `vite.config.ts`, `axiosClient.ts`, docs | Chuẩn hóa toàn bộ về **5100**. |

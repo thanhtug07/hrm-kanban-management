@@ -188,13 +188,16 @@ body {
   flex-shrink: 0;
   white-space: nowrap;
 }
-.ant-layout-header .ant-dropdown-trigger {
-  display: inline-flex !important;
-  align-items: center;
-}
 /* Ẩn role tag trên màn hình hẹp để tránh chồng lấn */
 @media (max-width: 1200px) {
   .ant-layout-header > .ant-space:last-child > .ant-space-item:first-child {
     display: none !important;
   }
+}
+/* User menu header: cao đúng bằng header, không tràn xuống */
+.ant-layout-header .ant-dropdown-trigger {
+  display: inline-flex !important;
+  align-items: center;
+  height: 44px;
+  max-height: 44px;
 }

@@ -73,7 +73,7 @@ export const BangLuongPage: React.FC = () => {
   const fetchMyPayrolls = useCallback(async () => {
     setLoadingMyPayrolls(true);
     try {
-      const res: any = await bangLuongApi.getMyPayroll({ nam: selectedMonth.year() });
+      const res = await bangLuongApi.getMyPayroll({ nam: selectedMonth.year() });
       if (res && res.success && res.data) {
         setMyPayrolls(res.data || []);
       }
@@ -89,7 +89,7 @@ export const BangLuongPage: React.FC = () => {
     if (!isHrOrAdmin) return;
     setLoadingCompanyPayrolls(true);
     try {
-      const res: any = await bangLuongApi.getList({
+      const res = await bangLuongApi.getList({
         thang: selectedMonth.month() + 1,
         nam: selectedMonth.year(),
         maPB: filterMaPB,
@@ -258,7 +258,7 @@ export const BangLuongPage: React.FC = () => {
       align: 'right',
       render: (val: number) => (
         <span style={{ color: val > 0 ? '#DC2626' : '#64748B', fontWeight: val > 0 ? 600 : 400 }}>
-          {val > 0 ? `-${formatCurrency(val)}` : '0 ₫'}
+          {val > 0 ? formatCurrency(-val) : '0 ₫'}
         </span>
       ),
     },
@@ -420,7 +420,7 @@ export const BangLuongPage: React.FC = () => {
             color: val > 0 ? '#DC2626' : '#64748B',
           }}
         >
-          {val > 0 ? `-${formatCurrency(val)}` : '0 ₫'}
+          {val > 0 ? formatCurrency(-val) : '0 ₫'}
         </span>
       ),
     },
@@ -699,7 +699,7 @@ export const BangLuongPage: React.FC = () => {
                   fontFamily: 'monospace',
                 }}
               >
-                {metrics.totalKhauTru > 0 ? `-${formatCurrency(metrics.totalKhauTru)}` : '0 ₫'}
+                {metrics.totalKhauTru > 0 ? formatCurrency(-metrics.totalKhauTru) : '0 ₫'}
               </div>
               <div style={{ fontSize: 12, color: '#EF4444', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span>Phạt kỷ luật, đi trễ, tạm ứng lương</span>

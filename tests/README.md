@@ -23,7 +23,16 @@ npx playwright install chromium
 
 ## 🚀 Cách chạy
 
-**Bắt buộc:** backend (`:5100`) + frontend (`:5173`) đang chạy. Cách nhanh: chạy `run.bat` ở thư mục gốc dự án.
+**Bắt buộc:** backend (`:5100`) + frontend (`:5173`) đang chạy, và DB SQL Server đã được seed.
+Cách nhanh để có đủ 3 điều kiện:
+
+```powershell
+.\run.ps1            # kiểm tra công cụ + tạo DB nếu thiếu + build + chạy cả backend & frontend
+# hoặc (đã build sẵn): run.bat (build) rồi start.bat (chạy server)
+```
+
+Nếu chưa có DB, nạp thủ công `QUANLYNHANSU.sql` → `SEED_DATA.sql` (xem README gốc dự án).
+Bộ test dùng các tài khoản demo nên DB **phải** đã seed dữ liệu mẫu.
 
 ```bash
 # Chạy TẤT CẢ bộ test
@@ -73,8 +82,14 @@ tests/
 
 Ví dụ chạy ẩn (CI):
 
-```bash
+```cmd
+:: cmd.exe
 set HEADLESS=1 && npm test
+```
+
+```powershell
+# PowerShell 5.1+ (cú pháp 'set ... &&' của cmd KHÔNG dùng được ở đây)
+$env:HEADLESS=1; npm test
 ```
 
 ---
@@ -88,3 +103,40 @@ Mỗi suite in ra `PASS`/`FAIL` từng test và tổng kết `x/y PASS`. Exit co
 - **E2E test tạo rồi xóa dữ liệu tạm** trên DB demo (task `AUTO-TEST-*`). Chạy trên DB test/demo, tránh DB production.
 - **RBAC test** có tạo 1 tài khoản Admin tên `ok_<timestamp>` — nên dọn định kỳ nếu chạy nhiều lần.
 - Các suite dùng tài khoản demo: `admin/Admin@123`, `hr01/Hr@123`, `nv001/Nv@123`.
+
+---
+
+## 🧩 Bộ test Backend (xUnit) — `backend/HRM.Tests`
+
+Ngoài bộ Playwright ở trên, backend có bộ test xUnit riêng (không cần chạy backend/frontend):
+
+| File | Nội dung |
+|---|---|
+| `ChamCongServiceTests.cs` | Logic check-in/check-out, khung giờ, tính trạng thái |
+| `NghiPhepServiceTests.cs` | Nghiệp vụ nghỉ phép, chống trùng lịch |
+| `ValidatorTests.cs` | FluentValidation cho DTO chính |
+| `ValidatorCoverageTests.cs` | Bao phủ thêm các nhánh validator |
+| `PayrollSqlIntegrationTests.cs` | **Integration test cần SQL Server thật** (xem dưới) |
+
+Chạy toàn bộ (integration test tự skip):
+
+```powershell
+cd backend
+dotnet test
+```
+
+### Integration test cần SQL Server — `PayrollSqlIntegrationTests`
+
+Các test này kiểm chứng hành vi mà EF Core InMemory **không thể** kiểm tra: stored procedure
+`SP_TinhLuongThang`, trigger `TR_NghiPhep_Update`, ràng buộc `UNIQUE(MaNV, Ngay)`. Mặc định chúng
+**bị skip** và chỉ chạy khi đặt `HRM_SQL_TEST=1`:
+
+```powershell
+$env:HRM_SQL_TEST=1                                                  # bắt buộc để bật
+$env:HRM_SQL_CONNSTR="Server=(localdb)\MSSQLLocalDB;Database=master;Trusted_Connection=True;TrustServerCertificate=True;"  # tùy chọn
+dotnet test --filter "FullyQualifiedName~PayrollSqlIntegrationTests"
+```
+
+- Cần một SQL Server truy cập được và file `QUANLYNHANSU.sql` ở gốc repo.
+- Mỗi test tạo một database tạm `HRM_Test_<guid>`, nạp schema rồi **DROP** sau khi xong — không đụng DB `QUANLYNHANSU`.
+- Nếu không đặt `HRM_SQL_TEST=1`, các test báo `Skipped` (không phải pass giả).

@@ -56,9 +56,9 @@ export const TaiKhoanPage: React.FC = () => {
   const fetchAccounts = useCallback(async () => {
     setLoading(true);
     try {
-      const res: any = await taiKhoanApi.getAll();
+      const res = await taiKhoanApi.getAll();
       if (res && res.success && res.data) {
-        setAccounts(res.data.items || []);
+        setAccounts(res.data || []);
       } else {
         message.error(res?.message || 'Không thể tải danh sách tài khoản.');
       }
@@ -76,7 +76,7 @@ export const TaiKhoanPage: React.FC = () => {
   // Handle Switch Status
   const handleToggleStatus = async (account: TaiKhoanDto, checked: boolean) => {
     try {
-      const res: any = await taiKhoanApi.updateStatus(account.maTK, { trangThai: checked });
+      const res = await taiKhoanApi.updateStatus(account.maTK, { trangThai: checked });
       if (res && res.success) {
         message.success(checked ? 'Đã kích hoạt tài khoản.' : 'Đã khóa tài khoản thành công.');
         setAccounts((prev) =>
@@ -94,7 +94,7 @@ export const TaiKhoanPage: React.FC = () => {
   // Handle Delete Account
   const handleDeleteAccount = async (id: number) => {
     try {
-      const res: any = await taiKhoanApi.delete(id);
+      const res = await taiKhoanApi.delete(id);
       if (res && res.success) {
         message.success('Đã xóa tài khoản khỏi hệ thống.');
         fetchAccounts();

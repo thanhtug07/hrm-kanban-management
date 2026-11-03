@@ -50,7 +50,6 @@ export const SiderMenu: React.FC = () => {
   const { sidebarCollapsed } = useUiStore();
 
   const vaiTro = user?.vaiTro;
-  const isAdminOrHr = vaiTro === 'Admin' || vaiTro === 'HR';
   const isAdmin = vaiTro === 'Admin';
   const isManager = vaiTro === 'Admin' || vaiTro === 'HR' || vaiTro === 'TruongPhong';
 
@@ -117,7 +116,7 @@ export const SiderMenu: React.FC = () => {
   };
 
   const userCard = (
-    <div className="hrm-user-card" onClick={() => navigate(isAdminOrHr ? '/taikhoan' : '/profile')}>
+    <div className="hrm-user-card" onClick={() => navigate(isAdmin ? '/taikhoan' : '/profile')}>
       <Avatar
         size={34}
         style={{

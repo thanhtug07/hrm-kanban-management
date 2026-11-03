@@ -21,8 +21,10 @@ function Fail($msg) {
 
 # 1. Kiem tra cong cu
 Write-Host "[1/4] Kiem tra cong cu..." -ForegroundColor Yellow
-try { $dn = dotnet --version; Write-Host "  [OK] .NET SDK $dn" -ForegroundColor Green } catch { Fail ".NET SDK chua cai. Tai: https://dotnet.microsoft.com/download/dotnet/8.0" }
-try { $nv = node --version; Write-Host "  [OK] Node.js $nv" -ForegroundColor Green } catch { Fail "Node.js chua cai. Tai: https://nodejs.org/" }
+if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) { Fail ".NET SDK chua cai. Tai: https://dotnet.microsoft.com/download/dotnet/8.0" }
+Write-Host "  [OK] .NET SDK $((dotnet --version))" -ForegroundColor Green
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { Fail "Node.js chua cai. Tai: https://nodejs.org/" }
+Write-Host "  [OK] Node.js $((node --version))" -ForegroundColor Green
 
 # 2. Kiem tra DB
 Write-Host ""
@@ -66,9 +68,28 @@ Write-Host "  [OK] Build thanh cong" -ForegroundColor Green
 Write-Host ""
 Write-Host "Khoi dong Backend + Frontend..." -ForegroundColor Cyan
 Start-Process cmd -ArgumentList "/k", "chcp 65001 >nul && cd /d `"$Backend`" && echo === BACKEND http://localhost:5100 === && dotnet run --project HRM.API --launch-profile http --no-build"
-Start-Sleep -Seconds 4
+
+# Doi backend san sang (toi da ~60s) roi moi mo frontend
+Write-Host "  Dang doi backend khoi dong..." -ForegroundColor DarkGray
+$ready = $false
+for ($i = 0; $i -lt 30; $i++) {
+    try { Invoke-WebRequest "http://localhost:5100/api/healthcheck/database" -UseBasicParsing -TimeoutSec 2 | Out-Null; $ready = $true; break }
+    catch { if ($_.Exception.Response) { $ready = $true; break } }
+    Start-Sleep -Seconds 2
+}
+if (-not $ready) { Write-Host "  [!] Backend chua phan hoi sau 60s - van tiep tuc." -ForegroundColor DarkYellow }
+
 Start-Process cmd -ArgumentList "/k", "chcp 65001 >nul && cd /d `"$Frontend`" && echo === FRONTEND http://localhost:5173 === && npm run dev"
-Start-Sleep -Seconds 6
+
+# Doi frontend (Vite) san sang (toi da ~30s) roi moi mo trinh duyet
+Write-Host "  Dang doi frontend khoi dong..." -ForegroundColor DarkGray
+$feReady = $false
+for ($i = 0; $i -lt 15; $i++) {
+    try { Invoke-WebRequest "http://localhost:5173" -UseBasicParsing -TimeoutSec 2 | Out-Null; $feReady = $true; break }
+    catch { if ($_.Exception.Response) { $feReady = $true; break } }
+    Start-Sleep -Seconds 2
+}
+if (-not $feReady) { Write-Host "  [!] Frontend chua phan hoi sau 30s - van tiep tuc." -ForegroundColor DarkYellow }
 Start-Process "http://localhost:5173"
 
 Write-Host ""

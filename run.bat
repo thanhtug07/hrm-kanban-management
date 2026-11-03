@@ -18,7 +18,9 @@ REM 0. DON TIEN TRINH CU (tranh lock file khi build)
 REM ============================================================
 echo [0/3] Don tien trinh cu (neu co)...
 taskkill /F /IM HRM.API.exe >nul 2>nul
-taskkill /F /IM dotnet.exe >nul 2>nul
+REM Chi kill tien trinh dang giu cong 5100 / 5173 (tranh kill nham dotnet/node khac)
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":5100" ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>nul
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":5173" ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>nul
 echo   [OK] Da don
 echo.
 

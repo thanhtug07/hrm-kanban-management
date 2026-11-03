@@ -46,6 +46,11 @@ public class CongViecService : ICongViecService
                     .Where(n => n.MaPB == managedPB).Select(n => n.MaNV);
                 query = query.Where(x => deptEmpIds.Contains(x.MaNV_PhuTrach) || x.MaNV_Giao == userMaNV);
             }
+            else
+            {
+                // Trưởng phòng không gắn phòng ban nào -> không được xem toàn công ty
+                query = query.Where(x => false);
+            }
         }
         else if (!string.IsNullOrWhiteSpace(maNV))
         {
@@ -108,7 +113,11 @@ public class CongViecService : ICongViecService
             return ApiResponse<TaskItemDto>.Fail($"Nhân viên phụ trách '{dto.MaNV_PhuTrach}' không tồn tại trên hệ thống.");
         }
 
-        var maNVGiao = user.FindFirstValue("MaNV") ?? "NV000";
+        var maNVGiao = user.FindFirstValue("MaNV");
+        if (string.IsNullOrWhiteSpace(maNVGiao))
+        {
+            return ApiResponse<TaskItemDto>.Fail("Tài khoản chưa liên kết nhân viên, không thể tạo công việc.", ErrorCode.Forbidden);
+        }
 
         var maxViTri = await _context.CongViecs
             .Where(t => t.TrangThai == "Todo" && !t.DaXoa)
@@ -191,26 +200,31 @@ public class CongViecService : ICongViecService
 
         var fromStatus = task.TrangThai;
 
-        // Bọc transaction: rebalance (nhiều lệnh ghi) + SP di chuyển phải NGUYÊN TỬ
-        await using var transaction = await _context.Database.BeginTransactionAsync();
+        // Bọc transaction: rebalance (nhiều lệnh ghi) + SP di chuyển phải NGUYÊN TỬ.
+        // Phải chạy qua execution strategy vì EnableRetryOnFailure không cho phép transaction do người dùng khởi tạo.
+        var strategy = _context.Database.CreateExecutionStrategy();
         try
         {
-            // Tính toán vị trí theo thuật toán Gap-based 1000 + Rebalance
-            int viTriMoi = await TinhViTriMoiAsync(dto.TrangThaiMoi, dto.MaTaskTruoc, dto.MaTaskSau, id);
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            // LỚP BẢO VỆ 2: Gọi Stored Procedure SP_DiChuyenTask
-            await _context.Database.ExecuteSqlRawAsync(
-                "EXEC dbo.SP_DiChuyenTask @MaTask = {0}, @TrangThaiMoi = {1}, @ViTriMoi = {2}",
-                id, dto.TrangThaiMoi, viTriMoi);
+                // Tính toán vị trí theo thuật toán Gap-based 1000 + Rebalance
+                int viTriMoi = await TinhViTriMoiAsync(dto.TrangThaiMoi, dto.MaTaskTruoc, dto.MaTaskSau, id);
 
-            await transaction.CommitAsync();
+                // LỚP BẢO VỆ 2: Gọi Stored Procedure SP_DiChuyenTask
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC dbo.SP_DiChuyenTask @MaTask = {0}, @TrangThaiMoi = {1}, @ViTriMoi = {2}",
+                    id, dto.TrangThaiMoi, viTriMoi);
 
-            _logger.LogInformation("TaskMoved: ActorMaNV={ActorMaNV}, TaskId={TaskId}, FromStatus={FromStatus}, ToStatus={ToStatus}, ViTriMoi={ViTriMoi}",
-                userMaNV, id, fromStatus, dto.TrangThaiMoi, viTriMoi);
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("TaskMoved: ActorMaNV={ActorMaNV}, TaskId={TaskId}, FromStatus={FromStatus}, ToStatus={ToStatus}, ViTriMoi={ViTriMoi}",
+                    userMaNV, id, fromStatus, dto.TrangThaiMoi, viTriMoi);
+            });
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
             _logger.LogError(ex, "MoveTaskFailed: TaskId={TaskId}, ToStatus={ToStatus}", id, dto.TrangThaiMoi);
             return ApiResponse<TaskItemDto>.Fail("Di chuyển công việc thất bại, đã hoàn tác thay đổi.");
         }
@@ -287,7 +301,11 @@ public class CongViecService : ICongViecService
         }
 
         var role = user.FindFirstValue(ClaimTypes.Role);
-        var userMaNV = user.FindFirstValue("MaNV") ?? "NV000";
+        var userMaNV = user.FindFirstValue("MaNV");
+        if (string.IsNullOrWhiteSpace(userMaNV))
+        {
+            return ApiResponse<BinhLuanDto>.Fail("Tài khoản chưa liên kết nhân viên, không thể bình luận.", ErrorCode.Forbidden);
+        }
 
         bool canComment = role == RoleConstants.Admin || role == RoleConstants.HR
             || task.MaNV_PhuTrach.Trim() == userMaNV.Trim() || task.MaNV_Giao.Trim() == userMaNV.Trim();
@@ -318,7 +336,7 @@ public class CongViecService : ICongViecService
         {
             MaBL = comment.MaBL,
             MaTask = comment.MaTask,
-            MaNV = comment.MaNV ?? userMaNV,
+            MaNV = comment.MaNV,
             HoTen = nv?.HoTen ?? userMaNV,
             NoiDung = comment.NoiDung,
             ThoiGian = comment.ThoiGian

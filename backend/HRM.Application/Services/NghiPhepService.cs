@@ -33,6 +33,9 @@ public class NghiPhepService : INghiPhepService
         }
 
         // Kiểm tra trùng lặp khoảng thời gian với đơn khác (overlap 2 khoảng ngày)
+        // shortcut: 2 request đồng thời cùng MaNV vẫn có thể cùng lọt qua check này (TOCTOU) vì
+        // không có lock/unique constraint trên khoảng ngày -> sinh 2 đơn trùng. Nâng cấp bằng
+        // transaction Serializable + UPDLOCK/HOLDLOCK trên bảng NghiPhep khi cần chống race thật.
         var hasOverlap = await _context.NghiPheps
             .AnyAsync(n => n.MaNV == maNV 
                         && n.TrangThai != "Từ chối"
@@ -136,7 +139,7 @@ public class NghiPhepService : INghiPhepService
         {
             var empPB = await _context.NhanViens.AsNoTracking()
                 .Where(n => n.MaNV == don.MaNV).Select(n => n.MaPB).FirstOrDefaultAsync();
-            if (empPB != null && empPB != managedPB)
+            if (empPB != managedPB)
                 return ApiResponse<NghiPhepDto>.Fail("Bạn chỉ được duyệt đơn của nhân viên thuộc phòng mình phụ trách.", ErrorCode.Forbidden);
         }
 

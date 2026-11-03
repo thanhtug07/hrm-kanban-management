@@ -52,13 +52,30 @@ import EmployeeCalendarDrawer, {
 
 const { Title, Text } = Typography;
 
+// Đồng hồ tự cập nhật riêng — chỉ re-render chính nó, không kéo cả trang mỗi giây
+const LiveClock: React.FC = () => {
+  const [time, setTime] = useState(() => dayjs());
+  useEffect(() => {
+    const timer = setInterval(() => setTime(dayjs()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  return <>{time.format('HH:mm:ss')}</>;
+};
+
 export const ChamCongPage: React.FC = () => {
   const { user } = useAuthStore();
   const isHrOrAdmin = user?.vaiTro === 'Admin' || user?.vaiTro === 'HR' || user?.vaiTro === 'TruongPhong';
   const isAdmin = user?.vaiTro === 'Admin';
 
-  const [currentTime, setCurrentTime] = useState(dayjs());
+  const now = dayjs();
+  const [, setMinuteTick] = useState(0);
   const [selectedMonth, setSelectedMonth] = useState<Dayjs>(dayjs());
+
+  // Nhịp 1 phút: giữ timeWindow/todayRecord đúng theo giờ thực mà không re-render mỗi giây
+  useEffect(() => {
+    const timer = setInterval(() => setMinuteTick((t) => t + 1), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Personal history (For Employee)
   const [myHistory, setMyHistory] = useState<ChamCongDto[]>([]);
@@ -91,17 +108,9 @@ export const ChamCongPage: React.FC = () => {
   // Active Tab
   const [activeTabKey, setActiveTabKey] = useState<string>('company_history');
 
-  // Clock interval for employee check-in view
-  useEffect(() => {
-    if (!isHrOrAdmin) {
-      const timer = setInterval(() => setCurrentTime(dayjs()), 1000);
-      return () => clearInterval(timer);
-    }
-  }, [isHrOrAdmin]);
-
   // Today attendance state (for Employee view)
   const todayRecord = myHistory.find(
-    (item) => item.ngay.split('T')[0] === currentTime.format('YYYY-MM-DD')
+    (item) => item.ngay.split('T')[0] === now.format('YYYY-MM-DD')
   );
 
   // Fetch cấu hình khung giờ chấm công
@@ -112,10 +121,10 @@ export const ChamCongPage: React.FC = () => {
   }, []);
 
   // Kiểm tra cửa sổ thời gian cho phép chấm công
-  const timeWindow = (() => {
+  const timeWindow = useMemo(() => {
     if (!cauHinhGio) return { canCheckIn: true, canCheckOut: true, reasonIn: "", reasonOut: "" };
     const toMin = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-    const nowMin = currentTime.hour() * 60 + currentTime.minute();
+    const nowMin = dayjs().hour() * 60 + dayjs().minute();
     const start = toMin(cauHinhGio.gioBatDau);
     const end = toMin(cauHinhGio.gioKetThuc);
     const earliest = start - cauHinhGio.phutChoPhepSom;
@@ -127,7 +136,7 @@ export const ChamCongPage: React.FC = () => {
     else if (nowMin > latest) reasonIn = `Đã quá giờ check-in (ca kết thúc ${cauHinhGio.gioKetThuc})`;
     const reasonOut = canCheckOut ? "" : `Chưa hết giờ làm việc (check-out sau ${cauHinhGio.gioKetThuc})`;
     return { canCheckIn, canCheckOut, reasonIn, reasonOut };
-  })();
+  }, [cauHinhGio, now.format('YYYY-MM-DD HH:mm')]);
 
   // Fetch Personal History
   const fetchMyHistory = useCallback(async () => {
@@ -287,7 +296,7 @@ export const ChamCongPage: React.FC = () => {
       );
     }
     if (s.includes('trễ') || s.includes('muộn')) {
-      const lateMins = calculateLateMinutes(gioVao);
+      const lateMins = calculateLateMinutes(gioVao, cauHinhGio?.gioBatDau);
       return (
         <Tag
           icon={<ClockCircleOutlined />}
@@ -879,7 +888,7 @@ export const ChamCongPage: React.FC = () => {
               <Col xs={24} md={12}>
                 <div>
                   <Text style={{ color: '#99F6E4', fontSize: 14 }}>
-                    Hôm nay là: {currentTime.format('dddd, DD/MM/YYYY')}
+                    Hôm nay là: {now.format('dddd, DD/MM/YYYY')}
                   </Text>
                   <div
                     style={{
@@ -891,7 +900,8 @@ export const ChamCongPage: React.FC = () => {
                       fontFamily: 'monospace',
                     }}
                   >
-                    {currentTime.format('HH:mm:ss')}
+                    <LiveClock />
+                  </div>
                   {cauHinhGio && (
                     <div style={{ color: "#99F6E4", fontSize: 13, marginBottom: 12 }}>
                       Ca làm việc: <b style={{ color: "#FFFFFF" }}>{cauHinhGio.gioBatDau.slice(0,5)} - {cauHinhGio.gioKetThuc.slice(0,5)}</b>
@@ -904,7 +914,6 @@ export const ChamCongPage: React.FC = () => {
                   {(!timeWindow.canCheckOut && todayRecord?.gioVao && !todayRecord?.gioRa) && (
                     <div style={{ color: "#FCD34D", fontSize: 12.5, marginBottom: 10 }}>⚠ {timeWindow.reasonOut}</div>
                   )}
-                  </div>
                   <Space size={14}>
                     <Button
                       type="primary"
@@ -1310,6 +1319,7 @@ export const ChamCongPage: React.FC = () => {
         onClose={() => setDrawerOpen(false)}
         employee={selectedEmployee}
         initialMonth={selectedMonth}
+        gioBatDau={cauHinhGio?.gioBatDau}
       />
 
       {/* ===================== MODAL SỬA BẢN GHI CHẤM CÔNG ===================== */}

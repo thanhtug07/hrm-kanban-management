@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Typography, Space, Row, Col } from 'antd';
+import { Card, Typography, Space, Row, Col, Tag } from 'antd';
 import {
   AreaChart,
   Area,
@@ -125,9 +125,14 @@ export const TaskTrendChart: React.FC<TaskTrendChartProps> = ({ period = 'month'
         }}
       >
         <div>
-          <div style={{ fontWeight: 700, fontSize: 15, color: '#0F172A' }}>
-            Xu Hướng Công Việc (Task Trend)
-          </div>
+          <Space size={8} align="center">
+            <div style={{ fontWeight: 700, fontSize: 15, color: '#0F172A' }}>
+              Xu Hướng Công Việc (Task Trend)
+            </div>
+            <Tag color="orange" style={{ borderRadius: 6, fontWeight: 600, marginInlineEnd: 0 }}>
+              Dữ liệu minh hoạ
+            </Tag>
+          </Space>
           <Text type="secondary" style={{ fontSize: 12.5 }}>
             Tương quan khối lượng việc tạo mới và hoàn tất — {rangeLabel}
           </Text>

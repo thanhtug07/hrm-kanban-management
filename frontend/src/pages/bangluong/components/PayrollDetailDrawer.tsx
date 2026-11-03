@@ -247,7 +247,7 @@ export const PayrollDetailDrawer: React.FC<PayrollDetailDrawerProps> = ({
                 3. Các Khoản Khấu Trừ
               </span>
               <span style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>
-                {record.khauTru > 0 ? `-${formatCurrency(record.khauTru)}` : '0 ₫'}
+                {record.khauTru > 0 ? formatCurrency(-record.khauTru) : '0 ₫'}
               </span>
             </div>
 
@@ -271,13 +271,13 @@ export const PayrollDetailDrawer: React.FC<PayrollDetailDrawerProps> = ({
                         {item.loai}: {item.lyDo || 'Khấu trừ vi phạm'}
                       </div>
                     </div>
-                    <strong style={{ color: '#DC2626' }}>-{formatCurrency(item.soTien)}</strong>
+                    <strong style={{ color: '#DC2626' }}>{formatCurrency(-item.soTien)}</strong>
                   </div>
                 ))
               ) : record.khauTru > 0 ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5 }}>
                   <span style={{ color: '#991B1B' }}>Khấu trừ kỷ luật & đi trễ/vắng:</span>
-                  <strong style={{ color: '#DC2626' }}>-{formatCurrency(record.khauTru)}</strong>
+                  <strong style={{ color: '#DC2626' }}>{formatCurrency(-record.khauTru)}</strong>
                 </div>
               ) : (
                 <div style={{ fontSize: 12, color: '#991B1B', fontStyle: 'italic', textAlign: 'center' }}>

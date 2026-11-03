@@ -30,5 +30,6 @@ module.exports = {
     admin: { u: 'admin', p: 'Admin@123', role: 'Admin' },
     hr: { u: 'hr01', p: 'Hr@123', role: 'HR' },
     nv: { u: 'nv001', p: 'Nv@123', role: 'NhanVien' },
+      tp: { u: 'tp01', p: 'Hr@123', role: 'TruongPhong' },
   },
 };

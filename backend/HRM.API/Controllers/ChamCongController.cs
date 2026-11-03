@@ -85,7 +85,7 @@ public class ChamCongController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<ChamCongDto>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateChamCongDto dto)
     {
-        var result = await _chamCongService.UpdateAsync(id, dto);
+        var result = await _chamCongService.UpdateAsync(id, dto, User);
         if (!result.Success)
         {
             return NotFound(result);

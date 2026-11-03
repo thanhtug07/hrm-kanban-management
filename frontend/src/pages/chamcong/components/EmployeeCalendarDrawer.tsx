@@ -37,6 +37,7 @@ interface EmployeeCalendarDrawerProps {
   onClose: () => void;
   employee: NhanVienDto | null;
   initialMonth?: Dayjs;
+  gioBatDau?: string | null;
 }
 
 export const formatCleanTime = (timeStr?: string | null): string => {
@@ -44,13 +45,19 @@ export const formatCleanTime = (timeStr?: string | null): string => {
   return timeStr.split('.')[0];
 };
 
-export const calculateLateMinutes = (gioVaoStr?: string | null): number => {
+const toMinutes = (time: string): number => {
+  const parts = time.split(':').map(Number);
+  if (parts.length < 2 || Number.isNaN(parts[0]) || Number.isNaN(parts[1])) return 0;
+  return parts[0] * 60 + parts[1];
+};
+
+export const calculateLateMinutes = (gioVaoStr?: string | null, gioBatDau?: string | null): number => {
   if (!gioVaoStr) return 0;
   const clean = gioVaoStr.split('.')[0];
   const parts = clean.split(':').map(Number);
   if (parts.length < 2) return 0;
   const vaoMinutes = parts[0] * 60 + parts[1];
-  const standardMinutes = 8 * 60; // Ca làm việc 08:00:00
+  const standardMinutes = toMinutes(gioBatDau || '08:00'); // Mặc định ca 08:00
   const late = vaoMinutes - standardMinutes;
   return late > 0 ? late : 0;
 };
@@ -60,6 +67,7 @@ export const EmployeeCalendarDrawer: React.FC<EmployeeCalendarDrawerProps> = ({
   onClose,
   employee,
   initialMonth,
+  gioBatDau,
 }) => {
   const [selectedMonth, setSelectedMonth] = useState<Dayjs>(initialMonth || dayjs());
   const [attendanceRecords, setAttendanceRecords] = useState<ChamCongDto[]>([]);
@@ -123,7 +131,7 @@ export const EmployeeCalendarDrawer: React.FC<EmployeeCalendarDrawerProps> = ({
         duCong++;
       } else if (status.includes('trễ') || status.includes('muộn')) {
         tre++;
-        tongPhutTre += calculateLateMinutes(item.gioVao);
+        tongPhutTre += calculateLateMinutes(item.gioVao, gioBatDau);
       } else if (status.includes('vắng') || status.includes('không phép')) {
         vang++;
       } else if (status.includes('phép')) {
@@ -139,7 +147,7 @@ export const EmployeeCalendarDrawer: React.FC<EmployeeCalendarDrawerProps> = ({
       tongPhutTre,
       tongNgayGhiNhan: attendanceRecords.length,
     };
-  }, [attendanceRecords]);
+  }, [attendanceRecords, gioBatDau]);
 
   // Custom fullCellRender ô lịch (Dương lịch thuần túy, kiểm soát 100% không trùng lặp số ngày)
   const fullCellRender = (current: Dayjs) => {
@@ -254,7 +262,7 @@ export const EmployeeCalendarDrawer: React.FC<EmployeeCalendarDrawerProps> = ({
 
     // 2. TRỄ
     if (status.includes('trễ') || status.includes('muộn')) {
-      const lateMins = calculateLateMinutes(record.gioVao);
+      const lateMins = calculateLateMinutes(record.gioVao, gioBatDau);
       return (
         <Tooltip
           title={`Đi trễ: Vào ${formatCleanTime(record.gioVao)} (Trễ ${lateMins > 0 ? lateMins + ' phút' : ''})`}
