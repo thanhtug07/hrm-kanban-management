@@ -33,11 +33,13 @@ public class BangLuongController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách bảng lương toàn công ty theo tháng/năm (Admin/HR)
+    /// Lấy danh sách bảng lương toàn công ty theo tháng/năm (Chỉ Admin).
+    /// Nhân viên xem phiếu của mình qua GET /api/BangLuong/me.
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = RoleConstants.AdminOrHR)]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(ApiResponse<List<BangLuongDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetList([FromQuery] int? thang, [FromQuery] int? nam)
     {
         var result = await _bangLuongService.GetListAsync(thang, nam);

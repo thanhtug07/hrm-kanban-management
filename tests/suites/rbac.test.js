@@ -33,6 +33,14 @@ const { Runner, launchBrowser, login, sleep, config } = require('../helpers');
   // nv001 gắn NV006 -> thử xem hồ sơ NV007 (người khác)
   r.check('NV xem hồ sơ người khác -> 403/chặn', (await api.get(config.API + '/api/nhanvien/NV007', { headers: H(nvTok) })).status() === 403);
 
+  // HR KHÔNG được xem bảng lương toàn công ty (ẩn UI + chặn ở server)
+  const hrList = await api.get(config.API + '/api/bangluong', { headers: H(hrTok) });
+  r.check('HR GET /api/bangluong (toàn công ty) -> 403', hrList.status() === 403, `status=${hrList.status()}`);
+
+  // Admin xem được bảng lương toàn công ty
+  const adminList = await api.get(config.API + '/api/bangluong', { headers: H(adminTok) });
+  r.check('Admin GET /api/bangluong -> 200', adminList.status() === 200, `status=${adminList.status()}`);
+
   // HR KHÔNG được tính lương (chỉ Admin)
   const hrTinhLuong = await api.post(config.API + '/api/bangluong/tinhluong', { headers: H(hrTok), data: { thang: 10, nam: 2026 } });
   r.check('HR tính lương -> 403 (chỉ Admin)', hrTinhLuong.status() === 403, `status=${hrTinhLuong.status()}`);
