@@ -504,14 +504,106 @@ def s_erd():
     text(s, Inches(0.75), Inches(1.55), Inches(11.8), Inches(0.35),
          [("12 bảng — nhóm danh mục, nhóm nhân sự/nghiệp vụ, nhóm Kanban  ·  ký pháp crow's foot", 12.5, MUTED, False)])
 
-    REL = RGBColor(0x5A, 0x6C, 0x8A)   # mau duong quan he (dam hon cho de thay)
+    REL = RGBColor(0x4A, 0x5C, 0x7A)   # mau duong quan he
 
-    # Luu hinh hoc tung thuc the de ve duong quan he sau (crow's foot)
+    # ---- khai bao thuc the (chua ve) : luu hinh hoc de tinh duong noi ----
+    ENTS = [
+        # (x, y, w, ten, fields, mau, hdr)
+        (0.75, 1.98, 2.15, "PhongBan", ["PK MaPB", "TenPB", "MaNV_QL  (FK)"], TEAL, 0.34),
+        (0.75, 3.60, 2.15, "ChucVu", ["PK MaCV", "TenCV", "LuongCoBan"], TEAL, 0.34),
+        (0.75, 5.12, 2.15, "CauHinhChamCong", ["PK MaCH", "GioVao / GioRa", "NguongTre"], TEAL, 0.34),
+        (3.22, 1.98, 2.35, "NhanVien", ["PK MaNV", "HoTen, CCCD, Email", "MaPB (FK), MaCV (FK)", "TrangThai"], ACCENT, 0.34),
+        (3.22, 3.72, 2.35, "HopDong", ["PK MaHD", "MaNV (FK)", "LoaiHD, Luong", "NgayBatDau/KetThuc"], ACCENT, 0.34),
+        (3.22, 5.52, 2.35, "TaiKhoan", ["PK MaTK", "TenDangNhap (UQ)", "VaiTro (CHECK)", "MaNV (FK)"], ACCENT2, 0.34),
+        (5.92, 1.98, 2.30, "ChamCong", ["PK MaCC", "MaNV (FK)", "Ngay (UQ+)", "TrangThai, SoLanTre"], PURPLE, 0.34),
+        (5.92, 3.33, 2.30, "NghiPhep", ["PK MaNP", "MaNV (FK)", "MaNV_Duyet (FK)", "TuNgay/DenNgay", "TrangThai"], PURPLE, 0.34),
+        (5.92, 4.90, 2.30, "BangLuong", ["PK MaBL", "MaNV+Thang+Nam (UQ)", "ThucLinh (PERSISTED)"], PURPLE, 0.34),
+        (5.92, 6.04, 2.30, "ChiPhiPhatSinh", ["PK MaPS", "MaNV (FK)", "Loai, SoTien"], PURPLE, 0.34),
+        (8.62, 1.98, 2.40, "CongViec", ["PK MaTask", "MaNV_PhuTrach (FK)", "MaTask_Cha (FK, tu tham chieu)",
+                                        "TrangThai (CHECK)", "ViTri (gap 1000)", "Deadline"], GREEN, 0.34),
+        (8.62, 4.46, 2.40, "BinhLuan", ["PK MaBL", "MaTask (FK)", "MaNV (FK)", "NoiDung"], GREEN, 0.34),
+    ]
+
     geo = {}
+    for ex, ey, ew, en, ef, ec, eh in ENTS:
+        hh = Inches(eh) + Inches(0.215) * len(ef)
+        geo[en] = (Inches(ex), Inches(ey), Inches(ew), hh, ec, ef, eh)
 
-    def ent(x, y, w, name, fields, c, hdr=0.34):
+    def _ln(x1, y1, x2, y2):
+        shp = s.shapes.add_connector(1, int(x1), int(y1), int(x2), int(y2))
+        shp.line.color.rgb = REL; shp.line.width = Pt(1.3)
+        shp.shadow.inherit = False
+
+    def _foot(x, y, direction):
+        """Dau crow\'s foot (nhieu) cham vao canh thuc the tai (x,y)."""
+        d = Inches(0.1); sp = Inches(0.075)
+        sgn = -1 if direction == "left" else 1
+        for dy in (-sp, 0, sp):
+            _ln(x, y, x + sgn * d, y + dy)
+
+    def _one(x, y, vertical=True):
+        """Dau 'mot': gach ngan vuong goc voi duong tai (x,y)."""
+        if vertical:  # duong chay ngang -> gach dung
+            _ln(x, y - Inches(0.07), x, y + Inches(0.07))
+        else:
+            _ln(x - Inches(0.07), y, x + Inches(0.07), y)
+
+    # ---- ve TAT CA duong noi TRUOC cac bang (chu bang luon nam tren duong) ----
+    # moi quan he chay ngang tu canh phai bang A, qua khe giua cot, cham canh trai bang B.
+    # nhieu quan he cung dich -> tach kenh doc trong khe ho (gutter) giua 2 cot.
+    def rel(a, b, lane_i=0, lane_n=1, a_frac=0.5, b_frac=0.5):
+        ax, ay, aw, ah, _, _, _ = geo[a]
+        bx, by, bw, bh, _, _, _ = geo[b]
+        # diem ra (canh phai A) va diem vao (canh trai B)
+        x1 = ax + aw
+        x2 = bx
+        # neo theo frac chieu cao bang (mac dinh: gan hang FK ~ 1/3 tu tren)
+        y1 = ay + ah * a_frac
+        y2 = by + bh * b_frac
+        # kenh doc trong khe giua A va B, trai deu
+        gap = x2 - x1
+        mid = x1 + gap * (lane_i + 1) / (lane_n + 1)
+        # duong: ngang tu A -> mid, doc -> y2, ngang -> B
+        _ln(x1, y1, mid, y1)
+        _ln(mid, y1, mid, y2)
+        _ln(mid, y2, x2, y2)
+        _one(x1 + Inches(0.05), y1, vertical=True)   # dau "1" gan bang A
+        _foot(x2 - Inches(0.01), y2, "left")          # crow\'s foot gan bang B
+
+    # (lane_i, lane_n) tach kenh trong khe ho; frac chon hang FK cho dung ngu nghia
+    rel("PhongBan", "NhanVien", 0, 2, a_frac=0.45, b_frac=0.30)
+    rel("ChucVu", "NhanVien", 1, 2, a_frac=0.45, b_frac=0.30)
+    rel("NhanVien", "HopDong", 0, 1, a_frac=0.72, b_frac=0.42)
+    rel("NhanVien", "TaiKhoan", 0, 1, a_frac=0.85, b_frac=0.42)
+    rel("NhanVien", "ChamCong", 0, 5, a_frac=0.35, b_frac=0.38)
+    rel("NhanVien", "NghiPhep", 1, 5, a_frac=0.42, b_frac=0.34)
+    rel("NhanVien", "BangLuong", 2, 5, a_frac=0.49, b_frac=0.36)
+    rel("NhanVien", "ChiPhiPhatSinh", 3, 5, a_frac=0.56, b_frac=0.36)
+
+    # BinhLuan nam duoi CongViec -> kenh doc o KHE giua cot NghiPhep va cot CongViec
+    _cv = geo["CongViec"]; _bl = geo["BinhLuan"]
+    _cx = _cv[0] - Inches(0.26)                    # khe ho ben trai cot CongViec
+    _y1 = _cv[1] + Inches(0.30)                    # hang 'MaNV_PhuTrach (FK)' cua CongViec
+    _y2 = _bl[1] + Inches(0.26)                    # hang 'MaTask (FK)' cua BinhLuan
+    _ln(_cv[0], _y1, _cx, _y1)                     # ra khoi canh trai CongViec
+    _ln(_cx, _y1, _cx, _y2)                        # xuong trong khe ho
+    _ln(_cx, _y2, _bl[0], _y2)                     # vao canh trai BinhLuan
+    _one(_cv[0] - Inches(0.04), _y1, vertical=True)
+    _foot(_bl[0] - Inches(0.01), _y2, "left")
+
+    # quan he tu than CongViec -> CongViec (cha): vong nho ben PHAI, khong cham panel
+    _x = _cv[0] + _cv[2]; _ya = _cv[1] + Inches(0.28); _yb = _cv[1] + _cv[3] * 0.62
+    _lx = _x + Inches(0.22)
+    _ln(_x, _ya, _lx, _ya); _ln(_lx, _ya, _lx, _yb); _ln(_lx, _yb, _x, _yb)
+    _one(_x + Inches(0.04), _ya, vertical=True)
+    _foot(_x - Inches(0.01), _yb, "right")
+
+    # ---- ve cac BANG (sau duong noi -> chu khong bi duong de) ----
+    def ent(x_i, y_i, w_i, name, fields, c, hdr):
+        x = Inches(x_i); y = Inches(y_i); w = Inches(w_i)
         hh = Inches(hdr) + Inches(0.215) * len(fields)
-        rect(s, x, y, w, hh, fill=WHITE, line=LINE, shadow=True, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
+        rect(s, x, y, w, hh, fill=WHITE, line=LINE, shadow=True,
+             shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
         rect(s, x, y, w, Inches(hdr), fill=c, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
         rect(s, x, y + Inches(hdr) - Inches(0.08), w, Inches(0.08), fill=c)
         text(s, x, y + Inches(0.055), w, Inches(0.27), [(name, 11, WHITE, True, FONT_H)],
@@ -521,89 +613,9 @@ def s_erd():
             text(s, x + Inches(0.13), fy, w - Inches(0.22), Inches(0.2),
                  [(f, 9.2, SLATE, False)])
             fy += Inches(0.215)
-        geo[name] = (x, y, w, hh)
-        return hh
 
-    def _ln(x1, y1, x2, y2):
-        shp = s.shapes.add_connector(1, int(x1), int(y1), int(x2), int(y2))
-        shp.line.color.rgb = REL; shp.line.width = Pt(1.4)
-        shp.shadow.inherit = False
-
-    def _foot(x, y, direction):
-        """Ve dau crow's foot (nhieu) cham vao canh thuc the tai (x,y)."""
-        d = Inches(0.11); sp = Inches(0.085)
-        sgn = -1 if direction == "left" else 1
-        for dy in (-sp, 0, sp):
-            _ln(x, y, x + sgn * d, y + dy)
-
-    # kenh doc rieng cho tung quan he -> khong de duong cat qua box khac
-    _lane = [0]
-
-    def rel(a, b, side="right"):
-        """Noi 1 - n giua hai thuc the. Dau crow's foot nam o phia B."""
-        ax, ay, aw, ah = geo[a]; bx, by, bw, bh = geo[b]
-        y_from = ay + ah / 2; y_to = by + bh / 2
-        if side == "right":          # A nam ben trai B
-            x1 = ax + aw; x2 = bx
-        else:                        # A nam ben phai B
-            x1 = ax; x2 = bx + bw
-        span = x2 - x1
-        # moi quan he lech kenh mot chut de khong trung nhau
-        step = Inches(0.07)
-        off = step * (_lane[0] % 5)
-        _lane[0] += 1
-        mid = (x1 + x2) / 2 + (off if span > Inches(0.3) else 0)
-        sgn_r = 1 if side == "right" else -1
-        _ln(x1, y_from, mid, y_from); _ln(mid, y_from, mid, y_to); _ln(mid, y_to, x2, y_to)
-        # dau "one": gach ngan vuong goc, dat ngay canh thuc the A
-        xt = x1 + sgn_r * Inches(0.055)
-        _ln(xt, y_from - Inches(0.075), xt, y_from + Inches(0.075))
-        # dau crow's foot cham canh thuc the B
-        _foot(x2 - sgn_r * Inches(0.01), y_to, "left" if side == "right" else "right")
-
-    # Danh muc
-    ent(Inches(0.75), Inches(1.98), Inches(2.15), "PhongBan",
-        ["PK MaPB", "TenPB", "MaNV_QL  (FK)"], TEAL)
-    ent(Inches(0.75), Inches(3.6), Inches(2.15), "ChucVu",
-        ["PK MaCV", "TenCV", "LuongCoBan"], TEAL)
-    ent(Inches(0.75), Inches(5.12), Inches(2.15), "CauHinhChamCong",
-        ["PK MaCH", "GioVao / GioRa", "NguongTre"], TEAL)
-
-    # Core
-    ent(Inches(3.22), Inches(1.98), Inches(2.35), "NhanVien",
-        ["PK MaNV", "HoTen, CCCD, Email", "MaPB (FK), MaCV (FK)", "TrangThai"], ACCENT)
-    ent(Inches(3.22), Inches(3.72), Inches(2.35), "HopDong",
-        ["PK MaHD", "MaNV (FK)", "LoaiHD, Luong", "NgayBatDau/KetThuc"], ACCENT)
-    ent(Inches(3.22), Inches(5.52), Inches(2.35), "TaiKhoan",
-        ["PK MaTK", "TenDangNhap (UQ)", "VaiTro (CHECK)", "MaNV (FK)"], ACCENT2)
-
-    # Nghiep vu
-    ent(Inches(5.92), Inches(1.98), Inches(2.3), "ChamCong",
-        ["PK MaCC", "MaNV (FK)", "Ngay (UQ+)", "TrangThai, SoLanTre"], PURPLE)
-    ent(Inches(5.92), Inches(3.33), Inches(2.3), "NghiPhep",
-        ["PK MaNP", "MaNV (FK)", "MaNV_Duyet (FK)", "TuNgay/DenNgay", "TrangThai"], PURPLE)
-    ent(Inches(5.92), Inches(4.90), Inches(2.3), "BangLuong",
-        ["PK MaBL", "MaNV+Thang+Nam (UQ)", "ThucLinh (PERSISTED)"], PURPLE)
-    ent(Inches(5.92), Inches(6.04), Inches(2.3), "ChiPhiPhatSinh",
-        ["PK MaPS", "MaNV (FK)", "Loai, SoTien"], PURPLE)
-
-    # Kanban
-    ent(Inches(8.62), Inches(1.98), Inches(2.4), "CongViec",
-        ["PK MaTask", "MaNV_PhuTrach (FK)", "MaTask_Cha (FK, tu tham chieu)",
-         "TrangThai (CHECK)", "ViTri (gap 1000)", "Deadline"], GREEN)
-    ent(Inches(8.62), Inches(4.46), Inches(2.4), "BinhLuan",
-        ["PK MaBL", "MaTask (FK)", "MaNV (FK)", "NoiDung"], GREEN)
-
-    # ---- quan he: chi ve cac lien ket ngan, hang xom (khong cat qua box) ----
-    rel("PhongBan", "NhanVien")            # 1 PB co n NV
-    rel("ChucVu", "NhanVien")              # 1 CV co n NV
-    rel("NhanVien", "HopDong")             # 1 NV co n HD
-    rel("NhanVien", "TaiKhoan")            # 1 NV co n TK
-    rel("NhanVien", "ChamCong")            # 1 NV co n CC
-    rel("NhanVien", "NghiPhep")            # 1 NV co n NP
-    rel("NhanVien", "BangLuong")           # 1 NV co n BL
-    rel("NhanVien", "ChiPhiPhatSinh")      # 1 NV co n PS
-    rel("CongViec", "BinhLuan")            # 1 task co n binh luan
+    for ex, ey, ew, en, ef, ec, eh in ENTS:
+        ent(ex, ey, ew, en, ef, ec, eh)
 
     # ---- panel phai: chu giai nhom + danh sach quan he ----
     px = Inches(11.3); pw = Inches(1.55)

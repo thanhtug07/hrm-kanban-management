@@ -119,10 +119,17 @@ badge số nhỏ chưa đổi. Khối **code SQL** vẫn giữ nền `NAVY` (đ�
 
 ## Sơ đồ ERD (crow's foot)
 
-- `ent()` lưu hình học vào `geo[name] = (x, y, w, h)`; `rel(a, b)` vẽ đường nối sau khi mọi box đã dựng.
-- `_ln()` dùng `add_connector` (đường thẳng, không mũi tên); `_foot()` vẽ 3 nhánh crow's foot chạm cạnh thực thể.
-- Mỗi quan hệ lệch kênh dọc một chút (`_lane`) để các đường không trùng nhau.
-- **Không vẽ đường dài cắt qua box khác.** Nếu quan hệ nhảy qua ≥ 2 cột, thay bằng **panel liệt kê quan hệ khoá ngoại** ở cột phải — đọc nhanh trong 5 giây và không rối.
+- **Vẽ đường nối TRƯỚC, vẽ bảng SAU** → chữ trong bảng luôn nằm trên đường, không bị đè.
+- `geo[name] = (x, y, w, h, color, fields, hdr)` lưu hình học; `rel(a, b, lane_i, lane_n, a_frac, b_frac)` vẽ nối 1–n.
+- `rel()` chạy **ngang từ cạnh phải A → kênh dọc trong KHE HỞ giữa 2 cột → cạnh trái B**.
+  Khe hở chia đều bằng `lane_i / (lane_n+1)` khi nhiều quan hệ cùng đích (vd NhanVien → 4 bảng nghiệp vụ).
+- **`a_frac` / `b_frac`** neo đường vào **đúng hàng FK** (≈ 0.30–0.42 chiều cao), KHÔNG dùng tâm bảng —
+  tâm làm crow's foot đâm vào giữa thân bảng và trông như đè chữ.
+- **Không bao giờ để đường dọc chạy trong thân bảng** (x nằm trong `[box.x, box.x+w]`). Kênh dọc phải
+  nằm trong khe hở giữa các cột; quan hệ tự thân vẽ vòng nhỏ ở khe ngoài (không chạm panel phải).
+- `_ln()` dùng `add_connector` (đường thẳng, không mũi tên); `_foot()` vẽ 3 nhánh crow's foot;
+  `_one()` vẽ gạch "một" vuông góc với đường, sát cạnh bảng A.
+- Quan hệ nhảy qua ≥ 2 cột vẫn nên thay bằng **panel liệt kê FK** ở cột phải.
 - Nhãn đúng ký pháp: "một → nhiều (1 : n)".
 
 ## Căn số trang
