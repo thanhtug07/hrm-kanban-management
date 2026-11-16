@@ -28,12 +28,15 @@ shape rời rạc, để giữ nhận diện đồng nhất.
 
 | Vai trò | Hằng số | Hex | Dùng cho |
 |---|---|---|---|
-| Nền tối | `NAVY` | `#0E1B2E` | bìa, slide cảm ơn |
-| Nền tối nhạt | `NAVY2` | `#162A45` | panel, ô số liệu lớn |
+| Nền tối | `NAVY` | `#0E1B2E` | bìa, slide cảm ơn, khối code SQL |
+| Nền tối nhạt | `NAVY2` | `#162A45` | badge số, header dự phòng (KHÔNG dùng cho panel lớn) |
+| Xanh da trời | `SKY` | `#2F7DD1` | viền/nhấn cho ô số liệu, panel sáng |
+| Xanh rất nhạt | `SKY_LT` | `#E8F1FC` | nền ô số liệu, mảng phụ nền slide |
 | Màu chữ chính | `INK` | `#141B2D` | tiêu đề, chữ đậm |
 | Chữ phụ | `SLATE` | `#475569` | nội dung thường |
 | Chữ mờ | `MUTED` | `#7B8799` | chú thích, footer |
-| Viền mềm | `LINE` | `#E7ECF4` | viền box mảnh |
+| Viền mềm | `LINE` | `#D3DCE8` | viền box thường |
+| Viền đậm | `LINE2` | `#B9C6D8` | khung chính cần nổi |
 | Nền phụ | `SOFT` | `#EEF2F9` | badge, dải phụ |
 | Nền slide | `BG` | `#F7F9FC` | nền toàn slide |
 | Nhấn chính | `ACCENT` | `#1F5FE0` | link, tiêu đề mục |
@@ -54,12 +57,12 @@ nhấn; màu nhấn chỉ dùng cho tiêu đề mục và dấu đầu dòng.
 | Hàm | Nhiệm vụ |
 |---|---|
 | `rect(...)` | Hình chữ nhật. `radius >= 1` = bán kính **tuyệt đối (EMU)** → góc bo đều mọi kích thước (dùng `Inches(0.14)`). `radius < 1` = tỉ lệ (dùng cho pill/badge). `shadow=True` = bóng mềm. |
-| `card(...)` | Box nội dung: bo góc đều, dải nhấn trên đầu, **căn giữa**, tự **thu nhỏ chữ** nếu văn bản dài hơn ô (không bao giờ tràn). |
+| `card(...)` | Box nội dung: **viền đậm màu theo accent**, **dải nhấn trên đầu dày** (`0.11"`), **icon ở góc trên-phải**, tiêu đề đậm (16.5pt), chữ nội dung to (13.5pt), **căn giữa**, tự **thu nhỏ chữ** nếu văn bản dài hơn ô (không bao giờ tràn). |
 | `col_header(...)` | Tiêu đề cột trong box: nền đặc màu, bo góc trên, chữ trắng căn giữa. |
 | `vlist(...)` | Danh sách dấu đầu dòng (mặc định `✓`), chữ to rõ, giãn dòng 1.15. |
 | `bullets(...)` | Danh sách nhấn mạnh (đậm + thường) — dùng cho phần giải thích. |
 | `pill(...)` | Nhãn bo tròn hoàn toàn. |
-| `slide_base(...)` | Khung slide chuẩn: dải màu trên, kicker, tiêu đề, gạch chân, badge số trang, transition. |
+| `slide_base(...)` | Khung slide chuẩn: dải màu trên dày (`0.11"` ACCENT + `0.03"` ACCENT2), mảng `SKY_LT` bên phải (bớt trống), kicker, tiêu đề, gạch chân, badge số trang, transition. |
 | `transition(slide, kind, dur)` | `fade` (mặc định, 700ms) / `morph` (900ms cho bìa & cảm ơn). |
 
 ## Quy tắc bố cục
@@ -95,10 +98,22 @@ Màu chỉ được mang nghĩa, không được chỉ để "cho đẹp":
 | Màu là **chú giải (legend)** cho một thuộc tính | ERD: teal = danh mục, xanh = nhân sự, tím = nghiệp vụ, lục = Kanban |
 | Màu là **trạng thái/loại có nghĩa cố định** | Kanban: Todo/InProgress/Review/Done; SQL: INSERT/UPDATE/DELETE/SELECT |
 
-**Mọi trường hợp khác → NAVY2 + đúng MỘT ACCENT** cho phần tử cần nhấn.
-Đã áp dụng cho: slide 2 (agenda), 8 (1NF/2NF/3NF + 3 bước phân rã), 13 (dải trên card), 16 (10 truy vấn).
+**Mọi trường hợp khác → một màu trung tính + đúng MỘT ACCENT** cho phần tử cần nhấn.
+Đã áp dụng cho: slide 2 (agenda), 8 (1NF/2NF/3NF + 3 bước phân rã), 16 (10 truy vấn).
+Card ở slide 13 dùng màu **theo nhóm chức năng** (màu mang nghĩa phân loại), viền card
+trùng màu đó.
 
-**Nhấn số liệu quan trọng**: dùng "number hero" — ô số lớn nhất + nền `GOLD`, các ô còn lại nền `NAVY2`, chữ nhỏ hơn. Ô hero đặt **đầu tiên**. (slide 14: `269 test case`.)
+**Nhấn số liệu quan trọng**: dùng "number hero" — ô số lớn nhất + nền `GOLD`,
+các ô còn lại nền **`SKY_LT`** + viền `SKY`, số màu `SKY` (tông sáng, không dùng
+panel navy đậm). Ô hero đặt **đầu tiên** + dải trắng trên đỉnh. (slide 14: `269 test case`.)
+
+**Icon trên card**: đặt ở **góc trên-phải** (tuyệt đối, không đẩy tiêu đề/nội dung
+xuống). Góc trái dễ đè chữ khi tiêu đề căn giữa và dài (vd `1NF — Nguyên tố`).
+Icon là ô vuông bo góc màu accent + glyph trắng 14pt.
+
+**Panel lớn (ô số liệu, panel phụ) không dùng `NAVY2`** — đó là màu gần như đen,
+khó đọc khi chiếu. Dùng `SKY_LT` (nền) + `SKY` (viền/nhấn). `NAVY2` chỉ còn cho
+badge số nhỏ chưa đổi. Khối **code SQL** vẫn giữ nền `NAVY` (đúng ngữ nghĩa code).
 
 **Dấu đầu dòng**: `✓` chỉ dùng khi nghĩa là "đạt/được phép" (ma trận RBAC). Với danh sách tính năng trung tính, dùng `▪`. Không dùng `⚠` kiểu cảnh báo lặp lại cùng loại nội dung — thay bằng số thứ tự ①②③.
 

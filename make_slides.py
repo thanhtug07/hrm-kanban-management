@@ -13,11 +13,14 @@ import copy
 
 # ---------------------------------------------------------------- THEME
 NAVY    = RGBColor(0x0E, 0x1B, 0x2E)   # Ocean Depths - Deep Navy
-NAVY2   = RGBColor(0x16, 0x2A, 0x45)   # Navy nhe hon
+NAVY2   = RGBColor(0x16, 0x2A, 0x45)   # Navy nhe hon (van dung cho bia/thank)
+SKY     = RGBColor(0x2F, 0x7D, 0xD1)   # xanh da troi - o so lieu / panel (sang hon navy)
+SKY_LT  = RGBColor(0xE8, 0xF1, 0xFC)   # nen xanh rat nhat - phu nhe them bg
 INK     = RGBColor(0x14, 0x1B, 0x2D)
 SLATE   = RGBColor(0x47, 0x55, 0x69)
 MUTED   = RGBColor(0x7B, 0x87, 0x99)
-LINE    = RGBColor(0xE7, 0xEC, 0xF4)   # vien mem, do dam thap
+LINE    = RGBColor(0xD3, 0xDC, 0xE8)   # vien dam hon cho khung ro
+LINE2   = RGBColor(0xB9, 0xC6, 0xD8)   # vien dam (khung chinh)
 SOFT    = RGBColor(0xEE, 0xF2, 0xF9)   # nen phu nhe
 CARD_SH = RGBColor(0x0B, 0x1F, 0x3A)  # mau bong do mem
 BG      = RGBColor(0xF7, 0xF9, 0xFC)
@@ -180,9 +183,12 @@ def transition(slide, kind="fade", dur=700):
 def slide_base(title=None, kicker=None, num=None, bg=BG):
     s = prs.slides.add_slide(BLANK)
     rect(s, 0, 0, W, H, fill=bg)
-    # dai mau tren cung, chuyen sac nhe cho de nhin
-    rect(s, 0, 0, W, Inches(0.075), fill=ACCENT)
-    rect(s, 0, Inches(0.075), W, Inches(0.03), fill=SOFT)
+    # mang xanh rat nhat o goc phai -> bot trong, them chieu sau
+    rect(s, W - Inches(4.6), 0, Inches(4.6), H, fill=SKY_LT)
+    rect(s, W - Inches(4.6), 0, Inches(0.04), H, fill=LINE)
+    # dai mau tren cung, day hon cho ro thuong hieu
+    rect(s, 0, 0, W, Inches(0.11), fill=ACCENT)
+    rect(s, 0, Inches(0.11), W, Inches(0.03), fill=ACCENT2)
     if kicker:
         text(s, Inches(0.8), Inches(0.36), Inches(9), Inches(0.3),
              [(kicker.upper(), 11.5, ACCENT, True, FONT)])
@@ -202,9 +208,9 @@ def slide_base(title=None, kicker=None, num=None, bg=BG):
     return s
 
 
-def card(slide, x, y, w, h, title, body, accent=ACCENT, icon=None, tsize=15.5,
-         bsize=13, fill=WHITE, center=True):
-    """The noi dung can giua, chu to hon, vien mem + bong nhe.
+def card(slide, x, y, w, h, title, body, accent=ACCENT, icon=None, tsize=16.5,
+         bsize=13.5, fill=WHITE, center=True):
+    """The noi dung can giua, chu to, vien mau dam + thanh accent day + icon goc.
     Tu dong thu nho chu neu doan van dai hon o -> khong tran khoi card."""
     # uoc luong bao thu (pessimistic): it ky tu/dong hon thuc te -> chu nho hon
     # mot chut nhung khong bao gio tran khoi card.
@@ -214,23 +220,30 @@ def card(slide, x, y, w, h, title, body, accent=ACCENT, icon=None, tsize=15.5,
         lines = max(1, (len(body) + per_line - 1) // per_line)
         # 1.42: bu cho xuong dong that + chieu cao dong
         return lines * sz * 1.42 / 72.0
+    # do cao thuc te danh cho body (khop voi bo tri ben duoi)
     box_h = (h - Inches(0.78)) / 914400.0
-    while bsize > 9 and _need_h(bsize) > box_h:
+    while bsize > 9.5 and _need_h(bsize) > box_h:
         bsize -= 0.5
-    rect(slide, x, y, w, h, fill=fill, line=LINE, lw=0.75, shadow=True,
+    # vien mau dam theo accent -> khung ro rang, chuyen nghiep
+    rect(slide, x, y, w, h, fill=fill, line=accent, lw=1.25, shadow=True,
          shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
-    # vach accent bo tron tren cung (mem hon vach doc)
-    rect(slide, x + Inches(0.28), y, w - Inches(0.56), Inches(0.075),
+    # thanh accent bo tron tren cung, day hon cho noi bat
+    rect(slide, x + Inches(0.28), y, w - Inches(0.56), Inches(0.11),
          fill=accent, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.5)
     al = PP_ALIGN.CENTER if center else PP_ALIGN.LEFT
     pad = Inches(0.3)
-    ty = y + Inches(0.2)
+    # icon o goc tren-phai: title can giua hai cham toi goc phai (tieu de ngan),
+    # tranh va cham voi chu khi tieu de dai (nhu "1NF - Nguyen to").
     if icon:
-        text(slide, x, ty, w, Inches(0.34), [(icon, 17, accent, True)], align=al)
-        ty += Inches(0.36)
-    text(slide, x + pad, ty, w - 2 * pad, Inches(0.38),
+        sq = Inches(0.4)
+        rect(slide, x + w - sq - Inches(0.2), y + Inches(0.2), sq, sq, fill=accent,
+             shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.1))
+        text(slide, x + w - sq - Inches(0.2), y + Inches(0.23), sq, Inches(0.34),
+             [(icon, 14, WHITE, True)], align=PP_ALIGN.CENTER)
+    ty = y + Inches(0.2)
+    text(slide, x + pad, ty, w - 2 * pad, Inches(0.4),
          [(title, tsize, INK, True, FONT_H)], align=al)
-    text(slide, x + pad, ty + Inches(0.4), w - 2 * pad, h - Inches(0.75),
+    text(slide, x + pad, ty + Inches(0.42), w - 2 * pad, h - Inches(0.76),
          [(body, bsize, SLATE, False)], align=al, line_spacing=1.18)
     return
 
@@ -956,8 +969,9 @@ def s_features():
     for i, (t, d, c, role) in enumerate(mods):
         cx = x0 + (i % 4) * (cw + gx)
         cy = y0 + (i // 4) * (ch + gy)
-        rect(s, cx, cy, cw, ch, fill=WHITE, line=LINE, shadow=True, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
-        rect(s, cx, cy, cw, Inches(0.08), fill=NAVY2)
+        rect(s, cx, cy, cw, ch, fill=WHITE, line=c, lw=1.25, shadow=True, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
+        rect(s, cx + Inches(0.24), cy, cw - Inches(0.48), Inches(0.1), fill=c,
+             shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.5)
         rect(s, cx + Inches(0.22), cy + Inches(0.28), Inches(0.42), Inches(0.42), fill=c,
              shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.25)
         text(s, cx + Inches(0.22), cy + Inches(0.33), Inches(0.42), Inches(0.35),
@@ -1016,12 +1030,16 @@ def s_testing():
     for i, (v, lb) in enumerate(stats):
         x = sx + i * (sw + sgx)
         hero = i == 0
-        rect(s, x, Inches(5.2), sw, Inches(1.25), fill=GOLD if hero else NAVY2,
+        # hero: nen vang dam; cac o con lai: nen xanh da troi sang + vien mau
+        rect(s, x, Inches(5.2), sw, Inches(1.25), fill=GOLD if hero else SKY_LT,
+             line=GOLD if hero else SKY, lw=1.25 if not hero else 0.75,
              shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
-        text(s, x, Inches(5.34), sw, Inches(0.6), [(v, 28 if hero else 22, WHITE, True, FONT_H)],
+        rect(s, x + Inches(0.28), Inches(5.2), sw - Inches(0.56), Inches(0.09),
+             fill=WHITE if hero else SKY, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.5)
+        text(s, x, Inches(5.34), sw, Inches(0.6), [(v, 28 if hero else 22, INK if hero else SKY, True, FONT_H)],
              align=PP_ALIGN.CENTER)
         text(s, x, Inches(5.98), sw, Inches(0.35),
-             [(lb, 11 if hero else 10.5, WHITE if hero else RGBColor(0x9F,0xB2,0xCC), hero)],
+             [(lb, 11 if hero else 10.5, INK if hero else SLATE, hero)],
              align=PP_ALIGN.CENTER)
     foot(s)
 
