@@ -28,7 +28,7 @@ Cách nhanh để có đủ 3 điều kiện:
 
 ```powershell
 .\run.ps1            # kiểm tra công cụ + tạo DB nếu thiếu + build + chạy cả backend & frontend
-# hoặc (đã build sẵn): run.bat (build) rồi start.bat (chạy server)
+# hoặc: run.bat (build + chạy server trong một lần)
 ```
 
 Nếu chưa có DB, nạp thủ công `QUANLYNHANSU.sql` → `SEED_DATA.sql` (xem README gốc dự án).

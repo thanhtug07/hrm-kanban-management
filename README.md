@@ -33,7 +33,7 @@
 ### Backend
 | Công nghệ | Mô tả |
 |---|---|
-| ASP.NET Core 8 Web API | Framework chính, kiến trúc 3 lớp (Core / Infrastructure / API) |
+| ASP.NET Core 8 Web API | Framework chính, kiến trúc 4 lớp (Core / Infrastructure / Application / API) |
 | Entity Framework Core 8 | ORM, Database-First (map lên DB có sẵn) |
 | SQL Server | Cơ sở dữ liệu quan hệ, Stored Procedures, Triggers, Views |
 | JWT Bearer | Xác thực token |
@@ -59,12 +59,13 @@
 
 ```text
 hrm-kanban-management/
-├── QUANLYNHANSU.sql        # ⭐ Script CSDL: 11 bảng, 6 views, 3 SP, 3 trigger (cấu trúc)
+├── QUANLYNHANSU.sql        # ⭐ Script CSDL: 12 bảng, 6 views, 3 SP, 3 trigger (cấu trúc)
 ├── SEED_DATA.sql           # 🌱 Dữ liệu mẫu: 100 nhân viên, 100 task, 100 hợp đồng, 100 đơn phép...
 ├── backend/                # ASP.NET Core 8 Web API
 │   ├── HRM.Core/           # Domain: Entities, DTOs, Interfaces, Constants
 │   ├── HRM.Infrastructure/ # EF Core: AppDbContext, Configurations, PasswordHasher
-│   └── HRM.API/            # Presentation: Controllers, Services, Validators
+│   ├── HRM.Application/    # Application: Services + Validators
+│   └── HRM.API/            # Presentation: Controllers, Middleware, Program.cs
 ├── frontend/               # React 19 + TypeScript
 │   └── src/
 │       ├── api/            # Axios services
@@ -77,8 +78,7 @@ hrm-kanban-management/
 │       └── types/          # TypeScript types
 ├── tools/                  # DB Viewer (xem CSDL kiểu phpMyAdmin) + hướng dẫn
 ├── docs/                   # API contract, swagger.json, test report
-├── run.bat                 # Build backend + frontend (KHÔNG khởi động server)
-├── start.bat               # Khởi động backend + frontend đã build
+├── run.bat                 # ⭐ All-in-one (CMD): build → khởi động backend + frontend → mở trình duyệt
 ├── run.ps1                 # ⭐ All-in-one (PowerShell): kiểm tra → tạo DB → build → chạy
 ├── README.md
 └── TIEN_DO_CHI_TIET.md     # Nhật ký tiến độ chi tiết
@@ -100,19 +100,18 @@ Sau khi đã chuẩn bị môi trường (xem mục dưới), có 2 cách:
 `QUANLYNHANSU` bằng `sqlcmd` (chỉ khi có `sqlcmd`, mặc định LocalDB) → cài npm packages nếu thiếu →
 build backend → mở backend và frontend trong 2 cửa sổ riêng → đợi backend và frontend phản hồi rồi tự mở trình duyệt.
 
-**Cách 2 — Chạy thủ công bằng 2 file .bat:**
+**Cách 2 — All-in-one bằng CMD (`run.bat`):**
 
 ```bat
-run.bat     :: BUILD only — không khởi động server, không tạo DB
-start.bat   :: Khởi động backend + frontend đã build, rồi mở trình duyệt
+run.bat     :: build backend + frontend → khởi động server → mở trình duyệt
 ```
 
-- `run.bat` chỉ **build**: dọn tiến trình cũ → kiểm tra công cụ → build backend (`dotnet build`) →
-  cài npm packages nếu thiếu → build frontend (`npm run build`). Script kết thúc bằng dòng nhắc
-  "Để CHẠY server: nhấp đúp `start.bat`" — nó **không** tạo database và **không** mở server.
-- `start.bat` **khởi động** backend + frontend trong 2 cửa sổ riêng. Nó yêu cầu backend đã build
-  và `frontend\node_modules` đã tồn tại (báo chạy `run.bat` trước nếu thiếu), sau đó đợi backend
-  (`/api/healthcheck/database`) và frontend phản hồi rồi mới tự mở trình duyệt tại http://localhost:5173.
+- `run.bat` gộp cả **build** và **run** trong một lần chạy: dọn tiến trình cũ (giải phóng cổng 5100 /
+  5173) → kiểm tra công cụ (dotnet, node) → build backend (`dotnet build`) → cài npm packages nếu
+  thiếu → build frontend (`npm run build`) → mở backend + frontend trong 2 cửa sổ riêng → đợi backend
+  (`/api/healthcheck/database`) và frontend phản hồi rồi tự mở trình duyệt tại http://localhost:5173.
+- Script này **không** tạo database — hãy chạy `QUANLYNHANSU.sql` và `SEED_DATA.sql` trước (xem Bước 1).
+- Nếu chỉ muốn build mà không chạy server, dùng `dotnet build` / `npm run build` thủ công.
 
 | Dịch vụ | URL |
 |---|---|
@@ -142,7 +141,7 @@ Lưu ý hai mặc định khác nhau trong dự án:
 Chọn một instance, tạo DB trên đó, rồi đảm bảo chuỗi kết nối backend trỏ đúng cùng instance (xem Bước 2).
 
 1. Mở **SSMS** hoặc **Azure Data Studio**, kết nối tới SQL Server của bạn (`localhost` hoặc `(localdb)\MSSQLLocalDB`).
-2. **File → Open File** chọn `QUANLYNHANSU.sql` → nhấn **F5** (Run All) để tạo cấu trúc 11 bảng + view + SP + trigger.
+2. **File → Open File** chọn `QUANLYNHANSU.sql` → nhấn **F5** (Run All) để tạo cấu trúc 12 bảng + view + SP + trigger.
 3. Tiếp tục **Open File** chọn `SEED_DATA.sql` → **F5** để nạp dữ liệu mẫu (100 nhân viên, 100 task Kanban, 100 hợp đồng...).
 
 > Chạy 2 file **theo thứ tự**: `QUANLYNHANSU.sql` (cấu trúc) → `SEED_DATA.sql` (dữ liệu).
@@ -231,11 +230,14 @@ Tài khoản hay dùng để demo nhanh:
 > 💡 Tổng cộng **50 tài khoản** (1 admin + 9 HR + 10 trưởng phòng + 30 nhân viên), tất cả đều
 > map tới nhân viên có thật trong bảng `NhanVien`.
 
-> ⚠️ **Lưu ý về vai trò `TruongPhong`:** hằng số `RoleConstants.TruongPhong` có trong code C#,
-> nhưng CHECK constraint `CK_TaiKhoan_VaiTro` trong CSDL chỉ cho phép `Admin` / `HR` / `NhanVien`.
-> Vì vậy các tài khoản trưởng phòng (`tp01`…) được cấp vai trò **HR**; quyền quản lý phòng ban
-> vẫn được xác định qua `PhongBan.MaNV_QL`. Muốn dùng đúng vai trò `TruongPhong` thì phải sửa
-> constraint trong `QUANLYNHANSU.sql` trước.
+> ⚠️ **Lưu ý về vai trò `TruongPhong`:** hằng số `RoleConstants.TruongPhong` có trong code C#
+> (`HRM.Core/Constants/RoleConstants.cs`), và CHECK constraint `CK_TaiKhoan_VaiTro` trong
+> `QUANLYNHANSU.sql` **đã cho phép** giá trị `TruongPhong` (xem `QUANLYNHANSU.sql:256`, và script còn
+> tự DROP/ADD lại constraint để bổ sung `TruongPhong` cho các DB cũ tạo thiếu).
+> Tuy nhiên `SEED_DATA.sql` vẫn cấp vai trò **HR** cho các tài khoản `tp01…tp10` (xem `SEED_DATA.sql:190`),
+> nên trong dữ liệu mẫu các trưởng phòng có `VaiTro = 'HR'`; quyền quản lý phòng ban của họ được xác định
+> qua `PhongBan.MaNV_QL` chứ không qua vai trò. Muốn dùng đúng vai trò `TruongPhong`, sửa `SEED_DATA.sql`
+> để gán `N'TruongPhong'` thay vì `N'HR'` — **không** cần sửa constraint.
 
 ---
 
@@ -330,17 +332,21 @@ Admin/HR xem KPI toàn công ty; nhân viên chỉ xem số liệu cá nhân (`/
 
 ## 🔐 Phân quyền (RBAC)
 
-| Chức năng | Admin | HR | Nhân viên |
-|---|:---:|:---:|:---:|
-| Dashboard tổng quan | ✅ | ✅ | ❌ (chỉ xem cá nhân) |
-| Quản lý nhân viên | ✅ | ✅ | ❌ |
-| Quản lý tài khoản | ✅ | ❌ | ❌ (chỉ trang cá nhân) |
-| Kanban — tạo/giao task | ✅ | ✅ | ❌ |
-| Kanban — kéo task của mình | ✅ | ✅ | ✅ |
-| Chấm công | ✅ | ✅ | ✅ (của mình) |
-| Nghỉ phép — duyệt đơn | ✅ | ✅ | ❌ |
-| Bảng lương — tính lương | ✅ | ❌ | ❌ |
-| Bảng lương — xem | ✅ | ❌ | ✅ (của mình) |
+| Chức năng | Admin | HR | TruongPhong | Nhân viên |
+|---|:---:|:---:|:---:|:---:|
+| Dashboard tổng quan | ✅ | ✅ | ✅ | ❌ (chỉ xem cá nhân) |
+| Quản lý nhân viên | ✅ | ✅ | ✅ (phòng mình) | ❌ |
+| Quản lý tài khoản | ✅ | ❌ | ❌ | ❌ (chỉ trang cá nhân) |
+| Kanban — tạo/giao task | ✅ | ✅ | ✅ | ❌ |
+| Kanban — kéo task của mình | ✅ | ✅ | ✅ | ✅ |
+| Chấm công | ✅ | ✅ | ✅ | ✅ (của mình) |
+| Nghỉ phép — duyệt đơn | ✅ | ✅ | ✅ (phòng mình) | ❌ |
+| Bảng lương — tính lương | ✅ | ❌ | ❌ | ❌ |
+| Bảng lương — xem | ✅ | ❌ | ❌ | ✅ (của mình) |
+
+> Lưu ý: trong **dữ liệu mẫu**, tài khoản `tp01…tp10` được seed với `VaiTro = 'HR'` (xem mục Tài khoản Demo),
+> nên ở giao diện chúng hành xử như HR. Cột `TruongPhong` ở bảng trên áp dụng khi bạn seed đúng vai trò
+> `TruongPhong`; khi đó phạm vi quản lý bị giới hạn theo `PhongBan.MaNV_QL`.
 
 ---
 
@@ -358,7 +364,7 @@ Admin/HR xem KPI toàn công ty; nhân viên chỉ xem số liệu cá nhân (`/
 
 ## 🗄️ Cơ sở dữ liệu
 
-**11 bảng:** `PhongBan`, `ChucVu`, `NhanVien`, `HopDong`, `ChamCong`, `NghiPhep`, `BangLuong`, `ChiPhiPhatSinh`, `CongViec`, `TaiKhoan`, `BinhLuan`
+**12 bảng:** `PhongBan`, `ChucVu`, `NhanVien`, `HopDong`, `ChamCong`, `NghiPhep`, `BangLuong`, `ChiPhiPhatSinh`, `CongViec`, `TaiKhoan`, `BinhLuan`, `CauHinhChamCong` (cấu hình khung giờ chấm công — quyết định ca nào bị tính là đi trễ)
 
 **6 Views:** `VW_DanhSachNhanVien`, `VW_ChamCongThang`, `VW_BangLuongChiTiet`, `VW_BoardKanban`, `VW_TaskQuaHan`, `VW_NangSuatNhanVien`
 
@@ -373,6 +379,7 @@ Admin/HR xem KPI toàn công ty; nhân viên chỉ xem số liệu cá nhân (`/
 - [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md) — Hợp đồng API cho frontend
 - [`docs/swagger.json`](docs/swagger.json) — Đặc tả OpenAPI v3
 - [`docs/SWAGGER_TEST_REPORT.md`](docs/SWAGGER_TEST_REPORT.md) — Báo cáo kiểm thử
+- [`docs/ARCHITECTURE_REVIEW.md`](docs/ARCHITECTURE_REVIEW.md) — Đánh giá kiến trúc (một số số liệu ở mục đầu đã cũ: ghi "11 bảng / 3 lớp"; xem mục "ĐÃ FIX" ở cuối file)
 - [`tests/README.md`](tests/README.md) — Bộ test tự động (Playwright) + hướng dẫn chạy
 - [`TIEN_DO_CHI_TIET.md`](TIEN_DO_CHI_TIET.md) — Nhật ký tiến độ chi tiết
 
@@ -395,6 +402,23 @@ database tạm (`HRM_Test_<guid>`) — không đụng vào DB `QUANLYNHANSU`:
 $env:HRM_SQL_TEST=1        # bắt buộc; tùy chọn: $env:HRM_SQL_CONNSTR="Server=...;Database=master;..."
 dotnet test --filter "FullyQualifiedName~PayrollSqlIntegrationTests"
 ```
+
+---
+
+## ⚠️ Hạn chế đã biết
+
+Các điểm dưới đây được ghi lại sau khi rà soát mã nguồn — không phải lỗi chặn demo, nhưng nên biết
+trước khi đánh giá hoặc mở rộng dự án:
+
+| # | Vị trí | Vấn đề | Hướng khắc phục |
+| :-: | :--- | :--- | :--- |
+| 1 | `HRM.Application/Services/NhanVienService.cs:178` | Vai trò **HR** có thể sửa `MaPB` / `MaCV` / `TrangThai` của **bất kỳ** nhân viên, kể cả trưởng phòng hay HR khác | Giới hạn các trường tổ chức (`MaPB`, `MaCV`, `TrangThai`) cho `Admin`, tách khỏi quyền sửa hồ sơ |
+| 2 | `HRM.Application/Services/CongViecService.cs` (Update/Delete task) | Kiểm tra quyền sở hữu task chỉ có ở `MoveTask`; Update/Delete hiện chỉ dựa vào `[Authorize]` ở controller | Bổ sung kiểm tra `MaNV_PhuTrach` ở tầng service để phòng vệ nhiều lớp |
+| 3 | `HRM.Application/Services/JwtTokenService.cs` | Token mang `VaiTro` / `MaNV` / `MaPB`, có hiệu lực tới 8 giờ và **không có cơ chế thu hồi** — đổi vai trò hoặc khóa tài khoản không có tác dụng ngay | Thêm kiểm tra trạng thái tài khoản mỗi request, hoặc rút ngắn thời hạn + refresh token |
+| 4 | `HRM.Application/Validators/` | Thiếu `UpdateTaskValidator` và `UpdateNhanVienValidator` — `UpdateTaskDto.TieuDe` là `null` sẽ gây lỗi 500 thay vì 400 | Thêm 2 validator tương ứng với bản `Create` |
+| 5 | `frontend/src/pages/kanban/KanbanBoardPage.tsx:197` | Khi thêm nhanh task, nếu tài khoản không gắn `MaNV` thì mặc định gán cho `'NV001'` (nhân viên có thật) | Chặn thêm nhanh và báo lỗi khi thiếu `user.maNV` |
+| 6 | `frontend/src/pages/kanban/KanbanBoardPage.tsx` (kéo thả) | Cập nhật lạc quan (optimistic) đọc mảng cũ từ closure và sửa trực tiếp object trong state → có thể hiển thị sai cột nếu board tự refresh đúng lúc đang kéo | Clone task đã di chuyển và tính vị trí trong hàm `setBoardData(prev => …)`; tạm dừng polling khi đang kéo |
+| 7 | `QUANLYNHANSU.sql` (`SP_TinhLuongThang`) | Bảng `BangLuong` chưa có ràng buộc `UNIQUE(MaNV, Thang, Nam)`; hai lần tính lương đồng thời cho kỳ chưa có dữ liệu có thể chèn trùng | Thêm ràng buộc UNIQUE trên `(MaNV, Thang, Nam)` |
 
 ---
 
