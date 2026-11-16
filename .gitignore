@@ -43,6 +43,16 @@ appsettings.Production.json
 .env.production.local
 secrets.json
 
+# ===== Office lock files (PowerPoint/Word đang mở) =====
+~$*
+
+# ===== Build artifacts của frontend =====
+frontend/dist/
+*.tsbuildinfo
+
+# ===== Log của backend =====
+backend/**/Logs/
+
 # ===== Tạm =====
 *.tmp
 tmp/
