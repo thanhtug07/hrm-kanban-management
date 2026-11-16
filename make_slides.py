@@ -501,157 +501,147 @@ def s_arch():
 # ================================================================ 6. ERD
 def s_erd():
     s = slide_base("Sơ đồ quan hệ thực thể (ERD)", kicker="03  •  Cơ sở dữ liệu", num=6)
-    text(s, Inches(0.75), Inches(1.55), Inches(11.8), Inches(0.35),
-         [("12 bảng — nhóm danh mục, nhóm nhân sự/nghiệp vụ, nhóm Kanban  ·  ký pháp crow's foot", 12.5, MUTED, False)])
+    text(s, Inches(0.75), Inches(1.44), Inches(11.8), Inches(0.28),
+         [("12 bảng — chia 4 cụm theo vai trò  ·  mũi nối giữa các cụm là quan hệ khoá ngoại 1 : n",
+           12, MUTED, False)])
 
-    REL = RGBColor(0x4A, 0x5C, 0x7A)   # mau duong quan he
+    REL = RGBColor(0x4A, 0x5C, 0x7A)
 
-    # ---- khai bao thuc the (chua ve) : luu hinh hoc de tinh duong noi ----
-    ENTS = [
-        # (x, y, w, ten, fields, mau, hdr)
-        (0.75, 1.98, 2.15, "PhongBan", ["PK MaPB", "TenPB", "MaNV_QL  (FK)"], TEAL, 0.34),
-        (0.75, 3.60, 2.15, "ChucVu", ["PK MaCV", "TenCV", "LuongCoBan"], TEAL, 0.34),
-        (0.75, 5.12, 2.15, "CauHinhChamCong", ["PK MaCH", "GioVao / GioRa", "NguongTre"], TEAL, 0.34),
-        (3.22, 1.98, 2.35, "NhanVien", ["PK MaNV", "HoTen, CCCD, Email", "MaPB (FK), MaCV (FK)", "TrangThai"], ACCENT, 0.34),
-        (3.22, 3.72, 2.35, "HopDong", ["PK MaHD", "MaNV (FK)", "LoaiHD, Luong", "NgayBatDau/KetThuc"], ACCENT, 0.34),
-        (3.22, 5.52, 2.35, "TaiKhoan", ["PK MaTK", "TenDangNhap (UQ)", "VaiTro (CHECK)", "MaNV (FK)"], ACCENT2, 0.34),
-        (5.92, 1.98, 2.30, "ChamCong", ["PK MaCC", "MaNV (FK)", "Ngay (UQ+)", "TrangThai, SoLanTre"], PURPLE, 0.34),
-        (5.92, 3.33, 2.30, "NghiPhep", ["PK MaNP", "MaNV (FK)", "MaNV_Duyet (FK)", "TuNgay/DenNgay", "TrangThai"], PURPLE, 0.34),
-        (5.92, 4.90, 2.30, "BangLuong", ["PK MaBL", "MaNV+Thang+Nam (UQ)", "ThucLinh (PERSISTED)"], PURPLE, 0.34),
-        (5.92, 6.04, 2.30, "ChiPhiPhatSinh", ["PK MaPS", "MaNV (FK)", "Loai, SoTien"], PURPLE, 0.34),
-        (8.62, 1.98, 2.40, "CongViec", ["PK MaTask", "MaNV_PhuTrach (FK)", "MaTask_Cha (FK, tu tham chieu)",
-                                        "TrangThai (CHECK)", "ViTri (gap 1000)", "Deadline"], GREEN, 0.34),
-        (8.62, 4.46, 2.40, "BinhLuan", ["PK MaBL", "MaTask (FK)", "MaNV (FK)", "NoiDung"], GREEN, 0.34),
-    ]
-
-    geo = {}
-    for ex, ey, ew, en, ef, ec, eh in ENTS:
-        hh = Inches(eh) + Inches(0.215) * len(ef)
-        geo[en] = (Inches(ex), Inches(ey), Inches(ew), hh, ec, ef, eh)
-
-    def _ln(x1, y1, x2, y2):
+    def _ln(x1, y1, x2, y2, w=1.6):
         shp = s.shapes.add_connector(1, int(x1), int(y1), int(x2), int(y2))
-        shp.line.color.rgb = REL; shp.line.width = Pt(1.3)
+        shp.line.color.rgb = REL; shp.line.width = Pt(w)
         shp.shadow.inherit = False
 
     def _foot(x, y, direction):
-        """Dau crow\'s foot (nhieu) cham vao canh thuc the tai (x,y)."""
-        d = Inches(0.1); sp = Inches(0.075)
+        d = Inches(0.11); sp = Inches(0.08)
         sgn = -1 if direction == "left" else 1
         for dy in (-sp, 0, sp):
             _ln(x, y, x + sgn * d, y + dy)
 
-    def _one(x, y, vertical=True):
-        """Dau 'mot': gach ngan vuong goc voi duong tai (x,y)."""
-        if vertical:  # duong chay ngang -> gach dung
-            _ln(x, y - Inches(0.07), x, y + Inches(0.07))
-        else:
-            _ln(x - Inches(0.07), y, x + Inches(0.07), y)
+    def _one(x, y):
+        _ln(x, y - Inches(0.075), x, y + Inches(0.075))
 
-    # ---- ve TAT CA duong noi TRUOC cac bang (chu bang luon nam tren duong) ----
-    # moi quan he chay ngang tu canh phai bang A, qua khe giua cot, cham canh trai bang B.
-    # nhieu quan he cung dich -> tach kenh doc trong khe ho (gutter) giua 2 cot.
-    def rel(a, b, lane_i=0, lane_n=1, a_frac=0.5, b_frac=0.5):
-        ax, ay, aw, ah, _, _, _ = geo[a]
-        bx, by, bw, bh, _, _, _ = geo[b]
-        # diem ra (canh phai A) va diem vao (canh trai B)
-        x1 = ax + aw
-        x2 = bx
-        # neo theo frac chieu cao bang (mac dinh: gan hang FK ~ 1/3 tu tren)
-        y1 = ay + ah * a_frac
-        y2 = by + bh * b_frac
-        # kenh doc trong khe giua A va B, trai deu
-        gap = x2 - x1
-        mid = x1 + gap * (lane_i + 1) / (lane_n + 1)
-        # duong: ngang tu A -> mid, doc -> y2, ngang -> B
-        _ln(x1, y1, mid, y1)
-        _ln(mid, y1, mid, y2)
-        _ln(mid, y2, x2, y2)
-        _one(x1 + Inches(0.05), y1, vertical=True)   # dau "1" gan bang A
-        _foot(x2 - Inches(0.01), y2, "left")          # crow\'s foot gan bang B
+    # ---- mo ta 4 cum: (ten, mau, x, y, w, h, dsach bang) ----
+    # 4 cot deu nhau tren be ngang 12.4" (0.75 .. 12.75), cao 4.8"
+    CX = [0.75, 3.95, 7.15, 10.35]
+    CW = 2.85; CY = 1.84; CH = 4.30
+    # moi bang: (ten, [truong chinh], so FK)
+    CLUSTERS = [
+        ("DANH MỤC", TEAL, CX[0], CY, CW, CH, [
+            ("PhongBan", ["PK MaPB", "TenPB", "MaNV_QL (FK)"], 1),
+            ("ChucVu", ["PK MaCV", "TenCV", "LuongCoBan"], 0),
+            ("CauHinhChamCong", ["PK MaCH", "GioVao / GioRa", "NguongTre"], 0),
+        ]),
+        ("NHÂN SỰ", ACCENT, CX[1], CY, CW, CH, [
+            ("NhanVien", ["PK MaNV", "HoTen, CCCD, Email", "MaPB (FK), MaCV (FK)", "TrangThai"], 2),
+            ("HopDong", ["PK MaHD", "MaNV (FK)", "LoaiHD, Luong", "NgayBatDau/KetThuc"], 1),
+            ("TaiKhoan", ["PK MaTK", "TenDangNhap (UQ)", "VaiTro (CHECK)"], 1),
+        ]),
+        ("NGHIỆP VỤ", PURPLE, CX[2], CY, CW, CH, [
+            ("ChamCong", ["PK MaCC", "MaNV (FK)", "Ngay (UQ+)", "SoLanTre"], 1),
+            ("NghiPhep", ["PK MaNP", "MaNV (FK)", "MaNV_Duyet (FK)"], 2),
+            ("BangLuong", ["PK MaBL", "MaNV+Thang+Nam (UQ)", "ThucLinh (PERSISTED)"], 1),
+            ("ChiPhiPhatSinh", ["PK MaPS", "MaNV (FK)", "Loai, SoTien"], 1),
+        ]),
+        ("KANBAN", GREEN, CX[3], CY, CW, CH, [
+            ("CongViec", ["PK MaTask", "MaNV_PhuTrach (FK)", "MaTask_Cha (FK)",
+                          "TrangThai (CHECK)", "ViTri (gap 1000)"], 2),
+            ("BinhLuan", ["PK MaBL", "MaTask (FK)", "MaNV (FK)"], 2),
+        ]),
+    ]
 
-    # (lane_i, lane_n) tach kenh trong khe ho; frac chon hang FK cho dung ngu nghia
-    rel("PhongBan", "NhanVien", 0, 2, a_frac=0.45, b_frac=0.30)
-    rel("ChucVu", "NhanVien", 1, 2, a_frac=0.45, b_frac=0.30)
-    rel("NhanVien", "HopDong", 0, 1, a_frac=0.72, b_frac=0.42)
-    rel("NhanVien", "TaiKhoan", 0, 1, a_frac=0.85, b_frac=0.42)
-    rel("NhanVien", "ChamCong", 0, 5, a_frac=0.35, b_frac=0.38)
-    rel("NhanVien", "NghiPhep", 1, 5, a_frac=0.42, b_frac=0.34)
-    rel("NhanVien", "BangLuong", 2, 5, a_frac=0.49, b_frac=0.36)
-    rel("NhanVien", "ChiPhiPhatSinh", 3, 5, a_frac=0.56, b_frac=0.36)
+    geo = {}
 
-    # BinhLuan nam duoi CongViec -> kenh doc o KHE giua cot NghiPhep va cot CongViec
-    _cv = geo["CongViec"]; _bl = geo["BinhLuan"]
-    _cx = _cv[0] - Inches(0.26)                    # khe ho ben trai cot CongViec
-    _y1 = _cv[1] + Inches(0.30)                    # hang 'MaNV_PhuTrach (FK)' cua CongViec
-    _y2 = _bl[1] + Inches(0.26)                    # hang 'MaTask (FK)' cua BinhLuan
-    _ln(_cv[0], _y1, _cx, _y1)                     # ra khoi canh trai CongViec
-    _ln(_cx, _y1, _cx, _y2)                        # xuong trong khe ho
-    _ln(_cx, _y2, _bl[0], _y2)                     # vao canh trai BinhLuan
-    _one(_cv[0] - Inches(0.04), _y1, vertical=True)
-    _foot(_bl[0] - Inches(0.01), _y2, "left")
-
-    # quan he tu than CongViec -> CongViec (cha): vong nho ben PHAI, khong cham panel
-    _x = _cv[0] + _cv[2]; _ya = _cv[1] + Inches(0.28); _yb = _cv[1] + _cv[3] * 0.62
-    _lx = _x + Inches(0.22)
-    _ln(_x, _ya, _lx, _ya); _ln(_lx, _ya, _lx, _yb); _ln(_lx, _yb, _x, _yb)
-    _one(_x + Inches(0.04), _ya, vertical=True)
-    _foot(_x - Inches(0.01), _yb, "right")
-
-    # ---- ve cac BANG (sau duong noi -> chu khong bi duong de) ----
-    def ent(x_i, y_i, w_i, name, fields, c, hdr):
-        x = Inches(x_i); y = Inches(y_i); w = Inches(w_i)
-        hh = Inches(hdr) + Inches(0.215) * len(fields)
-        rect(s, x, y, w, hh, fill=WHITE, line=LINE, shadow=True,
-             shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
-        rect(s, x, y, w, Inches(hdr), fill=c, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
-        rect(s, x, y + Inches(hdr) - Inches(0.08), w, Inches(0.08), fill=c)
-        text(s, x, y + Inches(0.055), w, Inches(0.27), [(name, 11, WHITE, True, FONT_H)],
+    def cluster(ten, mau, cx, cy, cw, chh, tables):
+        x = Inches(cx); y = Inches(cy); w = Inches(cw); h = Inches(chh)
+        # panel cum: nen nhat + vien mau dam + thanh tieu de
+        rect(s, x, y, w, h, fill=WHITE, line=mau, lw=1.5, shadow=True,
+             shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.16))
+        rect(s, x, y, w, Inches(0.44), fill=mau, shape=MSO_SHAPE.ROUNDED_RECTANGLE,
+             radius=Inches(0.16))
+        rect(s, x, y + Inches(0.3), w, Inches(0.14), fill=mau)
+        text(s, x, y + Inches(0.09), w, Inches(0.3),
+             [(ten + "   ·   " + str(len(tables)) + " bảng", 12.5, WHITE, True, FONT_H)],
              align=PP_ALIGN.CENTER)
-        fy = y + Inches(hdr) + Inches(0.05)
-        for f in fields:
-            text(s, x + Inches(0.13), fy, w - Inches(0.22), Inches(0.2),
-                 [(f, 9.2, SLATE, False)])
-            fy += Inches(0.215)
+        # cac bang con ben trong
+        bx = x + Inches(0.18); bw = w - Inches(0.36)
+        by = y + Inches(0.56)
+        for name, fields, nfk in tables:
+            bh = Inches(0.27) + Inches(0.172) * len(fields) + Inches(0.04)
+            rect(s, bx, by, bw, bh, fill=BG, line=mau, lw=0.75,
+                 shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.08))
+            rect(s, bx, by, bw, Inches(0.25), fill=mau, shape=MSO_SHAPE.ROUNDED_RECTANGLE,
+                 radius=Inches(0.08))
+            rect(s, bx, by + Inches(0.16), bw, Inches(0.09), fill=mau)
+            text(s, bx, by + Inches(0.026), bw, Inches(0.22), [(name, 10.5, WHITE, True, FONT_H)],
+                 align=PP_ALIGN.CENTER)
+            fy = by + Inches(0.275)
+            for f in fields:
+                text(s, bx + Inches(0.12), fy, bw - Inches(0.2), Inches(0.18),
+                     [(f, 8.6, SLATE, False)])
+                fy += Inches(0.172)
+            geo[name] = (bx, by, bw, bh, mau)
+            by += bh + Inches(0.075)
 
-    for ex, ey, ew, en, ef, ec, eh in ENTS:
-        ent(ex, ey, ew, en, ef, ec, eh)
+    for c in CLUSTERS:
+        cluster(*c)
 
-    # ---- panel phai: chu giai nhom + danh sach quan he ----
-    px = Inches(11.3); pw = Inches(1.55)
-    rect(s, px, Inches(1.9), pw, Inches(5.05), fill=WHITE, line=LINE,
-         shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
-    text(s, px + Inches(0.12), Inches(2.0), pw - Inches(0.24), Inches(0.3),
-         [("Nh\u00f3m b\u1ea3ng", 10.5, INK, True)])
-    legs = [("Danh m\u1ee5c", TEAL), ("Nh\u00e2n s\u1ef1", ACCENT), ("Nghi\u1ec7p v\u1ee5", PURPLE),
-            ("Kanban", GREEN), ("T\u00e0i kho\u1ea3n", ACCENT2)]
-    ly = Inches(2.34)
-    for t, c in legs:
-        rect(s, px + Inches(0.12), ly + Inches(0.035), Inches(0.13), Inches(0.13), fill=c)
-        text(s, px + Inches(0.32), ly, pw - Inches(0.44), Inches(0.25), [(t, 9, SLATE, False)])
-        ly += Inches(0.3)
+    # ---- duong noi GIUA CAC CUM (4 moi, gon va ro nghia) ----
+    # 1) Danh muc -> Nhan su : PhongBan/ChucVu -> NhanVien
+    pc = geo["PhongBan"]; nv = geo["NhanVien"]
+    y = nv[1] + Inches(0.62)
+    _ln(pc[0] + pc[2], y, nv[0], y)
+    _one(pc[0] + pc[2] + Inches(0.05), y)
+    _foot(nv[0] - Inches(0.01), y, "left")
+    text(s, pc[0] + pc[2] + Inches(0.01), y - Inches(0.24), Inches(0.55), Inches(0.2),
+         [("1 : n", 7, MUTED, True)], align=PP_ALIGN.CENTER)
 
-    # ky phap crow's foot
-    _ln(px + Inches(0.14), Inches(3.98), px + Inches(0.62), Inches(3.98))
-    _ln(px + Inches(0.2), Inches(3.91), px + Inches(0.2), Inches(4.05))
-    _foot(px + Inches(0.62), Inches(3.98), "left")
-    text(s, px + Inches(0.12), Inches(4.08), pw - Inches(0.24), Inches(0.3),
-         [("m\u1ed9t \u2192 nhi\u1ec1u (1 : n)", 8.2, MUTED, False)])
+    # 2) Nhan su -> Nghiep vu : NhanVien -> 4 bang (4 kenh trong khe ho)
+    x1 = nv[0] + nv[2]
+    for i, tgt in enumerate(["ChamCong", "NghiPhep", "BangLuong", "ChiPhiPhatSinh"]):
+        tg = geo[tgt]
+        y2 = tg[1] + tg[3] / 2
+        yy = nv[1] + Inches(0.95 + 0.2 * i)
+        mid = x1 + (tg[0] - x1) * (0.28 + 0.14 * i)
+        _ln(x1, yy, mid, yy); _ln(mid, yy, mid, y2); _ln(mid, y2, tg[0], y2)
+        _one(x1 + Inches(0.05), yy)
+        _foot(tg[0] - Inches(0.01), y2, "left")
+    text(s, x1 + Inches(0.01), nv[1] + Inches(0.7), Inches(0.55), Inches(0.2),
+         [("1 : n", 7, MUTED, True)], align=PP_ALIGN.CENTER)
 
-    rect(s, px + Inches(0.12), Inches(4.44), pw - Inches(0.24), Inches(0.02), fill=LINE)
-    text(s, px + Inches(0.12), Inches(4.54), pw - Inches(0.24), Inches(0.3),
-         [("Quan h\u1ec7 kh\u00f3a ngo\u1ea1i", 9.5, INK, True)])
-    rels = ["PhongBan \u2192 NhanVien", "ChucVu \u2192 NhanVien",
-            "NhanVien \u2192 HopDong", "NhanVien \u2192 TaiKhoan",
-            "NhanVien \u2192 ChamCong", "NhanVien \u2192 NghiPhep",
-            "NhanVien \u2192 BangLuong", "NhanVien \u2192 ChiPhiPhatSinh",
-            "NhanVien \u2192 CongViec", "CongViec \u2192 BinhLuan",
-            "CongViec \u2192 CongViec (cha)"]
-    ry2 = Inches(4.84)
-    for r in rels:
-        text(s, px + Inches(0.12), ry2, pw - Inches(0.24), Inches(0.2),
-             [(r, 7.4, SLATE, False)])
-        ry2 += Inches(0.185)
+    # 3) Nhan su -> Kanban : NhanVien -> CongViec (vong tren cung)
+    cv = geo["CongViec"]; bl = geo["BinhLuan"]
+    ytop = Inches(1.68)
+    xa = nv[0] + nv[2]; xb = cv[0] + cv[2] / 2
+    _ln(xa, nv[1] - Inches(0.02), xa, ytop)
+    _ln(xa, ytop, xb, ytop); _ln(xb, ytop, xb, cv[1])
+    _one(xa + Inches(0.05), nv[1] + Inches(0.1))
+    _foot(xb, cv[1] - Inches(0.01), "right")
+    # nhan "1 : n" dat trong khe ho giua 2 panel, khong de len phu de
+    text(s, Inches(7.0), ytop + Inches(0.02), Inches(0.5), Inches(0.18),
+         [("1 : n", 7, MUTED, True)], align=PP_ALIGN.LEFT)
+
+    # 4) trong cum Kanban : CongViec -> BinhLuan
+    x0 = cv[0] + cv[2] / 2
+    _ln(x0, cv[1] + cv[3], x0, bl[1])
+    _one(x0 + Inches(0.05), cv[1] + cv[3] + Inches(0.02))
+    _foot(x0, bl[1] - Inches(0.01), "right")
+
+    # ---- thanh thong ke gon o day slide ----
+    sy = Inches(6.30)
+    stats = [("12", "bảng dữ liệu"), ("14", "khoá ngoại (FK)"), ("6", "khung nhìn"),
+             ("3", "stored procedure"), ("3", "trigger"), ("4", "nhóm bảng")]
+    sx = Inches(0.75); sw = Inches(1.9); sg = Inches(0.09)
+    for i, (v, lb) in enumerate(stats):
+        x = sx + i * (sw + sg)
+        fill = GOLD if i == 0 else SKY_LT
+        line_c = GOLD if i == 0 else SKY
+        rect(s, x, sy, sw, Inches(0.72), fill=fill, line=line_c, lw=1.1,
+             shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.12))
+        text(s, x, sy + Inches(0.06), sw, Inches(0.34),
+             [(v, 17, INK if i == 0 else SKY, True, FONT_H)], align=PP_ALIGN.CENTER)
+        text(s, x, sy + Inches(0.41), sw, Inches(0.24),
+             [(lb, 9, SLATE, False)], align=PP_ALIGN.CENTER)
     foot(s)
 
 

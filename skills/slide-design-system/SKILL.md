@@ -117,20 +117,24 @@ badge số nhỏ chưa đổi. Khối **code SQL** vẫn giữ nền `NAVY` (đ�
 
 **Dấu đầu dòng**: `✓` chỉ dùng khi nghĩa là "đạt/được phép" (ma trận RBAC). Với danh sách tính năng trung tính, dùng `▪`. Không dùng `⚠` kiểu cảnh báo lặp lại cùng loại nội dung — thay bằng số thứ tự ①②③.
 
-## Sơ đồ ERD (crow's foot)
+## Sơ đồ ERD (bố cục theo CỤM)
 
-- **Vẽ đường nối TRƯỚC, vẽ bảng SAU** → chữ trong bảng luôn nằm trên đường, không bị đè.
-- `geo[name] = (x, y, w, h, color, fields, hdr)` lưu hình học; `rel(a, b, lane_i, lane_n, a_frac, b_frac)` vẽ nối 1–n.
-- `rel()` chạy **ngang từ cạnh phải A → kênh dọc trong KHE HỞ giữa 2 cột → cạnh trái B**.
-  Khe hở chia đều bằng `lane_i / (lane_n+1)` khi nhiều quan hệ cùng đích (vd NhanVien → 4 bảng nghiệp vụ).
-- **`a_frac` / `b_frac`** neo đường vào **đúng hàng FK** (≈ 0.30–0.42 chiều cao), KHÔNG dùng tâm bảng —
-  tâm làm crow's foot đâm vào giữa thân bảng và trông như đè chữ.
+Khi ERD có ≥ 10 bảng, **đừng** trải bảng thành cột rồi nối từng cặp — hai bên slide trống
+và đường nối luôn rối. Dùng **bố cục 4 cụm theo vai trò** (Danh mục | Nhân sự | Nghiệp vụ | Kanban):
+
+- **4 cột đều nhau** trên bề ngang `0.75 … 12.75"`; `CX = [0.75, 3.95, 7.15, 10.35]`,
+  `CW = 2.85`, `CH` đủ chứa cụm nhiều bảng nhất. Mọi panel **cùng chiều cao** dù nội dung ít hơn.
+- Mỗi cụm = **panel** (nền trắng, viền + thanh tiêu đề màu vai trò) chứa các **bảng con**
+  (header màu + danh sách trường ≤ 3–5 dòng).
+- **Đường nối chỉ vẽ GIỮA các cụm** (4 mối), không vẽ từng cặp bảng: ít đường ⇒ đọc rõ quan hệ nhóm.
+  Mối trong cùng một cụm (vd CongViec → BinhLuan) vẽ ngắn dọc theo khe hở giữa hai bảng con.
+- **Vẽ đường nối TRƯỚC, vẽ panel/bảng SAU** → chữ luôn nằm trên đường, không bị đè.
 - **Không bao giờ để đường dọc chạy trong thân bảng** (x nằm trong `[box.x, box.x+w]`). Kênh dọc phải
-  nằm trong khe hở giữa các cột; quan hệ tự thân vẽ vòng nhỏ ở khe ngoài (không chạm panel phải).
-- `_ln()` dùng `add_connector` (đường thẳng, không mũi tên); `_foot()` vẽ 3 nhánh crow's foot;
-  `_one()` vẽ gạch "một" vuông góc với đường, sát cạnh bảng A.
-- Quan hệ nhảy qua ≥ 2 cột vẫn nên thay bằng **panel liệt kê FK** ở cột phải.
-- Nhãn đúng ký pháp: "một → nhiều (1 : n)".
+  nằm trong khe hở giữa hai cột; nhiều quan hệ cùng đích chia đều kênh trong khe hở.
+- **Neo crow's foot vào đúng hàng FK**, không dùng tâm bảng.
+- `_ln()` = `add_connector` (đường thẳng, không mũi tên); `_foot()` = 3 nhánh crow's foot; `_one()` = gạch "một".
+- **Dải thống kê dưới cùng** (số bảng · FK · view · SP · trigger) đặt sao cho `sy + 0.72"` kết thúc trước footer (~7.1").
+- Nhãn đúng ký pháp: "một → nhiều (1 : n)". Nhãn "1 : n" đặt trong khe hở giữa hai panel, không đè phụ đề (kết thúc ~1.72").
 
 ## Căn số trang
 
