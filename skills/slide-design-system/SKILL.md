@@ -85,10 +85,43 @@ nhấn; màu nhấn chỉ dùng cho tiêu đề mục và dấu đầu dòng.
 5. Với mọi slide có `card`: kiểm tra text không tràn đáy ô (card tự shrink, nhưng
    vẫn phải xem ảnh vì ước lượng là gần đúng).
 
+## Quy tắc màu nhấn (đúc kết sau review)
+
+**Không xoay vòng cầu vồng màu accent cho các danh sách chỉ mang tính thứ tự.**
+Màu chỉ được mang nghĩa, không được chỉ để "cho đẹp":
+
+| Được phép nhiều màu khi… | Ví dụ |
+|---|---|
+| Màu là **chú giải (legend)** cho một thuộc tính | ERD: teal = danh mục, xanh = nhân sự, tím = nghiệp vụ, lục = Kanban |
+| Màu là **trạng thái/loại có nghĩa cố định** | Kanban: Todo/InProgress/Review/Done; SQL: INSERT/UPDATE/DELETE/SELECT |
+
+**Mọi trường hợp khác → NAVY2 + đúng MỘT ACCENT** cho phần tử cần nhấn.
+Đã áp dụng cho: slide 2 (agenda), 8 (1NF/2NF/3NF + 3 bước phân rã), 13 (dải trên card), 16 (10 truy vấn).
+
+**Nhấn số liệu quan trọng**: dùng "number hero" — ô số lớn nhất + nền `GOLD`, các ô còn lại nền `NAVY2`, chữ nhỏ hơn. Ô hero đặt **đầu tiên**. (slide 14: `269 test case`.)
+
+**Dấu đầu dòng**: `✓` chỉ dùng khi nghĩa là "đạt/được phép" (ma trận RBAC). Với danh sách tính năng trung tính, dùng `▪`. Không dùng `⚠` kiểu cảnh báo lặp lại cùng loại nội dung — thay bằng số thứ tự ①②③.
+
+## Sơ đồ ERD (crow's foot)
+
+- `ent()` lưu hình học vào `geo[name] = (x, y, w, h)`; `rel(a, b)` vẽ đường nối sau khi mọi box đã dựng.
+- `_ln()` dùng `add_connector` (đường thẳng, không mũi tên); `_foot()` vẽ 3 nhánh crow's foot chạm cạnh thực thể.
+- Mỗi quan hệ lệch kênh dọc một chút (`_lane`) để các đường không trùng nhau.
+- **Không vẽ đường dài cắt qua box khác.** Nếu quan hệ nhảy qua ≥ 2 cột, thay bằng **panel liệt kê quan hệ khoá ngoại** ở cột phải — đọc nhanh trong 5 giây và không rối.
+- Nhãn đúng ký pháp: "một → nhiều (1 : n)".
+
+## Căn số trang
+
+Badge số trang (`num=`) phải khớp **thứ tự dựng slide**, không phải thứ tự hàm trong file.
+Thứ tự dựng: `s_title, s_agenda, s_problem, s_stack, s_arch, s_erd, s_tables, s_normalize, s_sqlprog, s_payroll, s_security, s_frontend, s_features, s_testing, s_dml, s_queries, s_limits, s_thanks`.
+
 ## Checklist trước khi bàn giao
 
 - [ ] 18 slide, không tràn/đè chữ ở bất kỳ slide nào.
+- [ ] Badge số trang khớp vị trí slide (1–18).
+- [ ] Màu accent có nghĩa; không còn "cầu vồng" cho danh sách thứ tự.
+- [ ] Số liệu quan trọng nhất là ô hero lớn nhất.
 - [ ] Chuyển slide mượt (morph bìa + fade nội dung), file mở được bằng PowerPoint.
 - [ ] Bo góc đều nhau, viền mảnh, bóng mềm.
-- [ ] Chữ đủ to để đọc khi chiếu; số liệu quan trọng được nhấn.
+- [ ] Chữ đủ to để đọc khi chiếu; nội dung dưới footer (đáy ≤ 7.0in).
 - [ ] Nội dung khớp báo cáo Word (`BTL_CSDL_HOÀN_CHỈNH.docx`).

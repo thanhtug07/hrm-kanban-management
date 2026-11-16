@@ -324,13 +324,13 @@ def s_agenda():
     s = slide_base("Nội dung trình bày", kicker="Agenda", num=2)
     items = [
         ("01", "Lý do chọn đề tài & Yêu cầu", "Phân tích yêu cầu, xác định 12 thực thể và thuộc tính", ACCENT),
-        ("02", "Mô hình ER (Crow's foot)", "Ký pháp, sơ đồ tổng thể, 14 mối quan hệ", PURPLE),
-        ("03", "Chuyển ER → Mô hình quan hệ", "7 quy tắc, 12 lược đồ, đặc tả chi tiết bảng", TEAL),
-        ("04", "Chuẩn hóa 3NF / BCNF", "Phân tích phụ thuộc hàm, 3 bước phân rã", GREEN),
-        ("05", "Cài đặt trên SQL Server", "DDL, 26 câu lệnh, 10 truy vấn, view/SP/trigger", ACCENT2),
-        ("06", "Kiểm thử hệ thống", "78 test backend (xUnit) + 191 test E2E (Playwright)", RED),
-        ("07", "Kết luận & Hướng phát triển", "Kết quả đạt được, bài học kinh nghiệm, roadmap", GOLD),
-        ("08", "Tài liệu tham khảo", "5 tài liệu giáo trình & nguồn tham khảo", SLATE),
+        ("02", "Mô hình ER (Crow's foot)", "Ký pháp, sơ đồ tổng thể, 14 mối quan hệ", NAVY2),
+        ("03", "Chuyển ER → Mô hình quan hệ", "7 quy tắc, 12 lược đồ, đặc tả chi tiết bảng", NAVY2),
+        ("04", "Chuẩn hóa 3NF / BCNF", "Phân tích phụ thuộc hàm, 3 bước phân rã", NAVY2),
+        ("05", "Cài đặt trên SQL Server", "DDL, 26 câu lệnh, 10 truy vấn, view/SP/trigger", NAVY2),
+        ("06", "Kiểm thử hệ thống", "78 test backend (xUnit) + 191 test E2E (Playwright)", NAVY2),
+        ("07", "Kết luận & Hướng phát triển", "Kết quả đạt được, bài học kinh nghiệm, roadmap", NAVY2),
+        ("08", "Tài liệu tham khảo", "5 tài liệu giáo trình & nguồn tham khảo", NAVY2),
     ]
     x0, y0 = Inches(0.75), Inches(1.75)
     cw, ch, gx, gy = Inches(3.85), Inches(1.18), Inches(0.3), Inches(0.26)
@@ -338,14 +338,14 @@ def s_agenda():
         cx = x0 + (i % 3) * (cw + gx)
         cy = y0 + (i // 3) * (ch + gy)
         rect(s, cx, cy, cw, ch, fill=WHITE, line=LINE, shadow=True, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
-        rect(s, cx, cy, Inches(0.5), ch, fill=c, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.16)
-        rect(s, cx + Inches(0.25), cy, Inches(0.25), ch, fill=c)
-        text(s, cx, cy + Inches(0.3), Inches(0.5), Inches(0.5),
+        rect(s, cx, cy, Inches(0.62), ch, fill=c, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.16))
+        rect(s, cx + Inches(0.31), cy, Inches(0.31), ch, fill=c)
+        text(s, cx, cy + Inches(0.3), Inches(0.62), Inches(0.5),
              [(n, 18, WHITE, True, FONT_H)], align=PP_ALIGN.CENTER)
-        text(s, cx + Inches(0.66), cy + Inches(0.2), cw - Inches(0.85), Inches(0.4),
-             [(t, 15, INK, True, FONT_H)])
-        text(s, cx + Inches(0.66), cy + Inches(0.58), cw - Inches(0.85), Inches(0.5),
-             [(d, 11.5, SLATE, False)], line_spacing=1.05)
+        text(s, cx + Inches(0.78), cy + Inches(0.16), cw - Inches(0.95), Inches(0.42),
+             [(t, 14.5, INK, True, FONT_H)], line_spacing=0.95)
+        text(s, cx + Inches(0.78), cy + Inches(0.62), cw - Inches(0.95), Inches(0.5),
+             [(d, 11, SLATE, False)], line_spacing=1.0)
     foot(s)
 
 
@@ -357,15 +357,15 @@ def s_problem():
     card(s, Inches(0.75), Inches(1.98), Inches(5.9), Inches(1.52),
          "Dữ liệu nhân sự phân tán",
          "Hồ sơ, hợp đồng, chấm công, nghỉ phép, lương nằm rải rác trên giấy và nhiều tệp Excel rời nhau — "
-         "đối chiếu mất thời gian và dễ sai.", accent=RED, icon="\u26A0")
-    card(s, Inches(0.75), Inches(3.62), Inches(5.9), Inches(1.42),
+         "đối chiếu mất thời gian và dễ sai.", accent=RED, icon="\u2460")
+    card(s, Inches(0.75), Inches(3.60), Inches(5.9), Inches(1.48),
          "Thiết kế sai gây dư thừa",
          "Không chuẩn hóa thì dữ liệu trùng lặp, sửa chỗ này lệch chỗ kia, "
-         "thông tin thất lạc và chi phí bảo trì về sau rất cao.", accent=ACCENT2, icon="\u26A0")
-    card(s, Inches(0.75), Inches(5.16), Inches(5.9), Inches(1.36),
+         "thông tin thất lạc và chi phí bảo trì về sau rất cao.", accent=RED, icon="\u2461")
+    card(s, Inches(0.75), Inches(5.20), Inches(5.9), Inches(1.58),
          "Cần kiểm chứng bằng thực nghiệm",
          "Không chỉ vẽ thiết kế: toàn bộ CSDL phải chạy thật trên SQL Server "
-         "với dữ liệu mẫu lớn và các nghiệp vụ tự động.", accent=GOLD, icon="\u26A0")
+         "với dữ liệu mẫu lớn và các nghiệp vụ tự động.", accent=RED, icon="\u2462")
 
     text(s, Inches(7.05), Inches(1.6), Inches(5.5), Inches(0.4),
          [("Ba lý do chọn đề tài", 15, INK, True, FONT_H)])
@@ -419,7 +419,7 @@ def s_stack():
              shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
         col_header(s, x, Inches(1.7), cw, Inches(0.68), t, c, size=15)
         vlist(s, x + Inches(0.3), Inches(2.62), cw - Inches(0.6), Inches(3.9),
-              lst, size=13.5, gap=11, mark="\u2713", mark_col=c)
+              lst, size=13.5, gap=11, mark="\u25AA", mark_col=c)
     foot(s)
 
 
@@ -469,9 +469,14 @@ def s_arch():
         rect(s, rx, fy, Inches(4.0), Inches(0.72), fill=WHITE, line=LINE,
              shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.14)
         rect(s, rx, fy, Inches(0.07), Inches(0.72), fill=c)
-        text(s, rx + Inches(0.22), fy + Inches(0.1), Inches(3.7), Inches(0.3),
+        # so buoc 1..5
+        rect(s, rx + Inches(0.14), fy + Inches(0.2), Inches(0.32), Inches(0.32),
+             fill=c, shape=MSO_SHAPE.OVAL)
+        text(s, rx + Inches(0.14), fy + Inches(0.245), Inches(0.32), Inches(0.25),
+             [(str(i + 1), 10.5, WHITE, True, FONT_H)], align=PP_ALIGN.CENTER)
+        text(s, rx + Inches(0.56), fy + Inches(0.1), Inches(3.35), Inches(0.3),
              [(t, 12.5, INK, True, FONT_H)])
-        text(s, rx + Inches(0.22), fy + Inches(0.38), Inches(3.7), Inches(0.3),
+        text(s, rx + Inches(0.56), fy + Inches(0.38), Inches(3.35), Inches(0.3),
              [(d, 10.5, MUTED, False)])
         if i < 4:
             text(s, rx + Inches(1.9), fy + Inches(0.7), Inches(0.3), Inches(0.24),
@@ -484,7 +489,12 @@ def s_arch():
 def s_erd():
     s = slide_base("Sơ đồ quan hệ thực thể (ERD)", kicker="03  •  Cơ sở dữ liệu", num=6)
     text(s, Inches(0.75), Inches(1.55), Inches(11.8), Inches(0.35),
-         [("12 bảng — nhóm danh mục, nhóm nhân sự/nghiệp vụ, nhóm Kanban", 12.5, MUTED, False)])
+         [("12 bảng — nhóm danh mục, nhóm nhân sự/nghiệp vụ, nhóm Kanban  ·  ký pháp crow's foot", 12.5, MUTED, False)])
+
+    REL = RGBColor(0x5A, 0x6C, 0x8A)   # mau duong quan he (dam hon cho de thay)
+
+    # Luu hinh hoc tung thuc the de ve duong quan he sau (crow's foot)
+    geo = {}
 
     def ent(x, y, w, name, fields, c, hdr=0.34):
         hh = Inches(hdr) + Inches(0.215) * len(fields)
@@ -498,7 +508,45 @@ def s_erd():
             text(s, x + Inches(0.13), fy, w - Inches(0.22), Inches(0.2),
                  [(f, 9.2, SLATE, False)])
             fy += Inches(0.215)
+        geo[name] = (x, y, w, hh)
         return hh
+
+    def _ln(x1, y1, x2, y2):
+        shp = s.shapes.add_connector(1, int(x1), int(y1), int(x2), int(y2))
+        shp.line.color.rgb = REL; shp.line.width = Pt(1.4)
+        shp.shadow.inherit = False
+
+    def _foot(x, y, direction):
+        """Ve dau crow's foot (nhieu) cham vao canh thuc the tai (x,y)."""
+        d = Inches(0.11); sp = Inches(0.085)
+        sgn = -1 if direction == "left" else 1
+        for dy in (-sp, 0, sp):
+            _ln(x, y, x + sgn * d, y + dy)
+
+    # kenh doc rieng cho tung quan he -> khong de duong cat qua box khac
+    _lane = [0]
+
+    def rel(a, b, side="right"):
+        """Noi 1 - n giua hai thuc the. Dau crow's foot nam o phia B."""
+        ax, ay, aw, ah = geo[a]; bx, by, bw, bh = geo[b]
+        y_from = ay + ah / 2; y_to = by + bh / 2
+        if side == "right":          # A nam ben trai B
+            x1 = ax + aw; x2 = bx
+        else:                        # A nam ben phai B
+            x1 = ax; x2 = bx + bw
+        span = x2 - x1
+        # moi quan he lech kenh mot chut de khong trung nhau
+        step = Inches(0.07)
+        off = step * (_lane[0] % 5)
+        _lane[0] += 1
+        mid = (x1 + x2) / 2 + (off if span > Inches(0.3) else 0)
+        sgn_r = 1 if side == "right" else -1
+        _ln(x1, y_from, mid, y_from); _ln(mid, y_from, mid, y_to); _ln(mid, y_to, x2, y_to)
+        # dau "one": gach ngan vuong goc, dat ngay canh thuc the A
+        xt = x1 + sgn_r * Inches(0.055)
+        _ln(xt, y_from - Inches(0.075), xt, y_from + Inches(0.075))
+        # dau crow's foot cham canh thuc the B
+        _foot(x2 - sgn_r * Inches(0.01), y_to, "left" if side == "right" else "right")
 
     # Danh muc
     ent(Inches(0.75), Inches(1.98), Inches(2.15), "PhongBan",
@@ -519,30 +567,66 @@ def s_erd():
     # Nghiep vu
     ent(Inches(5.92), Inches(1.98), Inches(2.3), "ChamCong",
         ["PK MaCC", "MaNV (FK)", "Ngay (UQ+)", "TrangThai, SoLanTre"], PURPLE)
-    ent(Inches(5.92), Inches(3.42), Inches(2.3), "NghiPhep",
-        ["PK MaNP", "MaNV (FK)", "TuNgay/DenNgay", "TrangThai"], PURPLE)
-    ent(Inches(5.92), Inches(4.86), Inches(2.3), "BangLuong",
+    ent(Inches(5.92), Inches(3.33), Inches(2.3), "NghiPhep",
+        ["PK MaNP", "MaNV (FK)", "MaNV_Duyet (FK)", "TuNgay/DenNgay", "TrangThai"], PURPLE)
+    ent(Inches(5.92), Inches(4.90), Inches(2.3), "BangLuong",
         ["PK MaBL", "MaNV+Thang+Nam (UQ)", "ThucLinh (PERSISTED)"], PURPLE)
-    ent(Inches(5.92), Inches(5.98), Inches(2.3), "ChiPhiPhatSinh",
+    ent(Inches(5.92), Inches(6.04), Inches(2.3), "ChiPhiPhatSinh",
         ["PK MaPS", "MaNV (FK)", "Loai, SoTien"], PURPLE)
 
     # Kanban
     ent(Inches(8.62), Inches(1.98), Inches(2.4), "CongViec",
-        ["PK MaTask", "MaNV_PhuTrach (FK)", "TrangThai (CHECK)", "ViTri (gap 1000)", "Deadline"], GREEN)
-    ent(Inches(8.62), Inches(4.2), Inches(2.4), "BinhLuan",
+        ["PK MaTask", "MaNV_PhuTrach (FK)", "MaTask_Cha (FK, tu tham chieu)",
+         "TrangThai (CHECK)", "ViTri (gap 1000)", "Deadline"], GREEN)
+    ent(Inches(8.62), Inches(4.46), Inches(2.4), "BinhLuan",
         ["PK MaBL", "MaTask (FK)", "MaNV (FK)", "NoiDung"], GREEN)
 
-    # legend
-    rect(s, Inches(11.35), Inches(1.98), Inches(1.28), Inches(2.64), fill=WHITE, line=LINE,
-         shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.07)
-    text(s, Inches(11.47), Inches(2.08), Inches(1.05), Inches(0.3), [("Nh\u00f3m b\u1ea3ng", 10.5, INK, True)])
+    # ---- quan he: chi ve cac lien ket ngan, hang xom (khong cat qua box) ----
+    rel("PhongBan", "NhanVien")            # 1 PB co n NV
+    rel("ChucVu", "NhanVien")              # 1 CV co n NV
+    rel("NhanVien", "HopDong")             # 1 NV co n HD
+    rel("NhanVien", "TaiKhoan")            # 1 NV co n TK
+    rel("NhanVien", "ChamCong")            # 1 NV co n CC
+    rel("NhanVien", "NghiPhep")            # 1 NV co n NP
+    rel("NhanVien", "BangLuong")           # 1 NV co n BL
+    rel("NhanVien", "ChiPhiPhatSinh")      # 1 NV co n PS
+    rel("CongViec", "BinhLuan")            # 1 task co n binh luan
+
+    # ---- panel phai: chu giai nhom + danh sach quan he ----
+    px = Inches(11.3); pw = Inches(1.55)
+    rect(s, px, Inches(1.9), pw, Inches(5.05), fill=WHITE, line=LINE,
+         shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
+    text(s, px + Inches(0.12), Inches(2.0), pw - Inches(0.24), Inches(0.3),
+         [("Nh\u00f3m b\u1ea3ng", 10.5, INK, True)])
     legs = [("Danh m\u1ee5c", TEAL), ("Nh\u00e2n s\u1ef1", ACCENT), ("Nghi\u1ec7p v\u1ee5", PURPLE),
             ("Kanban", GREEN), ("T\u00e0i kho\u1ea3n", ACCENT2)]
-    ly = Inches(2.45)
+    ly = Inches(2.34)
     for t, c in legs:
-        rect(s, Inches(11.47), ly + Inches(0.04), Inches(0.15), Inches(0.15), fill=c)
-        text(s, Inches(11.7), ly, Inches(0.9), Inches(0.25), [(t, 9.2, SLATE, False)])
-        ly += Inches(0.4)
+        rect(s, px + Inches(0.12), ly + Inches(0.035), Inches(0.13), Inches(0.13), fill=c)
+        text(s, px + Inches(0.32), ly, pw - Inches(0.44), Inches(0.25), [(t, 9, SLATE, False)])
+        ly += Inches(0.3)
+
+    # ky phap crow's foot
+    _ln(px + Inches(0.14), Inches(3.98), px + Inches(0.62), Inches(3.98))
+    _ln(px + Inches(0.2), Inches(3.91), px + Inches(0.2), Inches(4.05))
+    _foot(px + Inches(0.62), Inches(3.98), "left")
+    text(s, px + Inches(0.12), Inches(4.08), pw - Inches(0.24), Inches(0.3),
+         [("m\u1ed9t \u2192 nhi\u1ec1u (1 : n)", 8.2, MUTED, False)])
+
+    rect(s, px + Inches(0.12), Inches(4.44), pw - Inches(0.24), Inches(0.02), fill=LINE)
+    text(s, px + Inches(0.12), Inches(4.54), pw - Inches(0.24), Inches(0.3),
+         [("Quan h\u1ec7 kh\u00f3a ngo\u1ea1i", 9.5, INK, True)])
+    rels = ["PhongBan \u2192 NhanVien", "ChucVu \u2192 NhanVien",
+            "NhanVien \u2192 HopDong", "NhanVien \u2192 TaiKhoan",
+            "NhanVien \u2192 ChamCong", "NhanVien \u2192 NghiPhep",
+            "NhanVien \u2192 BangLuong", "NhanVien \u2192 ChiPhiPhatSinh",
+            "NhanVien \u2192 CongViec", "CongViec \u2192 BinhLuan",
+            "CongViec \u2192 CongViec (cha)"]
+    ry2 = Inches(4.84)
+    for r in rels:
+        text(s, px + Inches(0.12), ry2, pw - Inches(0.24), Inches(0.2),
+             [(r, 7.4, SLATE, False)])
+        ry2 += Inches(0.185)
     foot(s)
 
 
@@ -591,29 +675,29 @@ def s_tables():
 # ================================================================ 8. NORMALIZATION
 def s_normalize():
     s = slide_base("Chuẩn hóa lược đồ quan hệ (3NF / BCNF)", kicker="04  •  Chuẩn hóa", num=8)
-    card(s, Inches(0.75), Inches(1.62), Inches(3.87), Inches(1.72),
+    card(s, Inches(0.75), Inches(1.58), Inches(3.87), Inches(1.78),
          "1NF — Nguyên tố",
          "Mọi thuộc tính là nguyên tố, không cột nào chứa giá trị đa trị. "
-         "Danh sách đa trị (ví dụ nhiều số điện thoại) đều đã tách sang bảng riêng.", accent=ACCENT, icon="\u2460")
-    card(s, Inches(4.73), Inches(1.62), Inches(3.87), Inches(1.72),
+         "Danh sách đa trị (nhiều số điện thoại) đã tách sang bảng riêng.", accent=NAVY2, icon="\u2460")
+    card(s, Inches(4.73), Inches(1.58), Inches(3.87), Inches(1.78),
          "2NF — Phụ thuộc đầy đủ",
          "Không có phụ thuộc bộ phận. Các bảng đều dùng khoá chính một cột nên "
-         "phụ thuộc hàm vốn đã đầy đủ → tất cả đạt 2NF.", accent=PURPLE, icon="\u2461")
-    card(s, Inches(8.71), Inches(1.62), Inches(3.87), Inches(1.72),
+         "phụ thuộc hàm vốn đã đầy đủ → tất cả đạt 2NF.", accent=NAVY2, icon="\u2461")
+    card(s, Inches(8.71), Inches(1.58), Inches(3.87), Inches(1.78),
          "3NF — Không bắc cầu",
          "Không thuộc tính không khoá nào phụ thuộc vào thuộc tính không khoá khác. "
-         "3NF là mức chuẩn mục tiêu của đề cương học phần.", accent=TEAL, icon="\u2462")
+         "3NF là mức chuẩn mục tiêu của đề cương học phần.", accent=NAVY2, icon="\u2462")
 
     # three decomposition steps
-    text(s, Inches(0.75), Inches(3.5), Inches(11.8), Inches(0.35),
+    text(s, Inches(0.75), Inches(3.46), Inches(11.8), Inches(0.35),
          [("Ba bước phân rã đến 3NF", 14.5, INK, True, FONT_H)])
     steps = [
         ("Bước 1", "Đạt 1NF",
-         "Bỏ thuộc tính lặp: tách “danh sách phòng ban” thành bảng PhongBan riêng, thay bằng khoá ngoại MaPB.", ACCENT),
+         "Bỏ thuộc tính lặp: tách “danh sách phòng ban” thành bảng PhongBan riêng, thay bằng khoá ngoại MaPB.", NAVY2),
         ("Bước 2", "Đạt 2NF",
-         "Bỏ phụ thuộc bộ phận: đưa TenPB về PhongBan, đưa TenCV và LuongCoBan về ChucVu; NhanVien chỉ giữ MaPB, MaCV.", PURPLE),
+         "Bỏ phụ thuộc bộ phận: đưa TenPB về PhongBan, đưa TenCV và LuongCoBan về ChucVu; NhanVien chỉ giữ MaPB, MaCV.", NAVY2),
         ("Bước 3", "Đạt 3NF",
-         "Bỏ phụ thuộc bắc cầu MaNV → MaPB → TenPB và MaNV → MaCV → LuongCoBan bằng cách tách bảng.", TEAL),
+         "Bỏ phụ thuộc bắc cầu MaNV → MaPB → TenPB và MaNV → MaCV → LuongCoBan bằng cách tách bảng.", NAVY2),
     ]
     x0, cw, gx = Inches(0.75), Inches(3.87), Inches(0.3)
     for i, (n, t, d, c) in enumerate(steps):
@@ -627,12 +711,12 @@ def s_normalize():
              [(d, 11, SLATE, False)], line_spacing=1.08)
 
     # BCNF + denormalization
-    card(s, Inches(0.75), Inches(5.34), Inches(5.75), Inches(1.62),
+    card(s, Inches(0.75), Inches(5.28), Inches(5.75), Inches(1.6),
          "Kiểm tra BCNF",
          "Chỉ xét bảng có ≥ 2 khoá ứng viên chồng lấn. NhanVien có MaNV (PK) và CCCD (UNIQUE); "
          "TaiKhoan có MaTK và TenDangNhap — mọi phụ thuộc hàm đều có vế trái là siêu khoá. "
          "Tất cả bảng đạt BCNF.", accent=GREEN, icon="\u2714", bsize=11.5)
-    card(s, Inches(6.85), Inches(5.34), Inches(5.75), Inches(1.62),
+    card(s, Inches(6.85), Inches(5.28), Inches(5.75), Inches(1.6),
          "Phi chuẩn hóa có kiểm soát",
          "Ngoại lệ cố ý: cột ThucLinh trong BangLuong là thuộc tính dẫn xuất. Dùng cột "
          "PERSISTED để SQL Server tự tính và lưu — đổi chút dung lượng lấy tốc độ truy vấn.", accent=ACCENT2, icon="\u2699", bsize=11.5)
@@ -873,7 +957,7 @@ def s_features():
         cx = x0 + (i % 4) * (cw + gx)
         cy = y0 + (i // 4) * (ch + gy)
         rect(s, cx, cy, cw, ch, fill=WHITE, line=LINE, shadow=True, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
-        rect(s, cx, cy, cw, Inches(0.08), fill=c)
+        rect(s, cx, cy, cw, Inches(0.08), fill=NAVY2)
         rect(s, cx + Inches(0.22), cy + Inches(0.28), Inches(0.42), Inches(0.42), fill=c,
              shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.25)
         text(s, cx + Inches(0.22), cy + Inches(0.33), Inches(0.42), Inches(0.35),
@@ -926,22 +1010,25 @@ def s_testing():
 
     text(s, Inches(0.75), Inches(4.75), Inches(11.8), Inches(0.35),
          [("Dữ liệu mẫu đã nạp (Chương 5.3)", 14, INK, True, FONT_H)])
-    stats = [("100", "nhân viên"), ("50", "tài khoản"), ("~4.000", "bản ghi chấm công"),
-             ("12", "bảng dữ liệu"), ("6", "khung nhìn"), ("269", "test case")]
+    stats = [("269", "test case"), ("100", "nhân viên"), ("~4.000", "bản ghi chấm công"),
+             ("50", "tài khoản"), ("12", "bảng dữ liệu"), ("6", "khung nhìn")]
     sx = Inches(0.75); sw = Inches(1.9); sgx = Inches(0.09)
     for i, (v, lb) in enumerate(stats):
         x = sx + i * (sw + sgx)
-        rect(s, x, Inches(5.2), sw, Inches(1.25), fill=NAVY2,
+        hero = i == 0
+        rect(s, x, Inches(5.2), sw, Inches(1.25), fill=GOLD if hero else NAVY2,
              shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=Inches(0.14))
-        text(s, x, Inches(5.42), sw, Inches(0.5), [(v, 22, WHITE, True, FONT_H)], align=PP_ALIGN.CENTER)
-        text(s, x, Inches(5.98), sw, Inches(0.35), [(lb, 10.5, RGBColor(0x9F,0xB2,0xCC), False)],
+        text(s, x, Inches(5.34), sw, Inches(0.6), [(v, 28 if hero else 22, WHITE, True, FONT_H)],
+             align=PP_ALIGN.CENTER)
+        text(s, x, Inches(5.98), sw, Inches(0.35),
+             [(lb, 11 if hero else 10.5, WHITE if hero else RGBColor(0x9F,0xB2,0xCC), hero)],
              align=PP_ALIGN.CENTER)
     foot(s)
 
 
 # ================================================================ 15. LIMITATIONS
 def s_limits():
-    s = slide_base("Kết luận & Hướng phát triển", kicker="07  •  Kết luận", num=15)
+    s = slide_base("Kết luận & Hướng phát triển", kicker="07  •  Kết luận", num=17)
     text(s, Inches(0.75), Inches(1.58), Inches(5.9), Inches(0.4),
          [("Kết quả đạt được", 14.5, GREEN, True, FONT_H)])
     done = [
@@ -977,7 +1064,7 @@ def s_limits():
 
 # ================================================================ 16a. DML CATALOG (Ch.5.4)
 def s_dml():
-    s = slide_base("26 c\u00e2u l\u1ec7nh thao t\u00e1c d\u1eef li\u1ec7u (\u2265 25)", kicker="05  \u2022  SQL Server", num=16)
+    s = slide_base("26 c\u00e2u l\u1ec7nh thao t\u00e1c d\u1eef li\u1ec7u (\u2265 25)", kicker="05  \u2022  SQL Server", num=15)
     groups = [
         ("INSERT \u2014 10 c\u00e2u", ACCENT, ["PhongBan, ChucVu, NhanVien", "HopDong, ChamCong, NghiPhep",
                                                "CongViec (Kanban), BinhLuan", "ChiPhiPhatSinh, TaiKhoan"]),
@@ -1015,18 +1102,18 @@ def s_dml():
 
 # ================================================================ 16b. QUERIES (Ch.5.5)
 def s_queries():
-    s = slide_base("10 truy v\u1ea5n t\u00ecm ki\u1ebfm \u2013 th\u1ed1ng k\u00ea (\u2265 10)", kicker="05  \u2022  SQL Server", num=17)
+    s = slide_base("10 truy v\u1ea5n t\u00ecm ki\u1ebfm \u2013 th\u1ed1ng k\u00ea (\u2265 10)", kicker="05  \u2022  SQL Server", num=16)
     qs = [
         ("01", "Th\u1ed1ng k\u00ea NV \u0111ang l\u00e0m theo t\u1eebng ph\u00f2ng ban", ACCENT),
-        ("02", "T\u1ed5ng l\u01b0\u01a1ng th\u1ef1c l\u0129nh theo th\u00e1ng v\u00e0 n\u0103m", ACCENT),
-        ("03", "NV c\u00f3 m\u1ee9c l\u01b0\u01a1ng th\u1ef1c l\u0129nh cao nh\u1ea5t", GREEN),
-        ("04", "\u0110\u1ebfm s\u1ed1 l\u1ea7n \u0111i tr\u1ec5 c\u1ee7a t\u1eebng nh\u00e2n vi\u00ean", ACCENT2),
-        ("05", "Th\u1ed1ng k\u00ea ng\u00e0y c\u00f4ng theo th\u00e1ng c\u1ee7a m\u1ed9t NV", PURPLE),
-        ("06", "Li\u1ec7t k\u00ea c\u00e1c task qu\u00e1 h\u1ea1n ch\u01b0a ho\u00e0n th\u00e0nh", RED),
-        ("07", "T\u00ecm nh\u00e2n vi\u00ean theo t\u00ean (t\u00ecm g\u1ea7n \u0111\u00fang)", TEAL),
-        ("08", "T\u1ed5ng h\u1ee3p chi ph\u00ed ph\u00e1t sinh theo lo\u1ea1i", ACCENT2),
-        ("09", "\u0110\u1ebfm s\u1ed1 task theo tr\u1ea1ng th\u00e1i tr\u00ean Kanban", GREEN),
-        ("10", "Th\u1ed1ng k\u00ea n\u0103ng su\u1ea5t NV (task ho\u00e0n th\u00e0nh / qu\u00e1 h\u1ea1n)", PURPLE),
+        ("02", "T\u1ed5ng l\u01b0\u01a1ng th\u1ef1c l\u0129nh theo th\u00e1ng v\u00e0 n\u0103m", NAVY2),
+        ("03", "NV c\u00f3 m\u1ee9c l\u01b0\u01a1ng th\u1ef1c l\u0129nh cao nh\u1ea5t", NAVY2),
+        ("04", "\u0110\u1ebfm s\u1ed1 l\u1ea7n \u0111i tr\u1ec5 c\u1ee7a t\u1eebng nh\u00e2n vi\u00ean", NAVY2),
+        ("05", "Th\u1ed1ng k\u00ea ng\u00e0y c\u00f4ng theo th\u00e1ng c\u1ee7a m\u1ed9t NV", NAVY2),
+        ("06", "Li\u1ec7t k\u00ea c\u00e1c task qu\u00e1 h\u1ea1n ch\u01b0a ho\u00e0n th\u00e0nh", NAVY2),
+        ("07", "T\u00ecm nh\u00e2n vi\u00ean theo t\u00ean (t\u00ecm g\u1ea7n \u0111\u00fang)", NAVY2),
+        ("08", "T\u1ed5ng h\u1ee3p chi ph\u00ed ph\u00e1t sinh theo lo\u1ea1i", NAVY2),
+        ("09", "\u0110\u1ebfm s\u1ed1 task theo tr\u1ea1ng th\u00e1i tr\u00ean Kanban", NAVY2),
+        ("10", "Th\u1ed1ng k\u00ea n\u0103ng su\u1ea5t NV (task ho\u00e0n th\u00e0nh / qu\u00e1 h\u1ea1n)", NAVY2),
     ]
     x0, y0 = Inches(0.75), Inches(1.8)
     cw, ch, gx, gy = Inches(5.78), Inches(0.82), Inches(0.3), Inches(0.24)
