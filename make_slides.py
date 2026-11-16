@@ -288,40 +288,40 @@ def col_header(slide, x, y, w, h, label, color, size=14.5):
 # ================================================================ 1. TITLE
 def s_title():
     s = prs.slides.add_slide(BLANK)
-    rect(s, 0, 0, W, H, fill=NAVY)
+    rect(s, 0, 0, W, H, fill=WHITE)
     transition(s, "morph", 900)
-    # decorative gradient-ish blocks
-    rect(s, W - Inches(4.9), 0, Inches(4.9), H, fill=NAVY2)
-    rect(s, W - Inches(4.9), 0, Inches(0.06), H, fill=ACCENT)
+    # khoi xanh dam ben phai + noc cam (tong xanh-cam-trang)
+    rect(s, W - Inches(4.9), 0, Inches(4.9), H, fill=NAVY)
+    rect(s, W - Inches(4.9), 0, Inches(0.14), H, fill=ACCENT2)
     for i, (yy, hh, col) in enumerate([
         (Inches(0.0), Inches(2.5), ACCENT), (Inches(2.5), Inches(2.5), ACCENT2),
-        (Inches(5.0), Inches(2.5), TEAL)]):
+        (Inches(5.0), Inches(2.5), ACCENT)]):
         rect(s, W - Inches(0.55), yy, Inches(0.18), hh, fill=col)
     text(s, Inches(0.9), Inches(0.72), Inches(7.5), Inches(0.4),
-         [("TRƯỜNG ĐẠI HỌC ĐẠI NAM  •  KHOA CÔNG NGHỆ THÔNG TIN", 11.5, RGBColor(0xC9,0xD6,0xE8), True)])
+         [("TRƯỜNG ĐẠI HỌC ĐẠI NAM  •  KHOA CÔNG NGHỆ THÔNG TIN", 11.5, SLATE, True)])
     text(s, Inches(0.9), Inches(1.2), Inches(7.4), Inches(0.4),
-         [("BÀI TẬP LỚN  •  HỌC PHẦN: CƠ SỞ DỮ LIỆU", 13.5, ACCENT, True)])
+         [("BÀI TẬP LỚN  •  HỌC PHẦN: CƠ SỞ DỮ LIỆU", 13.5, ACCENT2, True)])
     text(s, Inches(0.9), Inches(1.78), Inches(7.6), Inches(1.1),
-         [("QUẢN LÝ NHÂN SỰ", 44, WHITE, True, FONT_H)], line_spacing=0.95)
+         [("QUẢN LÝ NHÂN SỰ", 44, NAVY, True, FONT_H)], line_spacing=0.95)
     text(s, Inches(0.9), Inches(2.7), Inches(7.4), Inches(1.05),
-         [[("Thiết kế & xây dựng cơ sở dữ liệu", 19, RGBColor(0xC9,0xD6,0xE8), False, FONT_H)],
-          [("hệ thống Quản lý Nhân sự (HRM)", 19, RGBColor(0xC9,0xD6,0xE8), False, FONT_H)]],
+         [[("Thiết kế & xây dựng cơ sở dữ liệu", 19, SLATE, False, FONT_H)],
+          [("hệ thống Quản lý Nhân sự (HRM)", 19, SLATE, False, FONT_H)]],
          space_after=2, line_spacing=1.0)
-    rect(s, Inches(0.93), Inches(3.78), Inches(1.4), Inches(0.05), fill=ACCENT2)
+    rect(s, Inches(0.93), Inches(3.78), Inches(1.4), Inches(0.06), fill=ACCENT2)
     text(s, Inches(0.9), Inches(4.0), Inches(7.5), Inches(0.8),
          [("12 bảng  ·  14 quan hệ khóa ngoại  ·  6 view  ·  3 stored procedure  ·  3 trigger", 12,
-           RGBColor(0x9F,0xB2,0xCC), False)])
+           MUTED, False)])
     text(s, Inches(0.9), Inches(4.38), Inches(7.5), Inches(0.5),
          [("Ứng dụng demo:  ASP.NET Core 8  ·  SQL Server 2022  ·  React 19", 12,
-           RGBColor(0x9F,0xB2,0xCC), False)])
+           MUTED, False)])
     text(s, Inches(0.9), Inches(5.2), Inches(7.5), Inches(0.4),
-         [("GVHD:  ThS. Nguyễn Ngọc Ân", 13, WHITE, True)])
+         [("GVHD:  ThS. Nguyễn Ngọc Ân", 13, NAVY, True)])
     text(s, Inches(0.9), Inches(5.68), Inches(7.5), Inches(1.0),
          [[("SVTH:  Đoàn Thanh Tùng (1971040034)  ·  Trương Hoàng Phong (1971040022)", 11,
-            RGBColor(0xC9,0xD6,0xE8), False)],
+            SLATE, False)],
           [("Trần Hữu Phước (1971070006)             Hà Nội, 2026", 11,
-            RGBColor(0x9F,0xB2,0xCC), False)]], space_after=3)
-    # right panel stat block
+            MUTED, False)]], space_after=3)
+    # right panel stat block (chu trang tren nen navy)
     stats = [("12", "bảng dữ liệu"), ("14", "quan hệ khóa ngoại"), ("26", "câu lệnh DML")]
     yy = Inches(2.15)
     for v, lb in stats:
@@ -1151,20 +1151,20 @@ def s_queries():
 # ================================================================ 16. THANK YOU
 def s_thanks():
     s = prs.slides.add_slide(BLANK)
-    rect(s, 0, 0, W, H, fill=NAVY)
+    rect(s, 0, 0, W, H, fill=WHITE)
     transition(s, "morph", 900)
-    rect(s, 0, 0, W, Inches(0.12), fill=ACCENT)
-    rect(s, W - Inches(4.9), 0, Inches(4.9), H, fill=NAVY2)
-    rect(s, W - Inches(4.9), 0, Inches(0.06), H, fill=ACCENT2)
+    rect(s, 0, 0, W, Inches(0.12), fill=ACCENT2)
+    rect(s, W - Inches(4.9), 0, Inches(4.9), H, fill=NAVY)
+    rect(s, W - Inches(4.9), 0, Inches(0.14), H, fill=ACCENT2)
     text(s, Inches(0.9), Inches(2.1), Inches(7.4), Inches(0.5),
-         [("CẢM ƠN THẦY/CÔ VÀ CÁC BẠN ĐÃ THEO DÕI", 15, ACCENT, True)])
+         [("CẢM ƠN THẦY/CÔ VÀ CÁC BẠN ĐÃ THEO DÕI", 15, ACCENT2, True)])
     text(s, Inches(0.9), Inches(2.7), Inches(7.6), Inches(1.4),
-         [("Xin tiếp nhận\ncâu hỏi & góp ý", 44, WHITE, True, FONT_H)], line_spacing=1.0)
-    rect(s, Inches(0.93), Inches(4.45), Inches(1.4), Inches(0.05), fill=ACCENT2)
+         [("Xin tiếp nhận\ncâu hỏi & góp ý", 44, NAVY, True, FONT_H)], line_spacing=1.0)
+    rect(s, Inches(0.93), Inches(4.45), Inches(1.4), Inches(0.06), fill=ACCENT2)
     text(s, Inches(0.9), Inches(4.8), Inches(7.4), Inches(1.0),
-         [[("Thiết kế CSDL hệ thống Quản lý Nhân sự (HRM)", 14, RGBColor(0xC9,0xD6,0xE8), False)],
+         [[("Thiết kế CSDL hệ thống Quản lý Nhân sự (HRM)", 14, SLATE, False)],
           [("Demo:  admin / Admin@123   |   github.com/thanhtug07/hrm-kanban-management", 12.5,
-            RGBColor(0x9F,0xB2,0xCC), False)]], space_after=6)
+            MUTED, False)]], space_after=6)
     text(s, W - Inches(4.25), Inches(3.35), Inches(3.3), Inches(0.5),
          [("Q & A", 40, WHITE, True, FONT_H)], align=PP_ALIGN.CENTER)
 
