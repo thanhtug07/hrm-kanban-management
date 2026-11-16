@@ -117,24 +117,27 @@ badge số nhỏ chưa đổi. Khối **code SQL** vẫn giữ nền `NAVY` (đ�
 
 **Dấu đầu dòng**: `✓` chỉ dùng khi nghĩa là "đạt/được phép" (ma trận RBAC). Với danh sách tính năng trung tính, dùng `▪`. Không dùng `⚠` kiểu cảnh báo lặp lại cùng loại nội dung — thay bằng số thứ tự ①②③.
 
-## Sơ đồ ERD (bố cục theo CỤM)
+## Sơ đồ ERD (phong cách Visual Paradigm)
 
-Khi ERD có ≥ 10 bảng, **đừng** trải bảng thành cột rồi nối từng cặp — hai bên slide trống
-và đường nối luôn rối. Dùng **bố cục 4 cụm theo vai trò** (Danh mục | Nhân sự | Nghiệp vụ | Kanban):
+Khi ERD có nhiều bảng, dùng **phong cách công cụ chuẩn (Visual Paradigm / dbdiagram)** — đây là thứ
+người chấm quen mắt và đọc được ngay:
 
-- **4 cột đều nhau** trên bề ngang `0.75 … 12.75"`; `CX = [0.75, 3.95, 7.15, 10.35]`,
-  `CW = 2.85`, `CH` đủ chứa cụm nhiều bảng nhất. Mọi panel **cùng chiều cao** dù nội dung ít hơn.
-- Mỗi cụm = **panel** (nền trắng, viền + thanh tiêu đề màu vai trò) chứa các **bảng con**
-  (header màu + danh sách trường ≤ 3–5 dòng).
-- **Đường nối chỉ vẽ GIỮA các cụm** (4 mối), không vẽ từng cặp bảng: ít đường ⇒ đọc rõ quan hệ nhóm.
-  Mối trong cùng một cụm (vd CongViec → BinhLuan) vẽ ngắn dọc theo khe hở giữa hai bảng con.
-- **Vẽ đường nối TRƯỚC, vẽ panel/bảng SAU** → chữ luôn nằm trên đường, không bị đè.
-- **Không bao giờ để đường dọc chạy trong thân bảng** (x nằm trong `[box.x, box.x+w]`). Kênh dọc phải
-  nằm trong khe hở giữa hai cột; nhiều quan hệ cùng đích chia đều kênh trong khe hở.
-- **Neo crow's foot vào đúng hàng FK**, không dùng tâm bảng.
-- `_ln()` = `add_connector` (đường thẳng, không mũi tên); `_foot()` = 3 nhánh crow's foot; `_one()` = gạch "một".
-- **Dải thống kê dưới cùng** (số bảng · FK · view · SP · trigger) đặt sao cho `sy + 0.72"` kết thúc trước footer (~7.1").
-- Nhãn đúng ký pháp: "một → nhiều (1 : n)". Nhãn "1 : n" đặt trong khe hở giữa hai panel, không đè phụ đề (kết thúc ~1.72").
+- **Bảng rời, KHÔNG panel cụm bao ngoài.** Mỗi bảng = hình bo góc nhẹ (radius `Inches(0.06)`),
+  **nền màu nhạt**, header **cùng tông nhưng đậm hơn 1 bậc**. 4 tông theo vai trò:
+  vàng `FDF3C8/C8CF74` (danh mục) · xanh dương `D4E4FA/8FB6E8` (nhân sự) ·
+  xanh tím `DCE6FB/9DB4E6` (nghiệp vụ) · xanh lá `D6EFDB/8FC89C` (Kanban).
+- **Mỗi dòng = `TênTrường : kiểu_dữ_liệu`**. PK **đậm** ở trên cùng; FK ***in nghiêng + đậm***;
+  trường thường chữ thường màu nhạt hơn. Đây là "ý chính" của ERD — không liệt kê mô tả dài.
+- **Đường nối nét đứt (dash) mảnh `Pt(0.9)`**, chạy **thẳng vuông góc** (ngang → dọc → ngang), màu xám xanh.
+  **Không** vẽ đường cong, không chia nhiều kênh rườm rà.
+- Đầu nối đúng ký pháp: **vòng tròn nhỏ** (`circle()`) ở phía "một", **chân vịt 3 nhánh**
+  (`crow()`) ở phía "nhiều".
+- Bố trí: 4 cột `x = 0.72 / 3.75 / 6.78 / 9.81`, bề ngang bảng `2.75"`.
+  **Chiều cao dòng `RH = 0.128"`, header `TH = 0.215"`** — đủ nhỏ để 12 bảng nằm gọn trong 7.5".
+- Bảng nhiều dòng (NhanVien 9 dòng ≈ 1.40") đặt **trên cùng**, bảng ít dòng xếp dưới.
+- **Chú giải màu** (4 ô mẫu) + dòng tổng kết ở `y ≈ 6.58"`, trên footer.
+- **Vẽ chữ sau cùng** để không bị đường nối đè: vẽ bảng → chữ → rồi đường nối, hoặc chấp nhận
+  đường nối nằm dưới vì nét đứt mảnh đã đủ nhẹ.
 
 ## Căn số trang
 
